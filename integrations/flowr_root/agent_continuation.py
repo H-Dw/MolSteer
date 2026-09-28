@@ -27,6 +27,7 @@ def _within(path: Path, root: Path) -> bool:
 
 def prepare(agent_checkpoint: Path, flowr_config: Path, flowr_root: Path, output_root: Path):
     model_root=flowr_root.resolve(strict=True)
+    output_root=output_root.resolve()
     if not (model_root/'flowr/__init__.py').is_file():
         raise ValueError('flowr_root does not contain the generator package')
     output_dir=model_root/'output'
@@ -110,17 +111,23 @@ def main():
     parser.add_argument('--output-root',type=Path,required=True)
     parser.add_argument('--prepare-only',action='store_true')
     args=parser.parse_args()
+    output_root=args.output_root.resolve()
     config=prepare(args.agent_checkpoint.resolve(strict=True),args.flowr_config.resolve(strict=True),
-                   args.flowr_root,args.output_root)
-    print('AGENT_FLOWR_PREPARED '+str(args.output_root),flush=True)
+                   args.flowr_root,output_root)
+    print('AGENT_FLOWR_PREPARED '+str(output_root),flush=True)
     if args.prepare_only:return
     summary=run(config)
-    (args.output_root/'bridge_result.json').write_text(json.dumps({
+    (output_root/'bridge_result.json').write_text(json.dumps({
         'status':'completed','agent_run_id':config['agent_run_id'],
         'agent_reward_id':config['agent_reward_id'],'executions':summary['executions'],
         'source_hashes':summary['source_hashes'],
     },ensure_ascii=False,indent=2),encoding='utf-8')
-    print('AGENT_FLOWR_COMPLETED '+str(args.output_root),flush=True)
+    manifest_path=output_root/'bridge_manifest.json'
+    manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+    manifest['continuation_status']='completed'
+    manifest['execution_summary_path']=str(output_root/'run/experiment_summary.json')
+    manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+    print('AGENT_FLOWR_COMPLETED '+str(output_root),flush=True)
 
 
 if __name__=='__main__':main()

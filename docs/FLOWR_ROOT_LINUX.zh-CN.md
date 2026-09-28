@@ -1,73 +1,55 @@
-# Linux 上与 FLOWR.ROOT 配合：5i0b_A__5vef_M77 实测
+# Linux 上的 MolSteer × FLOWR.ROOT 实测
 
-本页记录在 `ml-apus.bio.sustech.edu.cn`、`/data1/dhuang/flowr_root` 上验证过的接入方式。MolSteer 仓库位于同级 `MolSteer-github/`；原有 `MolSteer/` 源码目录和 FLOWR.ROOT 仓库保持独立。
+本页记录 `ml-apus.bio.sustech.edu.cn` 上的 `5i0b_A__5vef_M77/ligand_002` 实验。顶层仓库是 `/data1/dhuang/MolSteer`；生成器及其模型、虚拟环境和输出位于 `/data1/dhuang/MolSteer/flowr_root`。根目录 `.gitignore` 的 `/flowr_root/` 规则排除整个生成器目录。旧路径 `/data1/dhuang/flowr_root` 保留为指向新位置的符号链接，因为早期 `runtime.pt` 和 StatePacket 记录了这个绝对路径。
 
-## 环境与代码
+## 环境激活
 
-远端 FLOWR.ROOT 使用 Python 3.12、PyTorch 2.5.1+cu121 和 RDKit 2026.03.6。以 `git -C MolSteer-github rev-parse HEAD` 核对具体代码版本。私有 GitHub 仓库尚未在远端配置认证，因此首次同步使用从已认证本机传输的 Git bundle；以后的直接 `git pull` 仍需配置远端 GitHub 凭据，或继续传输新 bundle 并快进本地分支。不要在文档或配置中放访问令牌。
-
-为避免改动 FLOWR.ROOT 的 `.venv`，使用 `.venv-molsteer` 叠加环境。其 `flowr_base.pth` 指向 FLOWR.ROOT 原虚拟环境的 `site-packages`，使 MolSteer 使用原有的模型、CUDA 和 RDKit 依赖；MolSteer 的 LangChain/OpenRouter 依赖安装在叠加环境中。这个方案已经通过测试，但升级任一环境后应重新检查导入来源和依赖版本。
+FLOWR.ROOT 原环境是 `flowr_root/.venv`，含 Python 3.12、PyTorch 2.5.1+cu121 与 RDKit 2026.03.6。MolSteer 使用 `flowr_root/.venv-molsteer` 叠加环境：它复用原环境的科学计算依赖，并从顶层 Git 仓库以 editable 方式导入 MolSteer。搬迁后，两个环境的激活脚本、命令入口和 `.pth` 路径已更新。
 
 ```bash
-cd /data1/dhuang/flowr_root
-.venv-molsteer/bin/python -m pytest MolSteer-github/tests -q
+cd /data1/dhuang/MolSteer
+source integrations/flowr_root/activate.sh
+python -m pytest tests -q
 ```
 
-实测结果：144 项通过。当前远端的 `OPENROUTER_API_KEY` 由交互式 shell 提供；批处理、调度器和 SSH 非交互命令必须在自身进程环境中注入该变量。不要假设登录用户配置会自动传给作业。
+脚本默认激活 `.venv-molsteer`，同时设置 `FLOWR_ROOT` 与 `PYTHONPATH`；仅运行原生成器时可使用 `MOLSTEER_FLOWR_ENV=base source integrations/flowr_root/activate.sh`。实测 146 项测试通过。`OPENROUTER_API_KEY` 当前由远端交互式 shell 提供；SSH 非交互会话、调度器和服务进程需在各自环境中注入，不能依赖交互式配置自动传递。
 
-## 样例输入与恢复边界
+GitHub 私有仓库在远端仍未配置认证。已认证本机将最新提交通过 Git bundle 传入，并快进顶层仓库；未来直接 `git pull` 需要配置仓库凭据，或继续使用 bundle。不要把令牌写入仓库或作业配置。
 
-指定的原始样例为：
+## 阶段捕获与迁移后的兼容性
 
-```text
-output/crossdocked_100target_stage_test/5i0b_A__5vef_M77/ligand_002/t_0.50/
-```
-
-其 `state.pt`、模型预测和 `ligand.sdf` 可供 MolReader 读取，但没有完整的 `runtime.pt`。它不能直接做严格的历史续推。用该目录生成了 `output/molsteer_openrouter_5i0b_20260928/original_StatePacket.json`，覆盖 129 条观测。
-
-同一靶标另有带完整运行状态的精确捕获：
-
-```text
-output/crossdocked_100target_stage_test_exact_20260923/5i0b_A__5vef_M77/ligand_002/t_0.50/runtime.pt
-```
-
-精确捕获与原始目录的 `state.pt`、`world_prediction.pt` 哈希不同。续推时，`saved_stage`、`reward_reference_stage`、`runtime.pt`、受体/参考配体、模型 checkpoint 和记录的 `stage_runner.py` 必须来自同一捕获；不能把原始样例的证据或基线混进精确捕获。该检查点要求 GPU 1、`float32_matmul_precision=highest`、原记录的 stage runner 哈希和第 50 步状态。FLOWR 适配器会检查源代码、模型路径、受体/配体身份、积分网格、数值精度、GPU 索引和恢复状态。
-
-已生成可审查的配置及奖励程序：
-
-```text
-output/molsteer_openrouter_5i0b_20260928/exact_preparation/configurations/t_0.50.json
-output/molsteer_openrouter_5i0b_20260928/exact_preparation/reasoning/t_0.50/RewardProgram.json
-```
-
-可用相同配置在新的输出目录分别跑引导与无引导对照：
+`integrations/flowr_root/stage_runner.py` 会自动查找嵌套的 FLOWR 包，也可读取显式 `FLOWR_ROOT`；调用 FLOWR 参数解析器后恢复调用者的 `sys.argv`。`--target` 可只生成指定靶标。以下命令已在新目录完成 100 步生成，并写出 `t_0.25`、`t_0.50`、`t_0.75` 与最终阶段的完整运行状态：
 
 ```bash
-cd /data1/dhuang/flowr_root
-CFG=output/molsteer_openrouter_5i0b_20260928/exact_preparation/configurations/t_0.50.json
-.venv-molsteer/bin/python -m molsteer.molexecutor.runner \
-  --config "$CFG" \
-  --output output/molsteer_openrouter_5i0b_20260928/flowr_creativity \
-  --arm creativity
-.venv-molsteer/bin/python -m molsteer.molexecutor.runner \
-  --config "$CFG" \
-  --output output/molsteer_openrouter_5i0b_20260928/flowr_unguided \
-  --arm unguided
+cd /data1/dhuang/MolSteer
+source integrations/flowr_root/activate.sh
+python integrations/flowr_root/stage_runner.py \
+  --output-root flowr_root/output/molsteer_stage_runner_moved_20260928 \
+  --input-root flowr_root/output/crossdocked_100target_stage_test_exact_20260923/inputs \
+  --checkpoint flowr_root/checkpoints/flowr_root_v2.2.ckpt \
+  --gpu 1 --precision highest --target 5i0b_A__5vef_M77
 ```
 
-输出目录必须为空。引导运行通过梯度有限差分预检，恢复至第 50 步，续推 50 步，其中 40 步接受引导提议；只编辑批次索引 2。最终产物位于各自的 `.../<arm>/5i0b_A__5vef_M77/ligand_002/final/`。同 RNG 无引导对照也完成。两份最终 SDF 可解析、连接图相同，MolReader 未发现蛋白碰撞；引导与无引导的原生 pKd head 分别约为 5.42825 和 5.42795，坐标帧 RMSD 约 0.00156 Å。单例和如此小的差异不足以证明生成质量改善；应扩大靶标和随机种子，并用独立指标评价。
+新捕获的 `ligand_002/t_0.50/runtime.pt` 已用 MolExecutor 在 GPU 1 恢复到第 50 步。改变 `stage_runner.py` 会改变其源哈希；旧精确捕获必须继续使用自身输出目录保存的旧版 `stage_runner.py`，不能换成新的集成脚本。适配器在目录搬迁后以实际文件身份比较模型、受体、配体和阶段路径，同时核验源哈希、模型内容哈希、积分步、GPU 与数值精度。
 
-## GLM-5.3 Agent 与生成器的接口
+用户指定的 `crossdocked_100target_stage_test/5i0b_A__5vef_M77/ligand_002/t_0.50` 原始阶段没有 `runtime.pt`，适合读取证据，不能冒充精确续推。下面的 Agent 结果来自 `crossdocked_100target_stage_test_exact_20260923` 的 StatePacket；其来源哈希与精确 `runtime.pt` 匹配。新捕获与旧精确捕获也不可交叉组合。
 
-`configs/agents.json` 默认让四个 Agent 通过 OpenRouter 调用 `z-ai/glm-5.3`，启用 reasoning。两轮真实 API 调用已验证模型和 `reasoning_details` 的续传。Agent 的 `RewardSpec` 经声明式验证和离线数值测试后，正式生成仍要求宿主提供 `AgentRuntime(inference_adapter=..., approve_inference=True)`。当前仓库的 FLOWR `runner.py` 接收的是另一种 `RewardProgram` JSON；它并不自动消费 Agent 的 `RewardSpec`。上面的 GPU 续推使用了 `prepare_exact_experiment.py` 生成的确定性奖励程序，不能表述为 GLM 直接控制的续推。
+## GLM-5.3 Agent 奖励的真实续推
 
-修正 OpenRouter 超时单位后，对精确捕获的 StatePacket/DiagnosticReport 运行了完整的真实 API Agent 工作流。`glm53_5i0b_fixed_20260928` 的状态为 `validated`，四个 Agent 合计留下 21 条审计事件；RewardSpec 有 4 项、2 个视图组，2 组离线数值测试通过。其 `execution_result.mode` 为 `validation_only`，没有调用 FLOWR 生成器。审计产物保存在 `MolSteer-github/outputs/agent_runs/glm53_5i0b_fixed_20260928.{trace,checkpoint}.json`。配置里的 `timeout` 单位是秒；`ChatOpenRouter` 接收毫秒，模型工厂会转换单位。
+OpenRouter 的四 Agent 工作流对精确捕获生成了 `glm53_5i0b_fixed_20260928.checkpoint.json`：状态 `validated`，4 个奖励项覆盖 `state` 和 `prediction` 两个视图，2 组离线数值测试通过。审计文件已复制到顶层 `outputs/agent_runs/`。`integrations/flowr_root/agent_continuation.py` 检查 Agent 审计摘要、奖励验证、阶段文件哈希、完整运行状态、受体/模型来源、GPU 与预算，然后将两种视图分别映射到实时 `X_t` 和可微的 `X̂₁`。只允许经过验证的区间距离、角度和最小距离项；编辑掩码限于奖励项引用的原子。
 
-接通两层需要一个受审查的适配器，至少完成以下工作：
+可在新的输出目录重跑同一实验：
 
-1. 从同一 `StatePacket` 和同一精确捕获编译受支持的 `RewardSpec` 条目到 FLOWR `RewardProgram`；拒绝无法表达的视图、奖励项或图操作，保留证据 ID、单位和坐标映射。
-2. 验证图签名、坐标哈希、模型和 stage runner 哈希、受体/配体、GPU、精度、积分步与 RNG；不得跨捕获组合参考预测。
-3. 将 `request.strength`、编辑掩码、每步/累计位移预算映射到实时梯度控制，保存完整状态，并返回真正测量的 segment 指标供 MolMonitor 判断。
-4. 对 GLM 产出的奖励先运行静态验证、数值梯度预检和小段续推，再与同 RNG 原生对照及独立质量指标比较。禁止把离线坐标试验标记为生成器收益。
+```bash
+cd /data1/dhuang/MolSteer
+source integrations/flowr_root/activate.sh
+python integrations/flowr_root/agent_continuation.py \
+  --agent-checkpoint outputs/agent_runs/glm53_5i0b_fixed_20260928.checkpoint.json \
+  --flowr-config flowr_root/output/molsteer_openrouter_5i0b_20260928/exact_preparation/configurations/t_0.50.json \
+  --flowr-root flowr_root \
+  --output-root flowr_root/output/NEW_AGENT_CONTINUATION
+```
 
-在这个桥接适配器通过验证前，API Agent 与 FLOWR 续推应分别运行并分别标记来源。
+输出目录必须尚不存在。该入口会先生成 `RewardProgram.agent.json`、执行配置及来源清单，再用同一完整检查点和 RNG 运行 `unguided`、`agent` 两条分支；梯度有限差分预检是硬门禁。历史实测产物在 `flowr_root/output/molsteer_agent_glm53_5i0b_20260928/`。此次从第 50 步运行到第 100 步，Agent 分支 44 步具有可用梯度，37 步接受引导，最大累计注入路径约 0.00257 Å；无引导分支接受数为 0。
+
+两条分支的最终 SDF 均可解析，分子连接图一致，MolReader 在该表示下未报告蛋白或分子内碰撞。最终坐标帧 RMSD 约 0.000112 Å；原生 pKd head 分别为 5.427947（Agent）和 5.427954（无引导），SDF MMFF 应变代理分别约为 19.567 和 19.546 kcal/mol。本单例证明 Agent 奖励已经接入实时续推，但不构成质量提升证据。后续应在多个靶标和随机种子上配对运行，并用独立评价指标判断收益。
