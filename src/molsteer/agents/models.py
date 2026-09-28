@@ -51,6 +51,10 @@ def create_chat_model(
         except ImportError:
             raise RuntimeError("install langchain-openrouter to use this provider") from None
         constructor = ChatOpenRouter
+        # ModelConfig.timeout is expressed in seconds like the other providers,
+        # while ChatOpenRouter's `timeout` argument is milliseconds.
+        if profile.timeout is not None:
+            kwargs["timeout"] = max(1, round(profile.timeout * 1000))
         if profile.reasoning_enabled:
             kwargs["reasoning"] = {"enabled": True}
     elif provider.kind == "openai":

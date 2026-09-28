@@ -66,6 +66,7 @@ def test_default_openrouter_factory_forwards_reasoning_without_network(monkeypat
     assert create_chat_model(config, "molreader", secret_store) is constructor.return_value
     secret_store.get.assert_called_once_with("openrouter")
     assert constructor.call_args.kwargs["model"] == "z-ai/glm-5.3"
+    assert constructor.call_args.kwargs["timeout"] == 120000
     assert constructor.call_args.kwargs["base_url"] == "https://openrouter.ai/api/v1"
     assert constructor.call_args.kwargs["api_key"] == "test-only-openrouter-key"
     assert constructor.call_args.kwargs["reasoning"] == {"enabled": True}

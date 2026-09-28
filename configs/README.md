@@ -24,7 +24,7 @@ or the configured secret reference directly under each provider. Environment var
 
 ## Independent models and runtime paths
 
-To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout`, `max_retries` and optional `reasoning_enabled`, then point each `agents.<name>.model` at the appropriate name. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. `reasoning_enabled` applies only to OpenRouter profiles. Do not pass a model's unsupported parameters.
+To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout`, `max_retries` and optional `reasoning_enabled`, then point each `agents.<name>.model` at the appropriate name. `timeout` is configured in seconds and converted to milliseconds for `ChatOpenRouter`. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. `reasoning_enabled` applies only to OpenRouter profiles. Do not pass a model's unsupported parameters.
 
 All runtime-relative paths resolve against the repository root, including when the config JSON is elsewhere or the current working directory differs. The source checkout must retain its `configs`, `skills` and `knowledge` directories; a wheel containing only Python modules is not a complete deployment bundle.
 
