@@ -9,7 +9,7 @@ from molsteer.molreader.reporting import render_diagnostic
 from molsteer.molthinker.planner import derive
 from molsteer.molthinker.reporting import render_derivation
 from molsteer.molexecutor.offline import run_offline_trial
-from molsteer.molthinker.creativity import derive as derive_program, render_program, DEFAULT_MODE
+from molsteer.molthinker.creativity import derive as derive_program, render_program
 
 
 def regenerate(input_root, baseline_root, output_root, knowledge):
@@ -62,7 +62,8 @@ def main():
     think=sub.add_parser('think')
     for name in ['packet','report','knowledge','output']:
         think.add_argument('--'+name,required=True)
-    think.add_argument('--mode',choices=['creativity','selection'],default=DEFAULT_MODE)
+    think.add_argument('--mode',choices=['creativity','selection'],required=True,
+                       help='Explicit historical deterministic mode; use the agents command for dynamic reward design')
     think.add_argument('--native-reference',help='Matched dense outcome reference; enables outcome-aware creativity')
     think.add_argument('--base-program',help='Existing live affinity program whose execution contract is retained')
     think.add_argument('--no-discrete-search',action='store_true')

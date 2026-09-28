@@ -1,4 +1,4 @@
-"""Evidence-grounded composition; molecular instances supply all atom selections."""
+"""Historical deterministic reward baselines; API Agent creativity uses a separate design path."""
 from .planner import derive as derive_selection
 from molsteer.common import digest
 
