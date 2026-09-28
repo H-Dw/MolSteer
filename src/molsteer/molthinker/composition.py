@@ -13,7 +13,7 @@ def validate_design_record(design: dict, terms: list[dict], candidate_ids: set[s
     """Check target selection, scale provenance and comparison without executing model text."""
     ids={t['term_id'] for t in terms}
     required={'target_groups','normalizations','omitted','objective_tree',
-              'architecture_reason','rejected_alternatives'}
+              'architecture_reason','rejected_alternatives','mathematical_audit','evaluation_plan'}
     if not isinstance(design,dict) or set(design)!=required or not ids:
         raise ValueError('Reward design fields are incomplete or unexpected')
     def explanation(value):
@@ -23,6 +23,16 @@ def validate_design_record(design: dict, terms: list[dict], candidate_ids: set[s
     alternatives=design['rejected_alternatives']
     if not isinstance(alternatives,list) or not alternatives or any(not explanation(x) for x in alternatives):
         raise ValueError('Compare at least one rejected architecture')
+    audit=design['mathematical_audit']
+    if (not isinstance(audit,dict)
+            or set(audit)!={'zero_set','marginal_sensitivity','constraint_and_gradient_path','failure_mode'}
+            or any(not explanation(x) for x in audit.values())):
+        raise ValueError('Record the objective zero set, sensitivities, live path and failure mode')
+    evaluation=design['evaluation_plan']
+    if (not isinstance(evaluation,dict)
+            or set(evaluation)!={'independent_measurement','matched_native_status'}
+            or any(not explanation(x) for x in evaluation.values())):
+        raise ValueError('Record independent evaluation and native comparison availability')
     groups=design['target_groups']
     if not isinstance(groups,list) or not groups:
         raise ValueError('At least one core repair target is required')

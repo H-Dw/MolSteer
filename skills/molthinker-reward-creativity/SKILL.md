@@ -107,6 +107,8 @@ Include:
 
 For a newly composed reward, also include the function-basis lineage, the explicit set $A$, each $F_k$ definition, the aggregation equation, the derivative allocation implied by the aggregator, and a declaration of which fields actually affect execution. Compatibility fields or inactive parameters must not be presented as active weights.
 
+The Agent submission must summarize the mathematical audit: the exact zero/acceptable set, marginal sensitivity of each retained target, the live gradient and constraint path (or `not_run`), and a concrete reward-hacking failure mode. State an independent final measurement and whether matched native continuation is available. These are decision records, not private reasoning traces.
+
 Unavailable objectives do not become zero. If the selected architecture cannot be represented or executed, mark it non-executable and retain the design; do not silently replace it with a simpler template.
 
 ## 8. Reassess changing states

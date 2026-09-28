@@ -102,6 +102,14 @@ def test_all_four_api_agents_use_actual_tool_calls(config, inputs):
         'objective_tree':{'op':'lp_norm','p':2,'children':[{'op':'term','term_id':t} for t in term_ids]},
         'architecture_reason':'An L2 violation norm requires simultaneous progress on the selected local deficits.',
         'rejected_alternatives':['A flat sum can hide a persistent local violation behind several smaller gains.'],
+        'mathematical_audit':{
+            'zero_set':'The tree is zero only when both selected nonnegative residuals are zero.',
+            'marginal_sensitivity':'Each active residual receives pressure proportional to its own magnitude.',
+            'constraint_and_gradient_path':'Copy-coordinate derivatives are checked; the live generator Jacobian remains untested.',
+            'failure_mode':'A surrogate residual can fall while independent final geometry remains abnormal.'},
+        'evaluation_plan':{
+            'independent_measurement':'Recheck localized geometry and chemical validity after a matched continuation.',
+            'matched_native_status':'A matched native continuation is not supplied in this synthetic API test.'},
     }
     models = {
         'molreader':ScriptModel([(n,{}) for n in ['inspect_geometry','inspect_chemistry','inspect_uncertainty','submit_diagnosis']]),
