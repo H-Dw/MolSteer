@@ -61,6 +61,8 @@ CFG=output/molsteer_openrouter_5i0b_20260928/exact_preparation/configurations/t_
 
 `configs/agents.json` 默认让四个 Agent 通过 OpenRouter 调用 `z-ai/glm-5.3`，启用 reasoning。两轮真实 API 调用已验证模型和 `reasoning_details` 的续传。Agent 的 `RewardSpec` 经声明式验证和离线数值测试后，正式生成仍要求宿主提供 `AgentRuntime(inference_adapter=..., approve_inference=True)`。当前仓库的 FLOWR `runner.py` 接收的是另一种 `RewardProgram` JSON；它并不自动消费 Agent 的 `RewardSpec`。上面的 GPU 续推使用了 `prepare_exact_experiment.py` 生成的确定性奖励程序，不能表述为 GLM 直接控制的续推。
 
+修正 OpenRouter 超时单位后，对精确捕获的 StatePacket/DiagnosticReport 运行了完整的真实 API Agent 工作流。`glm53_5i0b_fixed_20260928` 的状态为 `validated`，四个 Agent 合计留下 21 条审计事件；RewardSpec 有 4 项、2 个视图组，2 组离线数值测试通过。其 `execution_result.mode` 为 `validation_only`，没有调用 FLOWR 生成器。审计产物保存在 `MolSteer-github/outputs/agent_runs/glm53_5i0b_fixed_20260928.{trace,checkpoint}.json`。配置里的 `timeout` 单位是秒；`ChatOpenRouter` 接收毫秒，模型工厂会转换单位。
+
 接通两层需要一个受审查的适配器，至少完成以下工作：
 
 1. 从同一 `StatePacket` 和同一精确捕获编译受支持的 `RewardSpec` 条目到 FLOWR `RewardProgram`；拒绝无法表达的视图、奖励项或图操作，保留证据 ID、单位和坐标映射。
