@@ -6,6 +6,7 @@ import pytest
 from langchain_core.messages import AIMessage
 from molsteer.agents.config import load_config
 from molsteer.agents.runtime import AgentRuntime
+from molsteer.agents.loop import run_tools
 from molsteer.agents.monitor import RobustMonitor
 from molsteer.molthinker.planner import derive
 
@@ -107,3 +108,35 @@ def test_model_failure_does_not_fall_back(config, inputs):
     state=AgentRuntime(config,models=models).run(*inputs)
     assert state['status']=='failed'
     assert 'must-not-leak' not in json.dumps(state)
+
+
+def test_tool_loop_keeps_openrouter_reasoning_details_only_in_memory():
+    details = [{'type': 'reasoning.text', 'text': 'test-only private detail'}]
+    completed = {'value': False}
+
+    class CheckTool:
+        name = 'check'
+
+        def invoke(self, args):
+            completed['value'] = args['step'] == 2
+            return {'status': 'ok'}
+
+    class TwoTurnModel:
+        def __init__(self):
+            self.turn = 0
+
+        def bind_tools(self, tools):
+            return self
+
+        def invoke(self, messages):
+            self.turn += 1
+            if self.turn == 2:
+                assert messages[2].additional_kwargs['reasoning_details'] == details
+            return AIMessage(content='', additional_kwargs={'reasoning_details': details},
+                             tool_calls=[{'name': 'check', 'args': {'step': self.turn},
+                                          'id': f'call_{self.turn}'}])
+
+    state = {'run_id': 'reasoning_test'}
+    run_tools(TwoTurnModel(), [CheckTool()], instructions='Check two steps', context={},
+              state=state, node='reader', max_steps=2, completed=lambda: completed['value'])
+    assert 'test-only private detail' not in json.dumps(state)

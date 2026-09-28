@@ -2,6 +2,8 @@
 
 MolSteer separates molecular evidence extraction, reward reasoning, execution and monitoring. The new [LangChain/LangGraph agent layer](docs/AGENT_SYSTEM.zh-CN.md) defaults to API-backed, independently configurable models for all four agents. See [configuration](configs/README.md). The existing deterministic creativity/selection commands and FLOWR.ROOT/domain adapters remain available for compatibility; see [live execution](docs/EXECUTOR.md).
 
+The four agents default to `z-ai/glm-5.3` through OpenRouter. Set `OPENROUTER_API_KEY` in the host environment before an API run.
+
 ## Modules
 
 | Module | Implemented responsibility | Outputs |

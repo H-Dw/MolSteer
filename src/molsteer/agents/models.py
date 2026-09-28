@@ -45,7 +45,15 @@ def create_chat_model(
         kwargs["base_url"] = provider.base_url
     # Keep exceptions from provider constructors (which may echo arguments) out
     # of logs. Missing optional packages get a separate, actionable message.
-    if provider.kind == "openai":
+    if provider.kind == "openrouter":
+        try:
+            from langchain_openrouter import ChatOpenRouter
+        except ImportError:
+            raise RuntimeError("install langchain-openrouter to use this provider") from None
+        constructor = ChatOpenRouter
+        if profile.reasoning_enabled:
+            kwargs["reasoning"] = {"enabled": True}
+    elif provider.kind == "openai":
         try:
             from langchain_openai import ChatOpenAI
         except ImportError:

@@ -37,11 +37,16 @@ def config(tmp_path, monkeypatch):
     return AgentSystemConfig.model_validate({**payload(), "repo_root": tmp_path})
 
 
-def test_default_config_loads_without_selected_model_or_secrets(monkeypatch, tmp_path):
+def test_default_config_selects_openrouter_glm_without_secrets(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     config = load_config()
     assert config.mode == "api"
-    assert config.models["default"].model == "REPLACE_WITH_MODEL_ID"
+    assert config.models["default"].model == "z-ai/glm-5.3"
+    assert config.models["default"].provider == "openrouter"
+    assert config.models["default"].reasoning_enabled is True
+    assert config.providers["openrouter"].base_url == "https://openrouter.ai/api/v1"
+    assert config.providers["openrouter"].api_key_env == "OPENROUTER_API_KEY"
+    assert all(agent.model == "default" for agent in config.agents.values())
     assert config.runtime.max_agent_steps == 12
     assert config.runtime.max_repairs == config.runtime.max_replans == 2
     assert config.runtime.max_segments == 20
@@ -50,8 +55,29 @@ def test_default_config_loads_without_selected_model_or_secrets(monkeypatch, tmp
     assert config.skill_path == REPO_ROOT / "skills/molthinker-conflict-aware-control/SKILL.md"
     assert config.secrets_file == REPO_ROOT / "configs/secrets.local.json"
     assert config.trace_dir == REPO_ROOT / "outputs/agent_runs"
-    with pytest.raises(ValueError, match="REPLACE_WITH_MODEL_ID"):
-        create_chat_model(config, "molreader", Mock())
+
+
+def test_default_openrouter_factory_forwards_reasoning_without_network(monkeypatch):
+    config = load_config()
+    constructor = Mock()
+    secret_store = Mock()
+    secret_store.get.return_value = "test-only-openrouter-key"
+    monkeypatch.setitem(sys.modules, "langchain_openrouter", SimpleNamespace(ChatOpenRouter=constructor))
+    assert create_chat_model(config, "molreader", secret_store) is constructor.return_value
+    secret_store.get.assert_called_once_with("openrouter")
+    assert constructor.call_args.kwargs["model"] == "z-ai/glm-5.3"
+    assert constructor.call_args.kwargs["base_url"] == "https://openrouter.ai/api/v1"
+    assert constructor.call_args.kwargs["api_key"] == "test-only-openrouter-key"
+    assert constructor.call_args.kwargs["reasoning"] == {"enabled": True}
+
+
+def test_openrouter_adapter_round_trips_reasoning_details():
+    from langchain_openrouter.chat_models import _convert_dict_to_message, _convert_message_to_dict
+
+    details = [{"type": "reasoning.text", "text": "test-only detail"}]
+    message = _convert_dict_to_message({"role": "assistant", "content": "done", "reasoning_details": details})
+    assert message.additional_kwargs["reasoning_details"] == details
+    assert _convert_message_to_dict(message)["reasoning_details"] == details
 
 
 def test_custom_config_location_does_not_rebase_paths(tmp_path, monkeypatch):
@@ -76,6 +102,7 @@ def test_custom_config_location_does_not_rebase_paths(tmp_path, monkeypatch):
     lambda d: d.update(monitoring={"min_strength": 0.8, "max_strength": 0.1}),
     lambda d: d.update(monitoring={"threshold": float("inf")}),
     lambda d: d["providers"]["first"].update(base_url="https://user:secret@example.org"),
+    lambda d: d["models"]["one"].update(reasoning_enabled=True),
 ])
 def test_strict_validation(mutate):
     data = payload()

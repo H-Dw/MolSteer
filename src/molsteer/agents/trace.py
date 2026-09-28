@@ -16,7 +16,7 @@ from typing import Any
 from molsteer.common import digest
 
 _ALLOWED_KINDS = {"decision", "tool", "observation", "checkpoint", "error"}
-_SECRET_KEYS = re.compile(r"(?:api[_-]?key|secret|password|authorization|credential|private_reasoning|chain_of_thought|^thinking$|^reasoning$|^access_token$)", re.I)
+_SECRET_KEYS = re.compile(r"(?:api[_-]?key|secret|password|authorization|credential|private_reasoning|reasoning_details|reasoning_content|chain_of_thought|^thinking$|^reasoning$|^access_token$)", re.I)
 
 
 def _redact(value: Any) -> Any:

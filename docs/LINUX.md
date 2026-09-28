@@ -13,7 +13,7 @@ python -m pytest tests -q
 python -m molsteer --help
 ```
 
-Use an editable installation because agent configuration, knowledge and Skill files remain in the source tree. Git ignores `outputs/`, `.venv/` and local secret files. API agents require local credentials and a selected model ID; tests do not call model APIs.
+Use an editable installation because agent configuration, knowledge and Skill files remain in the source tree. Git ignores `outputs/`, `.venv/` and local secret files. API agents default to `z-ai/glm-5.3` through OpenRouter and require a host-injected `OPENROUTER_API_KEY`; tests do not call model APIs.
 
 ## FLOWR.ROOT generation
 

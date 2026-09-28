@@ -23,3 +23,13 @@ def test_nonfinite_observation_is_recorded_without_invalid_json(tmp_path):
     state={'run_id':'nonfinite'}
     append_trace(state,node='executor',kind='observation',summary='Invalid measurement',output={'metric':float('nan')})
     assert load_checkpoint(save_checkpoint(state,tmp_path))['trace'][0]['output']['metric']=={'unavailable':'nonfinite'}
+
+
+def test_provider_reasoning_fields_are_redacted_from_trace(tmp_path):
+    state = {'run_id': 'reasoning_redaction'}
+    append_trace(state, node='thinker', kind='tool', summary='Checked observation',
+                 input_value={'reasoning_details': [{'text': 'private-fragment'}]},
+                 output={'reasoning_content': 'private-content'})
+    saved = save_checkpoint(state, tmp_path).read_text(encoding='utf-8')
+    assert 'private-fragment' not in saved
+    assert 'private-content' not in saved

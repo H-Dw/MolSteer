@@ -2,6 +2,8 @@
 
 MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 [LangChain/LangGraph Agent 系统](docs/AGENT_SYSTEM.zh-CN.md)默认通过 API 调用 LLM，四个 Agent 可独立选择服务与模型，统一配置见 [configs/README.md](configs/README.md)。新 Agent 默认启用[冲突感知控制 Skill](skills/molthinker-conflict-aware-control/SKILL.zh-CN.md)。原有确定性 creativity/selection 命令与 FLOWR.ROOT 实时梯度引导、恢复和通用 flow/diffusion 回调接口保留。
 
+四个 Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。
+
 - MolReader：43 个独立指标、多视图 StatePacket、只报告风险的中英文 DiagnosticReport。
 - MolThinker：知识检索、适用性检查、奖励选择或组合，以及可执行 RewardProgram。
 - MolExecutor：可微奖励、明确的梯度注入、模型适配、自动启动脚本和完整运行检查点。

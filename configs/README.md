@@ -10,19 +10,21 @@ MolSteer now has a provider-neutral orchestration layer under `src/molsteer/agen
 
 ## Configuration
 
-Edit only non-secret values in [`configs/agents.json`](../configs/agents.json). Replace `REPLACE_WITH_MODEL_ID` with a model supported by the selected provider and the required structured tool-calling features. Provider keys can use native OpenAI-compatible or Anthropic LangChain integrations; an OpenAI-compatible endpoint is still represented as `kind: openai` and must be approved by the operator.
+The default in [`configs/agents.json`](../configs/agents.json) assigns all four agents to `z-ai/glm-5.3` through OpenRouter (`https://openrouter.ai/api/v1`). Set `OPENROUTER_API_KEY` in the host environment before an API run. The key is not stored in this repository. OpenAI and Anthropic providers remain available for independently configured agent profiles.
+
+`reasoning_enabled: true` sends OpenRouter's `reasoning: {"enabled": true}` request parameter. The OpenRouter LangChain adapter preserves `reasoning_details` in the transient tool-call conversation, including follow-up calls. Provider messages and private reasoning are not written to the audit trace or checkpoint.
 
 `configs/secrets.local.json` supports either:
 
 ```json
-{"providers": {"openai": {"openai_api_key": "REPLACE_WITH_OPENAI_API_KEY"}}}
+{"providers": {"openrouter": {"openrouter_api_key": "REPLACE_WITH_OPENROUTER_API_KEY"}}}
 ```
 
 or the configured secret reference directly under each provider. Environment variables take precedence. The placeholder file is intentionally not a usable credential.
 
 ## Independent models and runtime paths
 
-To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout` and `max_retries`, then point each `agents.<name>.model` at the appropriate name. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. Do not pass a model's unsupported parameters.
+To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout`, `max_retries` and optional `reasoning_enabled`, then point each `agents.<name>.model` at the appropriate name. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. `reasoning_enabled` applies only to OpenRouter profiles. Do not pass a model's unsupported parameters.
 
 All runtime-relative paths resolve against the repository root, including when the config JSON is elsewhere or the current working directory differs. The source checkout must retain its `configs`, `skills` and `knowledge` directories; a wheel containing only Python modules is not a complete deployment bundle.
 
@@ -36,4 +38,4 @@ On Windows, run with UTF-8 enabled because legacy fixtures contain non-ASCII JSO
 .venv/Scripts/python.exe -X utf8 -m pytest tests -q
 ```
 
-The test suite does not make live API calls. A live API/inference run requires explicit credentials, model IDs and a host-approved generator adapter.
+The test suite does not make live API calls. The default model ID is configured, but a live API/inference run still requires an OpenRouter credential and a host-approved generator adapter.

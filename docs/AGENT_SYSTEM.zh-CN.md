@@ -4,7 +4,9 @@
 
 新 Agent 层位于 `src/molsteer/agents`，旧版领域算法与已有实验文件保留。LangChain 负责各 Agent 的模型与工具接口，LangGraph 负责状态流转和有界反馈循环。API 是新层默认运行方式；离线模式必须显式选择，不会在 API 失败时偷偷退回规则算法。
 
-`configs/agents.json` 采用 `agents → models → providers` 引用结构。四个 Agent 可以分别指定不同的模型、服务端点和凭据引用。模型名仍是占位符，运行真实 API 前需要替换为所用服务支持工具调用的模型 ID。安装依赖使用项目虚拟环境，不改变系统 Python。
+`configs/agents.json` 采用 `agents → models → providers` 引用结构。四个 Agent 默认通过 OpenRouter 使用 `z-ai/glm-5.3`，端点为 `https://openrouter.ai/api/v1`；可分别改用其他模型、服务端点和凭据引用。运行真实 API 前，需要由宿主环境注入 `OPENROUTER_API_KEY`。安装依赖使用项目虚拟环境，不改变系统 Python。
+
+默认模型启用 OpenRouter reasoning 参数。`ChatOpenRouter` 在同一 Agent 的临时多轮工具调用中传递 `reasoning_details`；审计 trace 与 checkpoint 不保存供应商的私有 reasoning 内容。
 
 旧 `think` / `demo` 命令保留其历史语义；新 Agent 调度不是把历史离线实验重新标记为 LLM 实验。
 
@@ -60,7 +62,7 @@
 python -m pip install -e ".[test]"
 ```
 
-配置好模型和凭据后运行新 Agent 入口（会产生 API 费用）：
+注入 OpenRouter 凭据后运行新 Agent 入口（会产生 API 费用）：
 
 ```bash
 python -X utf8 -m molsteer agents --packet examples/5i0b_A__5vef_M77/ligand_002/t_0.50/StatePacket.json --report examples/5i0b_A__5vef_M77/ligand_002/t_0.50/DiagnosticReport.json
@@ -75,7 +77,7 @@ python -X utf8 -m molsteer agents --packet examples/5i0b_A__5vef_M77/ligand_002/
 - Executor 的自动修复范围是声明式程序检查和有界测试参数，不能自主编写并部署任意新 Python 后端。新公式需要受审查的后端实现。Web 和外部计算需注入宿主 callable；默认不联网执行这些工具。
 - 新工作流正式推理接入协议为 `adapter(packet=..., reward_spec=..., execution_result=validation, request=...)`，返回 `{'done': bool, 'metrics': {...}}`；`request` 含 segment/strength/run_id/monitor_event。适配器必须实际消费 strength，并负责实时梯度、硬约束和生成器状态；不能把旧 FLOWR CLI 配置直接当成该 callable。
 - 当前监控对每个指标分别维护基线，不混合原始量纲，异常不会污染正常基线。它尚未自动按 diffusion 时间阶段分桶；生产阈值仍需按真实轨迹校准。
-- 验收：完整测试 **139 passed**，包含四个 API Agent 的模拟 tool-call 测试、真实领域数值测试、监控先 retune 后 replan 的图级测试与审计快照完整性测试。另有一个原有 PyTorch Tensor 转标量警告。没有运行真实付费 API、在线检索或 GPU 生成器推理。
+- 验收：完整测试 **144 passed**，包含四个 API Agent 的模拟 tool-call 测试、OpenRouter reasoning 消息传递、真实领域数值测试、监控先 retune 后 replan 的图级测试与审计快照完整性测试。另有一个原有 PyTorch Tensor 转标量警告。没有运行真实付费 API、在线检索或 GPU 生成器推理。
 
 ## 验证方法
 

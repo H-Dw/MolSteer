@@ -13,7 +13,7 @@ python -m pytest tests -q
 python -m molsteer --help
 ```
 
-请使用可编辑安装：Agent 的配置、知识库与 Skill 文件仍位于源码目录。`outputs/`、`.venv/` 和本地密钥文件受 Git 忽略。API Agent 需要在本机设置服务凭据与模型 ID；测试不调用模型 API。
+请使用可编辑安装：Agent 的配置、知识库与 Skill 文件仍位于源码目录。`outputs/`、`.venv/` 和本地密钥文件受 Git 忽略。API Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`，需要由宿主环境注入 `OPENROUTER_API_KEY`；测试不调用模型 API。
 
 ## FLOWR.ROOT 生成
 

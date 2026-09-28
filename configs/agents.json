@@ -1,5 +1,11 @@
 {
   "providers": {
+    "openrouter": {
+      "kind": "openrouter",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "api_key_secret": "openrouter_api_key",
+      "base_url": "https://openrouter.ai/api/v1"
+    },
     "openai": {
       "kind": "openai",
       "api_key_env": "OPENAI_API_KEY",
@@ -15,12 +21,13 @@
   },
   "models": {
     "default": {
-      "provider": "openai",
-      "model": "REPLACE_WITH_MODEL_ID",
+      "provider": "openrouter",
+      "model": "z-ai/glm-5.3",
       "temperature": null,
-      "max_tokens": 4096,
+      "max_tokens": 8192,
       "timeout": 120.0,
-      "max_retries": 2
+      "max_retries": 2,
+      "reasoning_enabled": true
     }
   },
   "agents": {

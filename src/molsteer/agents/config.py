@@ -28,7 +28,7 @@ class StrictModel(BaseModel):
 
 
 class ProviderConfig(StrictModel):
-    kind: Literal["openai", "anthropic"]
+    kind: Literal["openrouter", "openai", "anthropic"]
     api_key_env: str = Field(min_length=1)
     api_key_secret: str = Field(min_length=1)
     base_url: str | None = Field(default=None, repr=False)
@@ -67,6 +67,7 @@ class ModelConfig(StrictModel):
     max_tokens: int | None = Field(default=None, gt=0)
     timeout: float | None = Field(default=None, gt=0)
     max_retries: int = Field(default=2, ge=0)
+    reasoning_enabled: bool = False
 
     @field_validator("model")
     @classmethod
@@ -140,6 +141,8 @@ class AgentSystemConfig(StrictModel):
         for name, profile in self.models.items():
             if profile.provider not in self.providers:
                 raise ValueError(f"model profile {name!r} references unknown provider {profile.provider!r}")
+            if profile.reasoning_enabled and self.providers[profile.provider].kind != "openrouter":
+                raise ValueError(f"model profile {name!r} enables OpenRouter reasoning for a different provider")
         for name, profile in self.agents.items():
             if profile.model not in self.models:
                 raise ValueError(f"agent profile {name!r} references unknown model {profile.model!r}")
