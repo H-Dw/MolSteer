@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DiagnosticReport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "packet_id",
+    "identity",
+    "assessment",
+    "summary",
+    "findings",
+    "evidence_gaps",
+    "coverage",
+    "history",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "kind": {
+      "const": "DiagnosticReport"
+    },
+    "packet_id": {
+      "type": "string"
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "target_id",
+        "ligand_id",
+        "stage",
+        "stage_t"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "type": "string"
+        },
+        "ligand_id": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "stage_t": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "assessment": {
+      "enum": [
+        "risks_observed",
+        "insufficient_evidence",
+        "no_flagged_risks_in_evaluated_metrics"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "category",
+          "view",
+          "scope",
+          "severity",
+          "evidence_strength",
+          "calibrated_probability",
+          "metric_id",
+          "observation_count",
+          "summary",
+          "evidence_ids",
+          "localized_examples",
+          "thresholds",
+          "units",
+          "interpretation_limit"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "view": {
+            "enum": [
+              "state",
+              "prediction",
+              "sdf"
+            ]
+          },
+          "scope": {
+            "enum": [
+              "observed_noisy_state",
+              "predicted_endpoint",
+              "decoded_endpoint"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "warning",
+              "high"
+            ]
+          },
+          "evidence_strength": {
+            "enum": [
+              "provisional_screening",
+              "direct_computational_check"
+            ]
+          },
+          "calibrated_probability": {
+            "type": "null"
+          },
+          "metric_id": {
+            "type": "string"
+          },
+          "observation_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "summary": {
+            "type": "string"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "localized_examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "evidence_id",
+                "atom_ids",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "evidence_id": {
+                  "type": "string",
+                  "pattern": "^ev_[0-9a-f]{20}$"
+                },
+                "atom_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "severity": {
+                  "enum": [
+                    "info",
+                    "warning",
+                    "high"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "thresholds": {
+            "type": "object"
+          },
+          "units": {
+            "type": "object"
+          },
+          "interpretation_limit": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence_gaps": {
+      "type": "array"
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "ok",
+        "partial",
+        "unavailable",
+        "not_applicable",
+        "error"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unavailable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_applicable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "history": {
+      "type": "array"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

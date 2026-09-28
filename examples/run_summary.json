@@ -1,0 +1,66 @@
+{
+  "records": [
+    {
+      "identity": {
+        "target_id": "5i0b_A__5vef_M77",
+        "ligand_id": "ligand_002",
+        "stage": "t_0.50",
+        "stage_t": 0.5
+      },
+      "packet_id": "sp_7c2bbc227fdd4e662ab161c2",
+      "parent_packet_id": "sp_fbf649b9b6f080b21f6a6229",
+      "observation_count": 129,
+      "evidence_count": 80,
+      "risk_regions": 1,
+      "coverage_root_causes": 5,
+      "offline_trial": {
+        "penalty_before": 0.032826989851003345,
+        "penalty_after": 5.617030540428822e-13,
+        "gradient_passed": true,
+        "source_files_unchanged": true
+      }
+    },
+    {
+      "identity": {
+        "target_id": "5i0b_A__5vef_M77",
+        "ligand_id": "ligand_002",
+        "stage": "t_0.75",
+        "stage_t": 0.75
+      },
+      "packet_id": "sp_ea21f649076801a7bbb9cad0",
+      "parent_packet_id": "sp_d5aef33bd35d2d19bbefd775",
+      "observation_count": 129,
+      "evidence_count": 62,
+      "risk_regions": 1,
+      "coverage_root_causes": 4
+    },
+    {
+      "identity": {
+        "target_id": "2pqw_A__2rhy_MLZ",
+        "ligand_id": "ligand_001",
+        "stage": "t_0.50",
+        "stage_t": 0.5
+      },
+      "packet_id": "sp_753d410c271ad68bef6cf61f",
+      "parent_packet_id": "sp_2369c748dd95c945d62d6dbb",
+      "observation_count": 129,
+      "evidence_count": 24,
+      "risk_regions": 1,
+      "coverage_root_causes": 4
+    },
+    {
+      "identity": {
+        "target_id": "2pqw_A__2rhy_MLZ",
+        "ligand_id": "ligand_001",
+        "stage": "t_0.75",
+        "stage_t": 0.75
+      },
+      "packet_id": "sp_75ca8726467e4fcffe5f9d94",
+      "parent_packet_id": "sp_d2be03f5f20eec95e7d8f8b1",
+      "observation_count": 129,
+      "evidence_count": 23,
+      "risk_regions": 1,
+      "coverage_root_causes": 4
+    }
+  ]
+}

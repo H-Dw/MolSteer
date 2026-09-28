@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Localized DiagnosticReport v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "packet_id",
+    "identity",
+    "assessment",
+    "summary",
+    "findings",
+    "raw_state_findings",
+    "evidence_gaps",
+    "coverage",
+    "history",
+    "evidence_index",
+    "appendix",
+    "representation_merging",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "kind": {
+      "const": "DiagnosticReport"
+    },
+    "packet_id": {
+      "type": "string"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "assessment": {
+      "enum": [
+        "risks_observed",
+        "insufficient_evidence",
+        "no_flagged_risks_in_evaluated_metrics"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "category",
+          "scope",
+          "priority",
+          "views",
+          "atom_ids",
+          "chemical_context",
+          "primary_evidence_ids",
+          "supporting_evidence_ids",
+          "evidence_ids",
+          "representative_evidence_ids",
+          "unique_primary_observation_count",
+          "source_observation_count",
+          "trajectory",
+          "calibrated_probability",
+          "interpretation_limit",
+          "molecule_context"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "observed_noisy_state",
+              "predicted_endpoint",
+              "decoded_endpoint"
+            ]
+          },
+          "priority": {
+            "enum": [
+              "high",
+              "elevated",
+              "contextual"
+            ]
+          },
+          "views": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "state",
+                "prediction",
+                "sdf"
+              ]
+            }
+          },
+          "atom_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "chemical_context": {
+            "type": "object"
+          },
+          "primary_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "supporting_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "representative_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "unique_primary_observation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_observation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "trajectory": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "calibrated_probability": {
+            "type": "null"
+          },
+          "interpretation_limit": {
+            "type": "string"
+          },
+          "molecule_context": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "raw_state_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "category",
+          "scope",
+          "priority",
+          "views",
+          "atom_ids",
+          "chemical_context",
+          "primary_evidence_ids",
+          "supporting_evidence_ids",
+          "evidence_ids",
+          "representative_evidence_ids",
+          "unique_primary_observation_count",
+          "source_observation_count",
+          "trajectory",
+          "calibrated_probability",
+          "interpretation_limit",
+          "molecule_context"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "observed_noisy_state",
+              "predicted_endpoint",
+              "decoded_endpoint"
+            ]
+          },
+          "priority": {
+            "enum": [
+              "high",
+              "elevated",
+              "contextual"
+            ]
+          },
+          "views": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "state",
+                "prediction",
+                "sdf"
+              ]
+            }
+          },
+          "atom_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "chemical_context": {
+            "type": "object"
+          },
+          "primary_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "supporting_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "representative_evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "unique_primary_observation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_observation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "trajectory": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "calibrated_probability": {
+            "type": "null"
+          },
+          "interpretation_limit": {
+            "type": "string"
+          },
+          "molecule_context": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "evidence_gaps": {
+      "type": "array"
+    },
+    "coverage": {
+      "type": "object"
+    },
+    "history": {
+      "type": "array"
+    },
+    "evidence_index": {
+      "type": "object"
+    },
+    "appendix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_ids",
+        "reason"
+      ],
+      "properties": {
+        "evidence_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "representation_merging": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prediction_sdf_merged",
+        "rule"
+      ],
+      "properties": {
+        "prediction_sdf_merged": {
+          "type": "boolean"
+        },
+        "rule": {
+          "type": "string"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

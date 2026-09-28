@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Selection"
+  short_description: "Select evidence-bound reference reward functions"
+  default_prompt: "Use $novel_conf_molthinker-reward-selection to derive a reward from this StatePacket, DiagnosticReport and knowledge base."

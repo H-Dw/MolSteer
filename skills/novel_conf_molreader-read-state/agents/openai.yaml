@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolReader State Evidence"
+  short_description: "Extract and package molecular state evidence"
+  default_prompt: "Use $novel_conf_molreader-read-state to assemble a provenance-bound StatePacket with measured evidence and steering readiness."

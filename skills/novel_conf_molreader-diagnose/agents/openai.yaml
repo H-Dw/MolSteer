@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolReader Diagnosis"
+  short_description: "Report localized molecular risks with evidence"
+  default_prompt: "Use $novel_conf_molreader-diagnose to produce English and Chinese risk-only DiagnosticReports from this StatePacket."

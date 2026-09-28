@@ -1,0 +1,31 @@
+{
+  "adapter": "flowr_root",
+  "model_root": "/data1/dhuang/flowr_root",
+  "stage_runner": "/data1/dhuang/flowr_root/output/crossdocked_100target_stage_test/stage_runner.py",
+  "checkpoint": "/data1/dhuang/flowr_root/checkpoints/flowr_root_v2.2.ckpt",
+  "receptor": "/data1/dhuang/flowr_root/output/crossdocked_100target_stage_test/inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0_pocket10.pdb",
+  "reference_ligand": "/data1/dhuang/flowr_root/output/crossdocked_100target_stage_test/inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0.sdf",
+  "output": "output/strength_sweep_reproduction",
+  "saved_stage": "/data1/dhuang/flowr_root/output/crossdocked_100target_stage_test/5i0b_A__5vef_M77/ligand_002/t_0.50",
+  "target_id": "5i0b_A__5vef_M77",
+  "ligand_index": 2,
+  "gpu": 1,
+  "start_step": 50,
+  "budget": {
+    "strength": 1.0,
+    "max_step_angstrom": 0.02,
+    "max_path_angstrom": 0.5
+  },
+  "reward_programs": {
+    "selection": "/data1/dhuang/flowr_root/MolSteer/experiments/guidance/selection.json",
+    "creativity": "/data1/dhuang/flowr_root/MolSteer/experiments/guidance/creativity.json"
+  },
+  "missing_resume_context_policy": "replay_context_restore_exact_saved_state",
+  "resume_checkpoint": "/data1/dhuang/flowr_root/MolSteer/experiments/guidance/resume_start.pt",
+  "float32_matmul_precision": "highest",
+  "record_tensor_trace": true,
+  "guidance_interval": [
+    0.5,
+    1.0
+  ]
+}

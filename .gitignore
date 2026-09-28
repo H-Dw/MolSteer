@@ -1,0 +1,21 @@
+# Local credentials and host-only configuration
+.env
+.env.*
+**/.env
+**/.env.*
+configs/secrets.local.json
+**/secrets.local.json
+**/secrets.*.local.json
+# Generated runs and environments
+outputs/
+**/outputs/
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+molsteer_source.tar.gz

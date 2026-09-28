@@ -1,0 +1,238 @@
+{
+  "kind": "ExecutionMonitor",
+  "packet_id": "sp_7c2bbc227fdd4e662ab161c2",
+  "reward_id": "rw_4098beec3d554ffe2a657933",
+  "view": "prediction",
+  "mode": "offline_frozen_graph_coordinate_copy",
+  "demo_movable_atom_ids": [
+    1,
+    10,
+    14
+  ],
+  "mobility_declaration": "Demonstration only; does not establish editable atoms in the generator",
+  "settings": {
+    "iterations": 30,
+    "learning_rate": 0.25,
+    "max_step_angstrom": 0.03,
+    "trust_radius_angstrom": 0.2
+  },
+  "numerical_gradient": {
+    "passed": true,
+    "maximum_absolute_error": 4.4577141977697465e-10,
+    "finite_difference_epsilon_angstrom": 1e-06,
+    "analytic_gradient_l2": 0.3805903515713363,
+    "checked_coordinates": 60,
+    "scope": "Coordinate derivative on a detached copy; no generator Jacobian tested"
+  },
+  "penalty_before": 0.032826989851003345,
+  "penalty_after": 5.617030540428822e-13,
+  "reward_before": -0.032826989851003345,
+  "reward_after": -5.617030540428822e-13,
+  "delta_E": -0.03282698985044164,
+  "delta_norm_angstrom": 0.17767808044319824,
+  "max_atom_displacement_angstrom": 0.12473016167044645,
+  "fixed_atoms_unchanged": true,
+  "input_snapshot_unchanged": true,
+  "monotone_penalty_descent": true,
+  "trace": [
+    0.032826989851003345,
+    0.018293889783941933,
+    0.008386035162075815,
+    0.0024124962267505993,
+    0.0006031240566876883,
+    0.00015078101417182377,
+    3.7695253542916416e-05,
+    9.423813385738743e-06,
+    2.355953346427456e-06,
+    5.889883366031286e-07,
+    1.4724708414993866e-07,
+    3.68117710381474e-08,
+    9.202942759175358e-09,
+    2.300735689733591e-09,
+    5.751839224522254e-10,
+    1.437959806638913e-10,
+    3.5948995144320907e-11,
+    8.987248779019817e-12,
+    2.246812206286956e-12,
+    5.617030540428822e-13
+  ],
+  "terms": [
+    {
+      "term_id": "term_0668564b0dd5",
+      "atom_ids": [
+        1,
+        10
+      ],
+      "unit": "angstrom",
+      "before": {
+        "value": 1.5375990914899693,
+        "energy": 0.030914741832117707
+      },
+      "after": {
+        "value": 1.786253382748937,
+        "energy": 5.617030540428822e-13
+      }
+    },
+    {
+      "term_id": "term_c1f485c34e9c",
+      "atom_ids": [
+        1,
+        14
+      ],
+      "unit": "angstrom",
+      "before": {
+        "value": 1.2440574900430839,
+        "energy": 0.0019122480188856399
+      },
+      "after": {
+        "value": 1.3359570626821626,
+        "energy": 0.0
+      }
+    }
+  ],
+  "before_screen": {
+    "bond_window_violations": [],
+    "protein_clashes": [],
+    "checked_protein_pairs": 6320,
+    "scope": "Frozen-graph bond windows and heavy-atom protein overlap; not full post-steering validation"
+  },
+  "after_screen": {
+    "bond_window_violations": [],
+    "protein_clashes": [],
+    "checked_protein_pairs": 6320,
+    "scope": "Frozen-graph bond windows and heavy-atom protein overlap; not full post-steering validation"
+  },
+  "new_bond_window_violations": 0,
+  "resolved_bond_window_violations": 0,
+  "new_protein_clashes": 0,
+  "resolved_protein_clashes": 0,
+  "trial_coordinates_angstrom": [
+    [
+      13.796237229555846,
+      32.15920112729073,
+      12.594864350743592
+    ],
+    [
+      17.34066988570228,
+      35.59639496156306,
+      13.667054789971056
+    ],
+    [
+      15.56235730573535,
+      32.94664011597634,
+      13.928284686990082
+    ],
+    [
+      9.993245481699706,
+      34.795145851373675,
+      17.48250196594745
+    ],
+    [
+      10.58166038915515,
+      31.50033686757088,
+      16.212099057622254
+    ],
+    [
+      12.26973491832614,
+      32.80405078530312,
+      15.448796254582703
+    ],
+    [
+      15.774326442927123,
+      33.393846315145495,
+      12.57329795975238
+    ],
+    [
+      14.357534527033568,
+      30.991970282793048,
+      12.051350099034607
+    ],
+    [
+      11.764630138128997,
+      33.92464326024056,
+      16.090522271580994
+    ],
+    [
+      13.40252095386386,
+      33.20846102833748,
+      14.831074365414679
+    ],
+    [
+      16.40195495628343,
+      34.66351109469673,
+      12.467370198251752
+    ],
+    [
+      14.289305090159178,
+      32.34195397496224,
+      14.030678373761475
+    ],
+    [
+      13.527794121950866,
+      34.53316799998284,
+      15.077619624324143
+    ],
+    [
+      10.025355457514525,
+      32.52976606488228,
+      16.8702206434682
+    ],
+    [
+      17.8990452835804,
+      34.59339305580289,
+      12.98369151511918
+    ],
+    [
+      12.576089634746314,
+      34.96682230830193,
+      15.860832911916077
+    ],
+    [
+      10.56887507364154,
+      33.766605478525165,
+      16.83473561424762
+    ],
+    [
+      11.701320230215789,
+      31.589722138643268,
+      15.479810637421906
+    ],
+    [
+      14.385239481180907,
+      33.40486643910408,
+      11.944579345174134
+    ],
+    [
+      14.392742990702391,
+      33.317381125688556,
+      10.562650186009705
+    ]
+  ],
+  "original_atom_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "rebound": null,
+  "population_ESS": null,
+  "full_sampler_ablation": "not_run",
+  "conclusion": "Numerical feasibility only; not evidence of generator control, stable chemistry or improved final binding",
+  "source_files_unchanged": true
+}

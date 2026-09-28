@@ -1,0 +1,58 @@
+{
+  "records": [
+    {
+      "identity": {
+        "target_id": "2pqw_A__2rhy_MLZ",
+        "ligand_id": "ligand_001",
+        "stage": "t_0.50",
+        "stage_t": 0.5
+      },
+      "observations": 129,
+      "evidence": 24,
+      "all_checks_passed": true
+    },
+    {
+      "identity": {
+        "target_id": "2pqw_A__2rhy_MLZ",
+        "ligand_id": "ligand_001",
+        "stage": "t_0.75",
+        "stage_t": 0.75
+      },
+      "observations": 129,
+      "evidence": 23,
+      "all_checks_passed": true
+    },
+    {
+      "identity": {
+        "target_id": "5i0b_A__5vef_M77",
+        "ligand_id": "ligand_002",
+        "stage": "t_0.50",
+        "stage_t": 0.5
+      },
+      "observations": 129,
+      "evidence": 80,
+      "all_checks_passed": true
+    },
+    {
+      "identity": {
+        "target_id": "5i0b_A__5vef_M77",
+        "ligand_id": "ligand_002",
+        "stage": "t_0.75",
+        "stage_t": 0.75
+      },
+      "observations": 129,
+      "evidence": 62,
+      "all_checks_passed": true
+    }
+  ],
+  "negative_guards_passed": [
+    "reward_parameter_tamper",
+    "reward_packet_mismatch",
+    "coordinate_tamper",
+    "capability_tamper",
+    "missing_demo_mobility"
+  ],
+  "total_observations": 516,
+  "total_evidence": 189,
+  "errors": 0
+}

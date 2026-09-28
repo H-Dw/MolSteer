@@ -1,0 +1,1307 @@
+{
+  "kind": "RewardProgram",
+  "mode": "creativity",
+  "skill": "molthinker-reward-creativity",
+  "packet_id": "sp_7c2bbc227fdd4e662ab161c2",
+  "identity": {
+    "target_id": "5i0b_A__5vef_M77",
+    "ligand_id": "ligand_002",
+    "stage": "t_0.50",
+    "stage_t": 0.5
+  },
+  "region_atom_ids": [
+    1,
+    10,
+    14
+  ],
+  "terms": [
+    {
+      "family": "flat_bottom_distance",
+      "atom_ids": [
+        1,
+        10
+      ],
+      "lower": 1.7862544426574747,
+      "upper": 3.077090737762458,
+      "scale": 1.0,
+      "unit": "angstrom",
+      "observable": "1-3 endpoint distance; coupled bond-length/angle proxy",
+      "graph_dependent": true,
+      "term_id": "term_0668564b0dd5",
+      "view": "prediction",
+      "function_id": "G01",
+      "finding_id": "risk_880f5e87f7c6b287",
+      "evidence_ids": [
+        "ev_b426fc1a42649d46af8f",
+        "ev_06501e86477f726bbba1"
+      ],
+      "reference_evidence_id": "ev_b426fc1a42649d46af8f",
+      "hypothesis_atom_ids": [
+        1,
+        14,
+        10
+      ],
+      "weight": 1.0,
+      "parameter_origin": "Reported screening bounds; normalization/weight are explicit uncalibrated demonstration settings",
+      "knowledge_source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 24
+      },
+      "mathematical_form": "E = 0.5*w*(relu((lower-v)/scale)^2 + relu((v-upper)/scale)^2); R = -E",
+      "derivation": "Squared-hinge specialization of interval deviation, zero throughout the accepted window; upper term omitted for minimum distance",
+      "differentiability": "Piecewise smooth in coordinates; angle requires nondegenerate vectors; category argmax is frozen",
+      "local_chemical_context": {
+        "atoms": [
+          {
+            "atom_id": 1,
+            "element": "N",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 1.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 3,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 0.8065704107284546
+              },
+              {
+                "category": "O",
+                "probability": 0.14336149394512177
+              },
+              {
+                "category": "C",
+                "probability": 0.033586643636226654
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.9988881945610046
+              },
+              {
+                "category": -1,
+                "probability": 0.0005921589909121394
+              },
+              {
+                "category": 1,
+                "probability": 0.0005072164931334555
+              }
+            ]
+          },
+          {
+            "atom_id": 10,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 4,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 0.8962487578392029
+              },
+              {
+                "category": "N",
+                "probability": 0.08696743845939636
+              },
+              {
+                "category": "O",
+                "probability": 0.015899673104286194
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.997568666934967
+              },
+              {
+                "category": 1,
+                "probability": 0.002364870859310031
+              },
+              {
+                "category": -1,
+                "probability": 6.01306528551504e-05
+              }
+            ]
+          },
+          {
+            "atom_id": 14,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 4,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 0.6943854689598083
+              },
+              {
+                "category": "N",
+                "probability": 0.26092278957366943
+              },
+              {
+                "category": "O",
+                "probability": 0.03360584005713463
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.996921718120575
+              },
+              {
+                "category": -1,
+                "probability": 0.0024295600596815348
+              },
+              {
+                "category": 1,
+                "probability": 0.0006351385382004082
+              }
+            ]
+          }
+        ],
+        "bonds": [
+          {
+            "atom_ids": [
+              1,
+              10
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.5375990914899693,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 0.4399619698524475
+              },
+              {
+                "category": 1,
+                "probability": 0.4085235297679901
+              },
+              {
+                "category": 2,
+                "probability": 0.13950790464878082
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              1,
+              14
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.2440574900430839,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 0.3411071002483368
+              },
+              {
+                "category": 0,
+                "probability": 0.29253026843070984
+              },
+              {
+                "category": 2,
+                "probability": 0.212556853890419
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              10,
+              14
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.492470065956167,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 0.5906130075454712
+              },
+              {
+                "category": 0,
+                "probability": 0.28578951954841614
+              },
+              {
+                "category": 2,
+                "probability": 0.07346658408641815
+              }
+            ]
+          }
+        ],
+        "source_metric": {
+          "view": "prediction",
+          "metric_id": "chemistry_context"
+        }
+      },
+      "conditions": [
+        "Current element/charge/graph hypothesis remains unchanged",
+        "Bounds are screening references, not validated physical acceptance limits"
+      ],
+      "executable_scope": "offline_coordinate_copy_only"
+    },
+    {
+      "family": "flat_bottom_distance",
+      "atom_ids": [
+        1,
+        14
+      ],
+      "lower": 1.3059,
+      "upper": 1.5961000000000003,
+      "scale": 1.0,
+      "unit": "angstrom",
+      "observable": "MMFF reference bond window",
+      "graph_dependent": true,
+      "term_id": "term_c1f485c34e9c",
+      "view": "prediction",
+      "function_id": "G01",
+      "finding_id": "risk_880f5e87f7c6b287",
+      "evidence_ids": [
+        "ev_7f9b0b23003da23a9390",
+        "ev_206f33389e5267daa585"
+      ],
+      "reference_evidence_id": "ev_7f9b0b23003da23a9390",
+      "hypothesis_atom_ids": [
+        1,
+        14
+      ],
+      "weight": 1.0,
+      "parameter_origin": "Reported screening bounds; normalization/weight are explicit uncalibrated demonstration settings",
+      "knowledge_source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 24
+      },
+      "mathematical_form": "E = 0.5*w*(relu((lower-v)/scale)^2 + relu((v-upper)/scale)^2); R = -E",
+      "derivation": "Squared-hinge specialization of interval deviation, zero throughout the accepted window; upper term omitted for minimum distance",
+      "differentiability": "Piecewise smooth in coordinates; angle requires nondegenerate vectors; category argmax is frozen",
+      "local_chemical_context": {
+        "atoms": [
+          {
+            "atom_id": 1,
+            "element": "N",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 1.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 3,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 0.8065704107284546
+              },
+              {
+                "category": "O",
+                "probability": 0.14336149394512177
+              },
+              {
+                "category": "C",
+                "probability": 0.033586643636226654
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.9988881945610046
+              },
+              {
+                "category": -1,
+                "probability": 0.0005921589909121394
+              },
+              {
+                "category": 1,
+                "probability": 0.0005072164931334555
+              }
+            ]
+          },
+          {
+            "atom_id": 10,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 4,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 0.8962487578392029
+              },
+              {
+                "category": "N",
+                "probability": 0.08696743845939636
+              },
+              {
+                "category": "O",
+                "probability": 0.015899673104286194
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.997568666934967
+              },
+              {
+                "category": 1,
+                "probability": 0.002364870859310031
+              },
+              {
+                "category": -1,
+                "probability": 6.01306528551504e-05
+              }
+            ]
+          },
+          {
+            "atom_id": 14,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 2,
+            "total_valence": 4,
+            "hybridization": "SP3",
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 0.6943854689598083
+              },
+              {
+                "category": "N",
+                "probability": 0.26092278957366943
+              },
+              {
+                "category": "O",
+                "probability": 0.03360584005713463
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.996921718120575
+              },
+              {
+                "category": -1,
+                "probability": 0.0024295600596815348
+              },
+              {
+                "category": 1,
+                "probability": 0.0006351385382004082
+              }
+            ]
+          }
+        ],
+        "bonds": [
+          {
+            "atom_ids": [
+              1,
+              10
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.5375990914899693,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 0.4399619698524475
+              },
+              {
+                "category": 1,
+                "probability": 0.4085235297679901
+              },
+              {
+                "category": 2,
+                "probability": 0.13950790464878082
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              1,
+              14
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.2440574900430839,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 0.3411071002483368
+              },
+              {
+                "category": 0,
+                "probability": 0.29253026843070984
+              },
+              {
+                "category": 2,
+                "probability": 0.212556853890419
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              10,
+              14
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.492470065956167,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 0.5906130075454712
+              },
+              {
+                "category": 0,
+                "probability": 0.28578951954841614
+              },
+              {
+                "category": 2,
+                "probability": 0.07346658408641815
+              }
+            ]
+          }
+        ],
+        "source_metric": {
+          "view": "prediction",
+          "metric_id": "chemistry_context"
+        }
+      },
+      "conditions": [
+        "Current element/charge/graph hypothesis remains unchanged",
+        "Bounds are screening references, not validated physical acceptance limits"
+      ],
+      "executable_scope": "offline_coordinate_copy_only"
+    }
+  ],
+  "active_objectives": [
+    "geometry",
+    "clash",
+    "pocket",
+    "movement"
+  ],
+  "weights": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "tau": 0.1,
+  "rho": 0.05,
+  "lambda_graph": 0.1,
+  "graph_epsilon": 1e-08,
+  "bond_tolerance_fraction": 0.1,
+  "angle_tolerance_degrees": 30.0,
+  "clash_scale_angstrom": 1.0,
+  "centroid_scale_angstrom": 1.0,
+  "movement_scale_angstrom": 0.5,
+  "intra_vdw_ratio": 0.7,
+  "protein_vdw_ratio": 0.75,
+  "severe_overlap_angstrom": 0.4,
+  "max_endpoint_displacement_angstrom": 1.0,
+  "graph_policy": "rebind_local_bond_and_angle_references",
+  "prerequisite_policy": "Reject guidance if any common objective or mandatory constraint cannot be evaluated",
+  "graph_preference_gradient": "Zero within each discrete branch; influences acceptance, no straight-through surrogate",
+  "constraints": [
+    "sanitized_connected_proposal_graph",
+    "no_new_or_worsened_severe_clash",
+    "endpoint_displacement_bound",
+    "fixed_mask",
+    "injected_path_budget"
+  ],
+  "inactive_objectives": [
+    {
+      "name": "residual_strain",
+      "reason": "No matched reference with local terms subtracted"
+    },
+    {
+      "name": "binding_affinity",
+      "reason": "No supplied endpoint target or calibrated differentiable binding objective"
+    },
+    {
+      "name": "contact_pattern",
+      "reason": "No designated validated favorable contacts; centroid retention only"
+    }
+  ],
+  "normalization_origin": "Explicit uncalibrated demonstration settings; tolerances express meaningful geometric scales",
+  "source_reward_id": "rw_4098beec3d554ffe2a657933",
+  "evidence_ids": [
+    "ev_06501e86477f726bbba1",
+    "ev_206f33389e5267daa585",
+    "ev_7f9b0b23003da23a9390",
+    "ev_b426fc1a42649d46af8f"
+  ],
+  "knowledge_source": {
+    "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+    "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+    "entry_count": 21
+  },
+  "retrieval": [
+    {
+      "function_id": "G01",
+      "name": "\u901a\u7528 flat-bottom \u53cc\u4fa7\uff0f\u5355\u4fa7\u533a\u95f4\u7f5a",
+      "name_en": "Flat-bottom interval penalty",
+      "sources": "Boltz-Steering\u3001Boltz\uff08PoseBusters \u52bf\uff09\u3001BInD\u3001DecompDiff\u3001IDOLpro",
+      "target": "\u952e\u957f\u5904\u4e8e\u8be5\u952e\u578b\u7a97\u53e3\uff1b1\u20133 \u8ddd\u79bb\uff08\u952e\u89d2\u4ee3\u7406\uff09\uff1bNCI/\u63a5\u89e6\u8ddd\u79bb\u843d\u5165\u7c7b\u522b\u7a97\u53e3\uff1barm\u2013scaffold \u6216\u94fe\u7aef\u95f4\u8ddd\u53ef\u6210\u952e\uff1b\u8d28\u5fc3\u4e0d\u584c\u7f29\uff1b\u6a21\u677f\u539f\u5b50\u521a\u4f53\u5bf9\u9f50\u540e\u504f\u5dee\u5728\u5bb9\u5dee\u5185",
+      "formula": "$E=\\sum_\\alpha k_\\alpha\\big([\\ell_\\alpha-v_\\alpha]_++[v_\\alpha-u_\\alpha]_+\\big)$\uff1b\u5355\u4fa7\u53d8\u4f53\u53ea\u4fdd\u7559\u4e00\u9879\uff08$k[v-u]_+$ \u6216 $k[\\ell-v]_+$\uff09\uff1b\u4e8c\u6b21\u53d8\u4f53 $E=\\frac12\\sum_\\alpha w_\\alpha(v_\\alpha-v_\\alpha^*)^2$\uff1b\u6700\u8fd1\u8ddd\u79bb\u53d8\u4f53 $v_n=\\min_{i\\in\\mathcal A_n,j\\in\\mathcal S}\\|x_i-x_j\\|_2$\uff08\u53ef\u6362 soft-min\uff09",
+      "variables": "$v_\\alpha$ \u53ef\u4e3a\u539f\u5b50\u5bf9\u8ddd\u79bb\u30011\u20133 \u8ddd\u79bb\u3001\u8d28\u5fc3\u8ddd\u3001\u6709\u7b26\u53f7/\u7edd\u5bf9\u4e8c\u9762\u89d2\u3001\u521a\u4f53\u5bf9\u9f50\u540e\u7684\u6a21\u677f\u504f\u5dee\uff1b$\\ell,u$ \u968f\u952e\u578b\u3001NCI \u7c7b\u578b\u3001\u5143\u7d20\u534a\u5f84\u4e0e buffer \u67e5\u8868\uff1b$k,w$ \u4e3a\u5f3a\u5ea6\uff1b$[a]_+=\\max(0,a)$",
+      "gradient_target": "\u539f\u5b50\u5750\u6807\uff08\u53ef\u7528\u63a9\u7801\u9650\u5b9a\u4e3a\u914d\u4f53/\u53ef\u52a8\u96c6\u5408\uff09",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "local_geometry"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "local_reference",
+        "declared_graph"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 24
+      },
+      "original_row": "| \u901a\u7528 flat-bottom \u53cc\u4fa7\uff0f\u5355\u4fa7\u533a\u95f4\u7f5a | Boltz-Steering\u3001Boltz\uff08PoseBusters \u52bf\uff09\u3001BInD\u3001DecompDiff\u3001IDOLpro | \u952e\u957f\u5904\u4e8e\u8be5\u952e\u578b\u7a97\u53e3\uff1b1\u20133 \u8ddd\u79bb\uff08\u952e\u89d2\u4ee3\u7406\uff09\uff1bNCI/\u63a5\u89e6\u8ddd\u79bb\u843d\u5165\u7c7b\u522b\u7a97\u53e3\uff1barm\u2013scaffold \u6216\u94fe\u7aef\u95f4\u8ddd\u53ef\u6210\u952e\uff1b\u8d28\u5fc3\u4e0d\u584c\u7f29\uff1b\u6a21\u677f\u539f\u5b50\u521a\u4f53\u5bf9\u9f50\u540e\u504f\u5dee\u5728\u5bb9\u5dee\u5185 | $E=\\sum_\\alpha k_\\alpha\\big([\\ell_\\alpha-v_\\alpha]_++[v_\\alpha-u_\\alpha]_+\\big)$\uff1b\u5355\u4fa7\u53d8\u4f53\u53ea\u4fdd\u7559\u4e00\u9879\uff08$k[v-u]_+$ \u6216 $k[\\ell-v]_+$\uff09\uff1b\u4e8c\u6b21\u53d8\u4f53 $E=\\frac12\\sum_\\alpha w_\\alpha(v_\\alpha-v_\\alpha^*)^2$\uff1b\u6700\u8fd1\u8ddd\u79bb\u53d8\u4f53 $v_n=\\min_{i\\in\\mathcal A_n,j\\in\\mathcal S}\\|x_i-x_j\\|_2$\uff08\u53ef\u6362 soft-min\uff09 | $v_\\alpha$ \u53ef\u4e3a\u539f\u5b50\u5bf9\u8ddd\u79bb\u30011\u20133 \u8ddd\u79bb\u3001\u8d28\u5fc3\u8ddd\u3001\u6709\u7b26\u53f7/\u7edd\u5bf9\u4e8c\u9762\u89d2\u3001\u521a\u4f53\u5bf9\u9f50\u540e\u7684\u6a21\u677f\u504f\u5dee\uff1b$\\ell,u$ \u968f\u952e\u578b\u3001NCI \u7c7b\u578b\u3001\u5143\u7d20\u534a\u5f84\u4e0e buffer \u67e5\u8868\uff1b$k,w$ \u4e3a\u5f3a\u5ea6\uff1b$[a]_+=\\max(0,a)$ | \u539f\u5b50\u5750\u6807\uff08\u53ef\u7528\u63a9\u7801\u9650\u5b9a\u4e3a\u914d\u4f53/\u53ef\u52a8\u96c6\u5408\uff09 |",
+      "retrieval_score": 9.643692888070792,
+      "retrieval_components": {
+        "lexical_bm25": 1.6436928880707928,
+        "category_bonus": 5,
+        "locality_bonus": 3.0
+      },
+      "matched_categories": [
+        "local_geometry"
+      ],
+      "decision": "conditional_offline",
+      "decision_reason": "Localized measurements and bounds available; frozen hypothesis and explicit demo mobility required",
+      "backend_implemented": true
+    },
+    {
+      "function_id": "P02",
+      "name": "\u8de8\u754c\u9762 van der Waals \u52bf",
+      "name_en": "Interfacial van der Waals potential",
+      "sources": "\u529b\u573a\u5f15\u5bfc EDM / SemlaFlow",
+      "target": "\u914d\u4f53\u2014\u53e3\u888b\u754c\u9762\u7684\u8fd1\u7a0b\u5806\u79ef\u4e0e\u4e2d\u7a0b\u5438\u5f15\u8d28\u91cf",
+      "formula": "$E_{vdW}=\\sum_{i\\in L,a\\in P}U_{vdW}(r_{ia};\\tau_i,\\tau_a)$\uff0c\u603b\u80fd\u91cf $E(X,Y)=E_{MMFF}+E_{vdW}+E_Q$",
+      "variables": "$\\tau_i,\\tau_a$ \u4e3a\u539f\u5b50\u7c7b\u578b\u53c2\u6570\uff0c$r_{ia}$ \u8de8\u754c\u9762\u8ddd\u79bb",
+      "gradient_target": "\u914d\u4f53\u5750\u6807\uff08\u53e3\u888b\u56fa\u5b9a\uff09",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "protein_clashes",
+        "interface"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "ligand_and_pocket_ff_types"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 37
+      },
+      "original_row": "| \u8de8\u754c\u9762 van der Waals \u52bf | \u529b\u573a\u5f15\u5bfc EDM / SemlaFlow | \u914d\u4f53\u2014\u53e3\u888b\u754c\u9762\u7684\u8fd1\u7a0b\u5806\u79ef\u4e0e\u4e2d\u7a0b\u5438\u5f15\u8d28\u91cf | $E_{vdW}=\\sum_{i\\in L,a\\in P}U_{vdW}(r_{ia};\\tau_i,\\tau_a)$\uff0c\u603b\u80fd\u91cf $E(X,Y)=E_{MMFF}+E_{vdW}+E_Q$ | $\\tau_i,\\tau_a$ \u4e3a\u539f\u5b50\u7c7b\u578b\u53c2\u6570\uff0c$r_{ia}$ \u8de8\u754c\u9762\u8ddd\u79bb | \u914d\u4f53\u5750\u6807\uff08\u53e3\u888b\u56fa\u5b9a\uff09 |",
+      "retrieval_score": 7.460736021503996,
+      "retrieval_components": {
+        "lexical_bm25": 2.4607360215039953,
+        "category_bonus": 5,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [
+        "protein_clashes"
+      ],
+      "decision": "deferred",
+      "decision_reason": "Protein coordinates exist; receptor force-field types do not",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P01",
+      "name": "MMFF94 \u5206\u5b50\u5185\u80fd",
+      "name_en": "MMFF94 intramolecular energy",
+      "sources": "\u529b\u573a\u5f15\u5bfc EDM / SemlaFlow",
+      "target": "\u5206\u5b50\u5185\u5e94\u53d8\uff1a\u952e\u4f38\u7f29\u3001\u952e\u89d2\u3001\u626d\u8f6c\u3001\u9762\u5916\u4e0e\u5206\u5b50\u5185\u975e\u952e\u51b2\u7a81\u7684\u8054\u5408\u4ee3\u4ef7",
+      "formula": "$E_{MMFF}=E_{bond}+E_{angle}+E_{torsion}+E_{oop}+E_{nb}^{intra}$\uff0c$g_X=-\\nabla_XE_{MMFF}$",
+      "variables": "\u524d\u7f6e\uff1a\u786e\u5b9a\u7684\u952e\u56fe\u3001MMFF \u539f\u5b50\u7c7b\u578b\u3001\u8fd1\u5e72\u51c0\u5750\u6807",
+      "gradient_target": "\u914d\u4f53\u539f\u5b50\u5750\u6807\uff08\u5728 $\\hat x_{0\\|t}$ \u4e0a\u8ba1\u7b97\uff0c\u7ecf $J_{D_\\theta}^\\top$ \u56de\u4f20\u6216\u6362\u7b97\u4e3a flow \u901f\u5ea6\u4fee\u6b63\uff09",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "conformational_strain",
+        "local_geometry"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "stable_graph",
+        "protonation",
+        "mmff_applicability"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 36
+      },
+      "original_row": "| MMFF94 \u5206\u5b50\u5185\u80fd | \u529b\u573a\u5f15\u5bfc EDM / SemlaFlow | \u5206\u5b50\u5185\u5e94\u53d8\uff1a\u952e\u4f38\u7f29\u3001\u952e\u89d2\u3001\u626d\u8f6c\u3001\u9762\u5916\u4e0e\u5206\u5b50\u5185\u975e\u952e\u51b2\u7a81\u7684\u8054\u5408\u4ee3\u4ef7 | $E_{MMFF}=E_{bond}+E_{angle}+E_{torsion}+E_{oop}+E_{nb}^{intra}$\uff0c$g_X=-\\nabla_XE_{MMFF}$ | \u524d\u7f6e\uff1a\u786e\u5b9a\u7684\u952e\u56fe\u3001MMFF \u539f\u5b50\u7c7b\u578b\u3001\u8fd1\u5e72\u51c0\u5750\u6807 | \u914d\u4f53\u539f\u5b50\u5750\u6807\uff08\u5728 $\\hat x_{0\\|t}$ \u4e0a\u8ba1\u7b97\uff0c\u7ecf $J_{D_\\theta}^\\top$ \u56de\u4f20\u6216\u6362\u7b97\u4e3a flow \u901f\u5ea6\u4fee\u6b63\uff09 |",
+      "retrieval_score": 7.331940920960031,
+      "retrieval_components": {
+        "lexical_bm25": 2.331940920960031,
+        "category_bonus": 5,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [
+        "local_geometry"
+      ],
+      "decision": "deferred",
+      "decision_reason": "Global strain is evidence, but stable graph/protonation and parameter applicability are unverified",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "G02",
+      "name": "\u6210\u5bf9\u6700\u5c0f\u8ddd\u79bb\u4f4d\u963b\u7f5a\uff08\u542b\u6392\u9664\u7403\uff09",
+      "name_en": "Pairwise minimum-distance penalty",
+      "sources": "BInD\u3001DiffSMol\u3001MolSnapper\u3001Boltz-Steering\u3001DiffPhore",
+      "target": "\u914d\u4f53\u2014\u86cb\u767d\u3001\u94fe\u2014\u94fe\u539f\u5b50\u5bf9\u7684\u6700\u4f4e\u5206\u79bb\u8ddd\u79bb\uff1b\u836f\u6548\u56e2\u6392\u9664\u533a\u57df\u5185\u7684\u7a7f\u900f\u6df1\u5ea6",
+      "formula": "$E=\\sum_{i,a}\\rho\\big([d^{ia}_{\\min}-d_{ia}]_+\\big)$\uff0c$d^{ia}_{\\min}=c_{\\rm buf}(R_i+R_a)$ \u6216\u7edf\u4e00\u9608\u503c\uff1b\u5e73\u65b9\u53d8\u4f53 $E=\\frac12\\sum_{i,a}[d^{ia}_{\\min}-d_{ia}]_+^2$\uff1b\u6392\u9664\u7403\u53d8\u4f53 $E=\\frac{w_e}{2}\\sum_{i,a}[R_a-\\|x_i-s_a\\|]_+^2$",
+      "variables": "$i$ \u4e3a\u914d\u4f53/\u53ef\u52a8\u539f\u5b50\uff0c$a$ \u4e3a\u53e3\u888b\u6216\u53e6\u4e00\u6761\u94fe\u539f\u5b50\uff0c$R$ \u4e3a\u8303\u5fb7\u534e\u534a\u5f84\uff0c$c_{\\rm buf}$ \u4e3a\u7f13\u51b2\u7cfb\u6570\uff0c$s_a,R_a$ \u4e3a\u6392\u9664\u7403\u5fc3\u4e0e\u534a\u5f84\uff0c$\\rho$ \u4e3a\u7ebf\u6027\u6216\u5e73\u65b9\u5355\u4fa7\u7f5a",
+      "gradient_target": "\u914d\u4f53\uff08\u6216\u63a9\u7801\u53ef\u52a8\u533a\uff09\u5750\u6807\uff1b\u53e3\u888b/\u56fa\u5b9a\u533a\u901a\u5e38\u51bb\u7ed3",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "protein_clashes",
+        "intramolecular_sterics"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "coordinates",
+        "radii",
+        "frame"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 25
+      },
+      "original_row": "| \u6210\u5bf9\u6700\u5c0f\u8ddd\u79bb\u4f4d\u963b\u7f5a\uff08\u542b\u6392\u9664\u7403\uff09 | BInD\u3001DiffSMol\u3001MolSnapper\u3001Boltz-Steering\u3001DiffPhore | \u914d\u4f53\u2014\u86cb\u767d\u3001\u94fe\u2014\u94fe\u539f\u5b50\u5bf9\u7684\u6700\u4f4e\u5206\u79bb\u8ddd\u79bb\uff1b\u836f\u6548\u56e2\u6392\u9664\u533a\u57df\u5185\u7684\u7a7f\u900f\u6df1\u5ea6 | $E=\\sum_{i,a}\\rho\\big([d^{ia}_{\\min}-d_{ia}]_+\\big)$\uff0c$d^{ia}_{\\min}=c_{\\rm buf}(R_i+R_a)$ \u6216\u7edf\u4e00\u9608\u503c\uff1b\u5e73\u65b9\u53d8\u4f53 $E=\\frac12\\sum_{i,a}[d^{ia}_{\\min}-d_{ia}]_+^2$\uff1b\u6392\u9664\u7403\u53d8\u4f53 $E=\\frac{w_e}{2}\\sum_{i,a}[R_a-\\|x_i-s_a\\|]_+^2$ | $i$ \u4e3a\u914d\u4f53/\u53ef\u52a8\u539f\u5b50\uff0c$a$ \u4e3a\u53e3\u888b\u6216\u53e6\u4e00\u6761\u94fe\u539f\u5b50\uff0c$R$ \u4e3a\u8303\u5fb7\u534e\u534a\u5f84\uff0c$c_{\\rm buf}$ \u4e3a\u7f13\u51b2\u7cfb\u6570\uff0c$s_a,R_a$ \u4e3a\u6392\u9664\u7403\u5fc3\u4e0e\u534a\u5f84\uff0c$\\rho$ \u4e3a\u7ebf\u6027\u6216\u5e73\u65b9\u5355\u4fa7\u7f5a | \u914d\u4f53\uff08\u6216\u63a9\u7801\u53ef\u52a8\u533a\uff09\u5750\u6807\uff1b\u53e3\u888b/\u56fa\u5b9a\u533a\u901a\u5e38\u51bb\u7ed3 |",
+      "retrieval_score": 7.062113056345456,
+      "retrieval_components": {
+        "lexical_bm25": 2.0621130563454564,
+        "category_bonus": 5,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [
+        "protein_clashes"
+      ],
+      "decision": "conditional_offline",
+      "decision_reason": "Localized measurements and bounds available; frozen hypothesis and explicit demo mobility required",
+      "backend_implemented": true
+    },
+    {
+      "function_id": "G03",
+      "name": "\u951a\u70b9\uff0f\u4fdd\u6301\u4e8c\u6b21\u52bf",
+      "name_en": "Anchor quadratic potential",
+      "sources": "MolSnapper\u3001DiffSBDD\u3001FLOWR.ROOT",
+      "target": "\u6307\u5b9a\u836f\u6548\u56e2\u951a\u70b9\u3001motif\u3001\u7f16\u8f91\u4f4d\u70b9\u7684\u4f4d\u7f6e\u4fdd\u6301\uff1b\u9632\u6b62\u56fa\u5b9a\u7247\u6bb5\u5728\u53bb\u566a\u4e2d\u6f02\u79fb",
+      "formula": "$E_{anchor}=\\frac12\\sum_m\\omega_{m,t}\\|x_{i_m}-q_m\\|^2_W$\uff1b\u5e26\u5ea6\u91cf\u53d8\u4f53 $E=\\frac12\\sum_{i\\in\\mathcal V}(x_i-\\mu_i)^\\top\\Sigma_i^{-1}(x_i-\\mu_i)$\uff1b\u53c2\u8003\u70b9\u53ef\u53d6\u5f53\u524d\u6b65 $t$ \u7684\u540c\u566a\u58f0\u5c42\u53c2\u8003 $x^{ref}_{i,t}$\uff0c\u4e5f\u53ef\u5728\u5e72\u51c0\u7a7a\u95f4\u53d6 $\\hat x_{i,0\\|t}$ \u540e\u7ecf $J_{D_\\theta}^\\top$ \u56de\u4f20",
+      "variables": "$q_m$ \u951a\u70b9/\u76ee\u6807\u4f4d\u7f6e\uff0c$\\omega_{m,t}$ \u968f\u53bb\u566a\u589e\u5927\u7684\u951a\u5b9a\u6743\u91cd\uff0c$W$ \u6216 $\\Sigma_i^{-1}$ \u4e3a\u5404\u5411\u5f02\u6027\u5ea6\u91cf",
+      "gradient_target": "\u88ab\u951a\u5b9a\u7684\u539f\u5b50\u5750\u6807",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "anchor"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "anchor_reference",
+        "movable_mask"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 26
+      },
+      "original_row": "| \u951a\u70b9\uff0f\u4fdd\u6301\u4e8c\u6b21\u52bf | MolSnapper\u3001DiffSBDD\u3001FLOWR.ROOT | \u6307\u5b9a\u836f\u6548\u56e2\u951a\u70b9\u3001motif\u3001\u7f16\u8f91\u4f4d\u70b9\u7684\u4f4d\u7f6e\u4fdd\u6301\uff1b\u9632\u6b62\u56fa\u5b9a\u7247\u6bb5\u5728\u53bb\u566a\u4e2d\u6f02\u79fb | $E_{anchor}=\\frac12\\sum_m\\omega_{m,t}\\|x_{i_m}-q_m\\|^2_W$\uff1b\u5e26\u5ea6\u91cf\u53d8\u4f53 $E=\\frac12\\sum_{i\\in\\mathcal V}(x_i-\\mu_i)^\\top\\Sigma_i^{-1}(x_i-\\mu_i)$\uff1b\u53c2\u8003\u70b9\u53ef\u53d6\u5f53\u524d\u6b65 $t$ \u7684\u540c\u566a\u58f0\u5c42\u53c2\u8003 $x^{ref}_{i,t}$\uff0c\u4e5f\u53ef\u5728\u5e72\u51c0\u7a7a\u95f4\u53d6 $\\hat x_{i,0\\|t}$ \u540e\u7ecf $J_{D_\\theta}^\\top$ \u56de\u4f20 | $q_m$ \u951a\u70b9/\u76ee\u6807\u4f4d\u7f6e\uff0c$\\omega_{m,t}$ \u968f\u53bb\u566a\u589e\u5927\u7684\u951a\u5b9a\u6743\u91cd\uff0c$W$ \u6216 $\\Sigma_i^{-1}$ \u4e3a\u5404\u5411\u5f02\u6027\u5ea6\u91cf | \u88ab\u951a\u5b9a\u7684\u539f\u5b50\u5750\u6807 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No anchor coordinates or mobility declaration",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "G04",
+      "name": "\u65b9\u5411\u4e00\u81f4\u7f5a\uff08\u65b9\u5411\u6027\u836f\u6548\u56e2\uff09",
+      "name_en": "Directional agreement penalty",
+      "sources": "ShEPhERD\u3001DiffPhore\u3001DiffPharma",
+      "target": "\u4f9b\u4f53\u3001\u53d7\u4f53\u3001\u82b3\u9999\u7279\u5f81\u7684\u4f5c\u7528\u65b9\u5411\u4e0e\u53c2\u8003\u4e00\u81f4\uff08\u5b9a\u70b9\u4e14\u5b9a\u5411\uff09",
+      "formula": "$E_{dir}=\\sum_m\\kappa_m\\big(1-u_{i_m}\\!\\cdot u^{ref}_m\\big)$\uff1b\u8f6f\u5339\u914d\u53d8\u4f53 $E=\\sum_{f,m}\\pi_{fm}\\mathbf 1[k_f=k_m],w_o\\big(1-u_f\\!\\cdot v_m\\big)$",
+      "variables": "$u$ \u4e3a\u5019\u9009\u7279\u5f81\u5355\u4f4d\u65b9\u5411\uff08\u952e\u5411\u91cf\u6216\u73af\u6cd5\u5411\uff09\uff0c$u^{ref},v_m$ \u4e3a\u76ee\u6807\u65b9\u5411\uff0c$\\kappa,w_o$ \u6743\u91cd\uff0c$\\pi_{fm}$ \u8f6f\u5339\u914d\u6982\u7387\uff0c$k$ \u4e3a\u7279\u5f81\u7c7b\u578b",
+      "gradient_target": "\u6784\u6210\u8be5\u7279\u5f81\u7684\u539f\u5b50\u5750\u6807\uff08\u7ecf\u8d28\u5fc3/\u952e\u5411\u91cf\u94fe\u5f0f\u6c42\u5bfc\uff09",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "direction",
+        "pharmacophore"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "direction_reference",
+        "feature_typing"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 27
+      },
+      "original_row": "| \u65b9\u5411\u4e00\u81f4\u7f5a\uff08\u65b9\u5411\u6027\u836f\u6548\u56e2\uff09 | ShEPhERD\u3001DiffPhore\u3001DiffPharma | \u4f9b\u4f53\u3001\u53d7\u4f53\u3001\u82b3\u9999\u7279\u5f81\u7684\u4f5c\u7528\u65b9\u5411\u4e0e\u53c2\u8003\u4e00\u81f4\uff08\u5b9a\u70b9\u4e14\u5b9a\u5411\uff09 | $E_{dir}=\\sum_m\\kappa_m\\big(1-u_{i_m}\\!\\cdot u^{ref}_m\\big)$\uff1b\u8f6f\u5339\u914d\u53d8\u4f53 $E=\\sum_{f,m}\\pi_{fm}\\mathbf 1[k_f=k_m],w_o\\big(1-u_f\\!\\cdot v_m\\big)$ | $u$ \u4e3a\u5019\u9009\u7279\u5f81\u5355\u4f4d\u65b9\u5411\uff08\u952e\u5411\u91cf\u6216\u73af\u6cd5\u5411\uff09\uff0c$u^{ref},v_m$ \u4e3a\u76ee\u6807\u65b9\u5411\uff0c$\\kappa,w_o$ \u6743\u91cd\uff0c$\\pi_{fm}$ \u8f6f\u5339\u914d\u6982\u7387\uff0c$k$ \u4e3a\u7279\u5f81\u7c7b\u578b | \u6784\u6210\u8be5\u7279\u5f81\u7684\u539f\u5b50\u5750\u6807\uff08\u7ecf\u8d28\u5fc3/\u952e\u5411\u91cf\u94fe\u5f0f\u6c42\u5bfc\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No target directions or prepared directional features",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "G05",
+      "name": "\u7acb\u4f53\u5316\u5b66\u4e0e\u5171\u8f6d\u5e73\u9762\u51e0\u4f55\u52bf",
+      "name_en": "Stereochemical and planar geometry potential",
+      "sources": "Boltz-Steering\u3001PoseBusters",
+      "target": "R/S \u624b\u6027\u7b26\u53f7\u4e0e\u79bb\u5f00\u6613\u7ffb\u8f6c\u7684\u8fd1\u5171\u9762\u533a\uff1b\u53cc\u952e E/Z \u987a\u53cd\uff1b$sp^2$/\u82b3\u73af/\u9170\u80fa\u5171\u9762",
+      "formula": "\u624b\u6027\uff1a\u76ee\u6807\u7b26\u53f7\u4e3a $+$ \u65f6 $E_{chir}=[\\phi_{\\min}-\\phi]_+$\uff0c\u4e3a $-$ \u65f6 $E_{chir}=[\\phi-\\phi_{\\max}]_+$\uff1b\u7b49\u4ef7\u786c\u5224\u5b9a $v=(x_a-x_c)\\cdot[(x_b-x_c)\\times(x_d-x_c)]$\uff0c\u7528 ${\\rm sign}(v)$ \u8bc6\u522b\uff1bE/Z\uff1a$E_{EZ}=\\big[\\,\\big\\vert\\,\\lvert\\phi\\rvert-c\\,\\big\\vert-\\Delta\\,\\big]_+$\uff0c$c\\in\\{0,\\pi\\}$\uff1b\u5e73\u9762\uff1a$E_{plane}=\\sum_{i\\in S}\\big[n^\\top(x_i-\\bar c)\\big]^2$\uff0c\u6216\u7528\u4e24\u4fa7 improper dihedral \u7edd\u5bf9\u503c\u4e0a\u754c",
+      "variables": "$\\phi$ \u6709\u7b26\u53f7/\u7edd\u5bf9\u4e8c\u9762\u89d2\uff0c$\\phi_{\\min/\\max}$ \u7f13\u51b2\u89d2\uff0c$\\Delta$ \u5141\u8bb8\u504f\u5dee\uff0c$n,\\bar c$ \u4e3a\u62df\u5408\u5e73\u9762\u6cd5\u5411\u4e0e\u4e2d\u5fc3\uff0c$S$ \u9700\u5171\u9762\u7684\u539f\u5b50\u96c6",
+      "gradient_target": "\u56db\u5143\u7ec4/\u539f\u5b50\u96c6\u5750\u6807\uff1b\u624b\u6027\u9879\u53e6\u9700\u786c\u68c0\u67e5\u4e0e\u5c40\u90e8\u91cd\u91c7\u6837\u914d\u5408",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "stereochemistry",
+        "planarity"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "stereo_or_plane_reference",
+        "declared_graph"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 28
+      },
+      "original_row": "| \u7acb\u4f53\u5316\u5b66\u4e0e\u5171\u8f6d\u5e73\u9762\u51e0\u4f55\u52bf | Boltz-Steering\u3001PoseBusters | R/S \u624b\u6027\u7b26\u53f7\u4e0e\u79bb\u5f00\u6613\u7ffb\u8f6c\u7684\u8fd1\u5171\u9762\u533a\uff1b\u53cc\u952e E/Z \u987a\u53cd\uff1b$sp^2$/\u82b3\u73af/\u9170\u80fa\u5171\u9762 | \u624b\u6027\uff1a\u76ee\u6807\u7b26\u53f7\u4e3a $+$ \u65f6 $E_{chir}=[\\phi_{\\min}-\\phi]_+$\uff0c\u4e3a $-$ \u65f6 $E_{chir}=[\\phi-\\phi_{\\max}]_+$\uff1b\u7b49\u4ef7\u786c\u5224\u5b9a $v=(x_a-x_c)\\cdot[(x_b-x_c)\\times(x_d-x_c)]$\uff0c\u7528 ${\\rm sign}(v)$ \u8bc6\u522b\uff1bE/Z\uff1a$E_{EZ}=\\big[\\,\\big\\vert\\,\\lvert\\phi\\rvert-c\\,\\big\\vert-\\Delta\\,\\big]_+$\uff0c$c\\in\\{0,\\pi\\}$\uff1b\u5e73\u9762\uff1a$E_{plane}=\\sum_{i\\in S}\\big[n^\\top(x_i-\\bar c)\\big]^2$\uff0c\u6216\u7528\u4e24\u4fa7 improper dihedral \u7edd\u5bf9\u503c\u4e0a\u754c | $\\phi$ \u6709\u7b26\u53f7/\u7edd\u5bf9\u4e8c\u9762\u89d2\uff0c$\\phi_{\\min/\\max}$ \u7f13\u51b2\u89d2\uff0c$\\Delta$ \u5141\u8bb8\u504f\u5dee\uff0c$n,\\bar c$ \u4e3a\u62df\u5408\u5e73\u9762\u6cd5\u5411\u4e0e\u4e2d\u5fc3\uff0c$S$ \u9700\u5171\u9762\u7684\u539f\u5b50\u96c6 | \u56db\u5143\u7ec4/\u539f\u5b50\u96c6\u5750\u6807\uff1b\u624b\u6027\u9879\u53e6\u9700\u786c\u68c0\u67e5\u4e0e\u5c40\u90e8\u91cd\u91c7\u6837\u914d\u5408 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No indicated stereo/plane defect with validated reference",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "G06",
+      "name": "\u5f62\u72b6\uff0f\u4f53\u79ef\u5360\u636e\u52bf",
+      "name_en": "Shape/volume occupancy potential",
+      "sources": "SiMGen\u3001ShEPhERD\u3001DiffSMol",
+      "target": "\u539f\u5b50\u4e91\u662f\u5426\u8986\u76d6\u76ee\u6807\u5f62\u72b6/\u4f53\u79ef\uff08\u7b49\u6392\u4f53\u5f62\u72b6\u3001\u73af\u5f62/\u6241\u5e73/\u7ec6\u957f\u4f53\u79ef\uff09",
+      "formula": "(a) \u9ad8\u65af\u6df7\u5408 $f(x)=\\sum_m\\exp[-\\frac12(x-\\mu_m)^\\top\\Sigma^{-1}(x-\\mu_m)]$\uff0c$E=-\\log f(x)$\uff0c$F=-\\sum_mw_m\\Sigma^{-1}(x-\\mu_m)$\uff1b(b) \u5bc6\u5ea6\u5dee $\\rho_X(r)=\\sum_i\\exp[-\\|r-x_i\\|^2/(2\\sigma^2)]$\uff0c$E_{shape}=\\int[\\rho_X(r)-\\rho_{ref}(r)]^2dr$\uff1b(c) \u71b5\u6b63\u5219\u6700\u4f18\u4f20\u8f93 $E_{transport}=\\min_{\\pi}\\sum_{im}\\pi_{im}\\|x_i-q_m\\|^2+\\tau\\sum_{im}\\pi_{im}\\log\\pi_{im}$",
+      "variables": "$q_m,\\mu_m$ \u76ee\u6807\u70b9\u4e91/\u9ad8\u65af\u4e2d\u5fc3\uff0c$\\Sigma$ \u5404\u5411\u5f02\u6027\u5c3a\u5ea6\uff0c$w_m$ \u5f52\u4e00\u5316\u8d23\u4efb\u5ea6\uff0c$\\sigma$ \u9ad8\u65af\u5bbd\u5ea6\uff08\u65e9\u671f\u5927\u3001\u540e\u671f\u6536\u7a84\uff09\uff0c$\\tau$ \u71b5\u6b63\u5219\u6e29\u5ea6",
+      "gradient_target": "\u539f\u5b50\u5750\u6807\uff08\u5c0f\u5206\u5b50\u70b9\u4e91/\u9aa8\u67b6\u70b9\uff09",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "shape",
+        "volume"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "shape_reference",
+        "alignment"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 29
+      },
+      "original_row": "| \u5f62\u72b6\uff0f\u4f53\u79ef\u5360\u636e\u52bf | SiMGen\u3001ShEPhERD\u3001DiffSMol | \u539f\u5b50\u4e91\u662f\u5426\u8986\u76d6\u76ee\u6807\u5f62\u72b6/\u4f53\u79ef\uff08\u7b49\u6392\u4f53\u5f62\u72b6\u3001\u73af\u5f62/\u6241\u5e73/\u7ec6\u957f\u4f53\u79ef\uff09 | (a) \u9ad8\u65af\u6df7\u5408 $f(x)=\\sum_m\\exp[-\\frac12(x-\\mu_m)^\\top\\Sigma^{-1}(x-\\mu_m)]$\uff0c$E=-\\log f(x)$\uff0c$F=-\\sum_mw_m\\Sigma^{-1}(x-\\mu_m)$\uff1b(b) \u5bc6\u5ea6\u5dee $\\rho_X(r)=\\sum_i\\exp[-\\|r-x_i\\|^2/(2\\sigma^2)]$\uff0c$E_{shape}=\\int[\\rho_X(r)-\\rho_{ref}(r)]^2dr$\uff1b(c) \u71b5\u6b63\u5219\u6700\u4f18\u4f20\u8f93 $E_{transport}=\\min_{\\pi}\\sum_{im}\\pi_{im}\\|x_i-q_m\\|^2+\\tau\\sum_{im}\\pi_{im}\\log\\pi_{im}$ | $q_m,\\mu_m$ \u76ee\u6807\u70b9\u4e91/\u9ad8\u65af\u4e2d\u5fc3\uff0c$\\Sigma$ \u5404\u5411\u5f02\u6027\u5c3a\u5ea6\uff0c$w_m$ \u5f52\u4e00\u5316\u8d23\u4efb\u5ea6\uff0c$\\sigma$ \u9ad8\u65af\u5bbd\u5ea6\uff08\u65e9\u671f\u5927\u3001\u540e\u671f\u6536\u7a84\uff09\uff0c$\\tau$ \u71b5\u6b63\u5219\u6e29\u5ea6 | \u539f\u5b50\u5750\u6807\uff08\u5c0f\u5206\u5b50\u70b9\u4e91/\u9aa8\u67b6\u70b9\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No selected reference shape or alignment",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "G07",
+      "name": "\u5c40\u90e8\u73af\u5883\u76f8\u4f3c\u6838\u52bf",
+      "name_en": "Local environment similarity kernel",
+      "sources": "SiMGen",
+      "target": "\u6bcf\u4e2a\u751f\u6210\u539f\u5b50\u7684\u5c40\u90e8\u914d\u4f4d\u73af\u5883\u80fd\u5426\u5728\u53c2\u8003\u5e93\u4e2d\u627e\u5230\u8fd1\u90bb\uff1b\u6bcf\u4e2a\u5173\u952e\u53c2\u8003\u73af\u5883\u662f\u5426\u88ab\u81f3\u5c11\u4e00\u6b21\u8986\u76d6",
+      "formula": "$k_{ij}(t)=\\exp\\!\\big[-\\|\\chi_i-\\chi^{ref}_j\\|^2/(2\\sigma(t)^2)\\big]$\uff0c$E_{sim}=-\\sum_i\\log\\sum_jk_{ij}(t)$\uff0c$E_{inv}=-\\sum_j\\log\\sum_ik_{ij}(t)$",
+      "variables": "$\\chi_i$ \u4e3a\u534a\u5f84\u7ea6 5 \u00c5 \u90bb\u57df\u5185\u7684\u591a\u4f53\u5c40\u90e8\u63cf\u8ff0\u7b26\uff08MACE \u98ce\u683c\uff09\uff0c$\\chi^{ref}_j$ \u53c2\u8003\u73af\u5883\uff0c$\\sigma(t)$ \u968f\u53bb\u566a\u6536\u7a84\u7684\u6838\u5bbd\uff08\u5148\u7c97\u5339\u914d\u540e\u7cbe\u4fee\uff09",
+      "gradient_target": "\u5c40\u90e8\u90bb\u57df\u5750\u6807\uff08\u7ecf $\\partial\\chi_i/\\partial X$ \u94fe\u5f0f\u6c42\u5bfc\uff09",
+      "section": "\u4e00\u3001\u51e0\u4f55\u7c7b",
+      "tags": [
+        "environment"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "descriptor_model",
+        "reference_library"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 30
+      },
+      "original_row": "| \u5c40\u90e8\u73af\u5883\u76f8\u4f3c\u6838\u52bf | SiMGen | \u6bcf\u4e2a\u751f\u6210\u539f\u5b50\u7684\u5c40\u90e8\u914d\u4f4d\u73af\u5883\u80fd\u5426\u5728\u53c2\u8003\u5e93\u4e2d\u627e\u5230\u8fd1\u90bb\uff1b\u6bcf\u4e2a\u5173\u952e\u53c2\u8003\u73af\u5883\u662f\u5426\u88ab\u81f3\u5c11\u4e00\u6b21\u8986\u76d6 | $k_{ij}(t)=\\exp\\!\\big[-\\|\\chi_i-\\chi^{ref}_j\\|^2/(2\\sigma(t)^2)\\big]$\uff0c$E_{sim}=-\\sum_i\\log\\sum_jk_{ij}(t)$\uff0c$E_{inv}=-\\sum_j\\log\\sum_ik_{ij}(t)$ | $\\chi_i$ \u4e3a\u534a\u5f84\u7ea6 5 \u00c5 \u90bb\u57df\u5185\u7684\u591a\u4f53\u5c40\u90e8\u63cf\u8ff0\u7b26\uff08MACE \u98ce\u683c\uff09\uff0c$\\chi^{ref}_j$ \u53c2\u8003\u73af\u5883\uff0c$\\sigma(t)$ \u968f\u53bb\u566a\u6536\u7a84\u7684\u6838\u5bbd\uff08\u5148\u7c97\u5339\u914d\u540e\u7cbe\u4fee\uff09 | \u5c40\u90e8\u90bb\u57df\u5750\u6807\uff08\u7ecf $\\partial\\chi_i/\\partial X$ \u94fe\u5f0f\u6c42\u5bfc\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No differentiable environment descriptor or reference library",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P03",
+      "name": "\u8de8\u754c\u9762\u9759\u7535\u52bf",
+      "name_en": "Interfacial electrostatic potential",
+      "sources": "\u529b\u573a\u5f15\u5bfc EDM / SemlaFlow\u3001Re-Dock",
+      "target": "\u754c\u9762\u6781\u6027\u4e92\u8865\uff1a\u5206\u5f00\u540c\u53f7\u7535\u8377\u3001\u62c9\u8fd1\u5f02\u53f7\u4e92\u8865\u533a\u57df",
+      "formula": "$E_Q=\\sum_{i,a}k_e\\dfrac{q_iq_a}{\\varepsilon(r_{ia})\\,r_{ia}}$\uff1bRe-Dock \u53d8\u4f53 $E_{Coulomb}=\\kappa\\sum_{i,j}\\dfrac{q_iq_j}{r_{ij}}$\uff08\u65e0\u8ddd\u79bb\u4f9d\u8d56\u4ecb\u7535\uff09\uff1b\u5e38\u4e0e LJ\u3001anti-clash \u76f4\u63a5\u76f8\u52a0",
+      "variables": "$q_i,q_a$ \u5206\u914d\u7684\uff08\u90e8\u5206\uff09\u7535\u8377\uff0c$\\varepsilon(r)$ \u8ddd\u79bb\u76f8\u5173\u4ecb\u7535\uff0c$k_e,\\kappa$ \u5e38\u6570",
+      "gradient_target": "\u914d\u4f53\u5750\u6807",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "electrostatics"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "partial_charges",
+        "dielectric_model"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 38
+      },
+      "original_row": "| \u8de8\u754c\u9762\u9759\u7535\u52bf | \u529b\u573a\u5f15\u5bfc EDM / SemlaFlow\u3001Re-Dock | \u754c\u9762\u6781\u6027\u4e92\u8865\uff1a\u5206\u5f00\u540c\u53f7\u7535\u8377\u3001\u62c9\u8fd1\u5f02\u53f7\u4e92\u8865\u533a\u57df | $E_Q=\\sum_{i,a}k_e\\dfrac{q_iq_a}{\\varepsilon(r_{ia})\\,r_{ia}}$\uff1bRe-Dock \u53d8\u4f53 $E_{Coulomb}=\\kappa\\sum_{i,j}\\dfrac{q_iq_j}{r_{ij}}$\uff08\u65e0\u8ddd\u79bb\u4f9d\u8d56\u4ecb\u7535\uff09\uff1b\u5e38\u4e0e LJ\u3001anti-clash \u76f4\u63a5\u76f8\u52a0 | $q_i,q_a$ \u5206\u914d\u7684\uff08\u90e8\u5206\uff09\u7535\u8377\uff0c$\\varepsilon(r)$ \u8ddd\u79bb\u76f8\u5173\u4ecb\u7535\uff0c$k_e,\\kappa$ \u5e38\u6570 | \u914d\u4f53\u5750\u6807 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "Formal charges cannot replace atomistic partial charges or a dielectric model",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P04",
+      "name": "xTB \u539f\u5b50\u529b\u8303\u6570\u7a33\u5b9a\u6027\u635f\u5931",
+      "name_en": "xTB force-norm loss",
+      "sources": "ChemGuide",
+      "target": "\u8fd1\u5e72\u51c0\u7ed3\u6784\u662f\u5426\u63a5\u8fd1\u91cf\u5b50\u5316\u5b66\u52bf\u80fd\u9a7b\u70b9\uff08\u6b8b\u4f59\u539f\u5b50\u529b\u7684\u5927\u5c0f\uff09",
+      "formula": "$L_{force}=\\dfrac1N\\sum_i\\|F_i(G)\\|^2$\uff0c$F_i=-\\dfrac{\\partial E_{xTB}}{\\partial x_i}$\uff08\u4e5f\u53ef\u53d6 Force RMS \u8303\u6570\uff09",
+      "variables": "$G=D(\\hat z_0)$ \u4e3a\u89e3\u7801\u5f97\u5230\u7684\u8fd1\u5e72\u51c0\u5206\u5b50\uff0c$F_i$ \u539f\u5b50 $i$ \u7684\u8fd1\u4f3c\u91cf\u5b50\u5316\u5b66\u529b",
+      "gradient_target": "\u4e0d\u53ef\u76f4\u63a5\u53cd\u4f20\u65f6\u7528 SPSA \u4f30\u8ba1\u5230\u5750\u6807\u6f5c\u53d8\u91cf $z_x$\uff1b\u53ef\u5fae\u540e\u7aef\u53ef\u76f4\u63a5\u5bf9\u5750\u6807\u6c42\u5bfc",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "force",
+        "stability"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "xtb_oracle",
+        "stable_graph",
+        "protonation",
+        "budget"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 39
+      },
+      "original_row": "| xTB \u539f\u5b50\u529b\u8303\u6570\u7a33\u5b9a\u6027\u635f\u5931 | ChemGuide | \u8fd1\u5e72\u51c0\u7ed3\u6784\u662f\u5426\u63a5\u8fd1\u91cf\u5b50\u5316\u5b66\u52bf\u80fd\u9a7b\u70b9\uff08\u6b8b\u4f59\u539f\u5b50\u529b\u7684\u5927\u5c0f\uff09 | $L_{force}=\\dfrac1N\\sum_i\\|F_i(G)\\|^2$\uff0c$F_i=-\\dfrac{\\partial E_{xTB}}{\\partial x_i}$\uff08\u4e5f\u53ef\u53d6 Force RMS \u8303\u6570\uff09 | $G=D(\\hat z_0)$ \u4e3a\u89e3\u7801\u5f97\u5230\u7684\u8fd1\u5e72\u51c0\u5206\u5b50\uff0c$F_i$ \u539f\u5b50 $i$ \u7684\u8fd1\u4f3c\u91cf\u5b50\u5316\u5b66\u529b | \u4e0d\u53ef\u76f4\u63a5\u53cd\u4f20\u65f6\u7528 SPSA \u4f30\u8ba1\u5230\u5750\u6807\u6f5c\u53d8\u91cf $z_x$\uff1b\u53ef\u5fae\u540e\u7aef\u53ef\u76f4\u63a5\u5bf9\u5750\u6807\u6c42\u5bfc |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No xTB oracle, verified chemistry or oracle budget",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P05",
+      "name": "Vina / torchvina \u603b\u5206\uff08\u542b\u4e94\u4e2a\u5206\u9879\u4e0e\u67d4\u6027\u6821\u6b63\uff09",
+      "name_en": "Vina / torchvina total score",
+      "sources": "IDOLpro\uff08torchvina\uff09\u3001AutoDock Vina",
+      "target": "\u7ec8\u6001\u590d\u5408\u7269\u7684\u7ecf\u9a8c\u7ed3\u5408\u4ee3\u7406\u603b\u5206\uff08\u8fd1\u7a0b\u5f62\u72b6\u4e92\u8865\u3001\u5bbd\u7a0b\u586b\u5145\u3001\u6392\u65a5\u3001\u758f\u6c34\u3001\u6c22\u952e\uff0c\u518d\u6309\u67d4\u6027\u6821\u6b63\uff09",
+      "formula": "\u8868\u9762\u8ddd\u79bb $d=r_{ij}-R_{t_i}-R_{t_j}$\uff1b$G_1=e^{-(d/0.5)^2}$\uff0c$G_2=e^{-((d-3)/2)^2}$\uff0c$R=d^2\\mathbf 1[d<0]$\uff0c$H_{phob}$ \u4e0e $H_{bond}$ \u4e3a\u5206\u6bb5\u7ebf\u6027\uff1b$E_{inter}=\\sum_{m=1}^{5}w_mh_m(d)$\uff0c$w=(-0.0356,-0.00516,0.840,-0.0351,-0.587)$\uff1b$E_{vina}=E_{inter}/(1+w_{rot}N_{rot})$\uff0c$w_{rot}\\approx0.0585$",
+      "variables": "$R_{t_i}$ \u7c7b\u578b\u76f8\u5173\u539f\u5b50\u534a\u5f84\uff08$d$ \u5355\u4f4d\u4e3a \u00c5\uff09\uff0c$h_m$ \u4e3a\u4e94\u4e2a\u5206\u9879\uff0c$N_{rot}$ \u53ef\u65cb\u8f6c\u952e\u6570",
+      "gradient_target": "\u7ec8\u6001\u914d\u4f53\u5750\u6807\uff1b\u518d\u7ecf\u5b8c\u6574\u540e\u7f00\u96c5\u53ef\u6bd4 $J_{F_{h\\to0}}^\\top$ \u56de\u5230\u68c0\u67e5\u70b9 $z_h$\uff0c\u6216\u4f5c\u4e3a\u9ed1\u7bb1 reward \u53c2\u4e0e\u7c92\u5b50\u91cd\u91c7\u6837",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "binding",
+        "affinity"
+      ],
+      "role": "coordinate_energy_or_population_score",
+      "prerequisites": [
+        "vina_preparation",
+        "scoring_backend"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 40
+      },
+      "original_row": "| Vina / torchvina \u603b\u5206\uff08\u542b\u4e94\u4e2a\u5206\u9879\u4e0e\u67d4\u6027\u6821\u6b63\uff09 | IDOLpro\uff08torchvina\uff09\u3001AutoDock Vina | \u7ec8\u6001\u590d\u5408\u7269\u7684\u7ecf\u9a8c\u7ed3\u5408\u4ee3\u7406\u603b\u5206\uff08\u8fd1\u7a0b\u5f62\u72b6\u4e92\u8865\u3001\u5bbd\u7a0b\u586b\u5145\u3001\u6392\u65a5\u3001\u758f\u6c34\u3001\u6c22\u952e\uff0c\u518d\u6309\u67d4\u6027\u6821\u6b63\uff09 | \u8868\u9762\u8ddd\u79bb $d=r_{ij}-R_{t_i}-R_{t_j}$\uff1b$G_1=e^{-(d/0.5)^2}$\uff0c$G_2=e^{-((d-3)/2)^2}$\uff0c$R=d^2\\mathbf 1[d<0]$\uff0c$H_{phob}$ \u4e0e $H_{bond}$ \u4e3a\u5206\u6bb5\u7ebf\u6027\uff1b$E_{inter}=\\sum_{m=1}^{5}w_mh_m(d)$\uff0c$w=(-0.0356,-0.00516,0.840,-0.0351,-0.587)$\uff1b$E_{vina}=E_{inter}/(1+w_{rot}N_{rot})$\uff0c$w_{rot}\\approx0.0585$ | $R_{t_i}$ \u7c7b\u578b\u76f8\u5173\u539f\u5b50\u534a\u5f84\uff08$d$ \u5355\u4f4d\u4e3a \u00c5\uff09\uff0c$h_m$ \u4e3a\u4e94\u4e2a\u5206\u9879\uff0c$N_{rot}$ \u53ef\u65cb\u8f6c\u952e\u6570 | \u7ec8\u6001\u914d\u4f53\u5750\u6807\uff1b\u518d\u7ecf\u5b8c\u6574\u540e\u7f00\u96c5\u53ef\u6bd4 $J_{F_{h\\to0}}^\\top$ \u56de\u5230\u68c0\u67e5\u70b9 $z_h$\uff0c\u6216\u4f5c\u4e3a\u9ed1\u7bb1 reward \u53c2\u4e0e\u7c92\u5b50\u91cd\u91c7\u6837 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No prepared Vina inputs/backend or live suffix derivative",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P06",
+      "name": "\u53ef\u5fae SASA \u76ee\u6807\u52bf\uff08\u5019\u9009\uff09",
+      "name_en": "Differentiable SASA target potential",
+      "sources": "dSASA",
+      "target": "\u6307\u5b9a\u57fa\u56e2/\u539f\u5b50\u7684\u300c\u5e94\u57cb\u85cf\u300d\u6216\u300c\u5e94\u66b4\u9732\u300d\u7a0b\u5ea6\uff08\u6eb6\u5242\u5316\u4e0e\u754c\u9762\u8bbe\u8ba1\uff09",
+      "formula": "$E_{SASA}=\\rho\\big(SASA_S(X)-A^*\\big)$",
+      "variables": "$S$ \u4e3a\u6307\u5b9a\u539f\u5b50/\u57fa\u56e2\u96c6\u5408\uff0c$A^*$ \u76ee\u6807\u53ef\u53ca\u9762\u79ef\uff0c$\\rho$ \u4e3a\u504f\u5dee\u7f5a",
+      "gradient_target": "\u539f\u5b50\u5750\u6807\uff08\u4e3b\u8981\u6cbf\u5c40\u90e8\u8868\u9762\u6cd5\u5411\uff09",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "sasa",
+        "burial"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "group_area_target",
+        "differentiable_sasa"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 41
+      },
+      "original_row": "| \u53ef\u5fae SASA \u76ee\u6807\u52bf\uff08\u5019\u9009\uff09 | dSASA | \u6307\u5b9a\u57fa\u56e2/\u539f\u5b50\u7684\u300c\u5e94\u57cb\u85cf\u300d\u6216\u300c\u5e94\u66b4\u9732\u300d\u7a0b\u5ea6\uff08\u6eb6\u5242\u5316\u4e0e\u754c\u9762\u8bbe\u8ba1\uff09 | $E_{SASA}=\\rho\\big(SASA_S(X)-A^*\\big)$ | $S$ \u4e3a\u6307\u5b9a\u539f\u5b50/\u57fa\u56e2\u96c6\u5408\uff0c$A^*$ \u76ee\u6807\u53ef\u53ca\u9762\u79ef\uff0c$\\rho$ \u4e3a\u504f\u5dee\u7f5a | \u539f\u5b50\u5750\u6807\uff08\u4e3b\u8981\u6cbf\u5c40\u90e8\u8868\u9762\u6cd5\u5411\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No atom-group SASA target or differentiable backend",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "P07",
+      "name": "ESP \u8868\u9762\u76f8\u4f3c\u52bf\uff08\u5019\u9009\uff09",
+      "name_en": "ESP surface similarity potential",
+      "sources": "ShEPhERD",
+      "target": "\u5019\u9009\u8868\u9762\u9759\u7535\u52bf\u4e0e\u53c2\u8003\u7684\u7535\u5b50\u7b49\u6392/\u6781\u6027\u4e92\u8865\u4e00\u81f4",
+      "formula": "$E_{ESP}=\\sum_mw_m\\big(\\Phi_m(X,q)-\\Phi^{ref}_m\\big)^2$\uff0c$\\Phi_m=\\sum_i\\dfrac{q_i}{\\sqrt{\\|r_m-x_i\\|^2+\\varepsilon^2}}$",
+      "variables": "$r_m$ \u5bf9\u9f50\u540e\u7684\u56fa\u5b9a\u8868\u9762\u91c7\u6837\u70b9\uff0c$q_i$ \u539f\u5b50\u7535\u8377\uff0c$\\varepsilon$ \u8f6f\u5316\u5e38\u6570\uff0c$\\Phi^{ref}_m$ \u53c2\u8003\u7535\u52bf",
+      "gradient_target": "\u5e26\u7535\u539f\u5b50\u7684\u5750\u6807\uff08\u82e5\u5141\u8bb8\uff0c\u4e5f\u53ef\u4f5c\u7528\u4e8e\u7535\u8377/\u539f\u5b50\u7c7b\u578b\u901a\u9053\uff09",
+      "section": "\u4e8c\u3001\u7269\u7406\u5316\u5b66\u7c7b",
+      "tags": [
+        "electrostatics",
+        "shape"
+      ],
+      "role": "coordinate_energy",
+      "prerequisites": [
+        "partial_charges",
+        "aligned_reference_esp"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 42
+      },
+      "original_row": "| ESP \u8868\u9762\u76f8\u4f3c\u52bf\uff08\u5019\u9009\uff09 | ShEPhERD | \u5019\u9009\u8868\u9762\u9759\u7535\u52bf\u4e0e\u53c2\u8003\u7684\u7535\u5b50\u7b49\u6392/\u6781\u6027\u4e92\u8865\u4e00\u81f4 | $E_{ESP}=\\sum_mw_m\\big(\\Phi_m(X,q)-\\Phi^{ref}_m\\big)^2$\uff0c$\\Phi_m=\\sum_i\\dfrac{q_i}{\\sqrt{\\|r_m-x_i\\|^2+\\varepsilon^2}}$ | $r_m$ \u5bf9\u9f50\u540e\u7684\u56fa\u5b9a\u8868\u9762\u91c7\u6837\u70b9\uff0c$q_i$ \u539f\u5b50\u7535\u8377\uff0c$\\varepsilon$ \u8f6f\u5316\u5e38\u6570\uff0c$\\Phi^{ref}_m$ \u53c2\u8003\u7535\u52bf | \u5e26\u7535\u539f\u5b50\u7684\u5750\u6807\uff08\u82e5\u5141\u8bb8\uff0c\u4e5f\u53ef\u4f5c\u7528\u4e8e\u7535\u8377/\u539f\u5b50\u7c7b\u578b\u901a\u9053\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No aligned ESP reference or partial charges",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S01",
+      "name": "\u76ee\u6807\u503c\u578b\u9ad8\u65af\u6838 reward \u6743\u91cd",
+      "name_en": "Target-value Gaussian reward",
+      "sources": "PILOT",
+      "target": "\u8ba9\u67d0\u4e2a\u6027\u8d28\u7684\u5206\u5e03\u5411\u6307\u5b9a\u76ee\u6807\u503c $c$ \u96c6\u4e2d\uff08\u5982 SA\u3001QED \u843d\u5728\u6210\u836f\u7a97\u53e3\uff09",
+      "formula": "$p_\\delta(c\\mid M,P)\\propto\\exp\\!\\left[-\\dfrac{(f_\\delta(M,P)-c)^2}{2\\sigma_c^2}\\right]$",
+      "variables": "$f_\\delta$ \u9ed1\u7bb1\u6027\u8d28\u8bc4\u5206\uff08\u4e0b\u6807 $\\delta$ \u4e3a\u5177\u4f53 reward \u901a\u9053\uff09\uff0c$c$ \u76ee\u6807\u503c\uff0c$\\sigma_c$ \u5bb9\u5dee\u5bbd\u5ea6",
+      "gradient_target": "\u79cd\u7fa4\u4e2a\u4f53\uff08\u7c92\u5b50/\u8f68\u8ff9\uff09\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "property_target"
+      ],
+      "role": "population_weight",
+      "prerequisites": [
+        "target_value_tolerance",
+        "live_population"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 48
+      },
+      "original_row": "| \u76ee\u6807\u503c\u578b\u9ad8\u65af\u6838 reward \u6743\u91cd | PILOT | \u8ba9\u67d0\u4e2a\u6027\u8d28\u7684\u5206\u5e03\u5411\u6307\u5b9a\u76ee\u6807\u503c $c$ \u96c6\u4e2d\uff08\u5982 SA\u3001QED \u843d\u5728\u6210\u836f\u7a97\u53e3\uff09 | $p_\\delta(c\\mid M,P)\\propto\\exp\\!\\left[-\\dfrac{(f_\\delta(M,P)-c)^2}{2\\sigma_c^2}\\right]$ | $f_\\delta$ \u9ed1\u7bb1\u6027\u8d28\u8bc4\u5206\uff08\u4e0b\u6807 $\\delta$ \u4e3a\u5177\u4f53 reward \u901a\u9053\uff09\uff0c$c$ \u76ee\u6807\u503c\uff0c$\\sigma_c$ \u5bb9\u5dee\u5bbd\u5ea6 | \u79cd\u7fa4\u4e2a\u4f53\uff08\u7c92\u5b50/\u8f68\u8ff9\uff09\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No target value/tolerance or live population",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S02",
+      "name": "softmax / tilted \u91cd\u8981\u6027\u91c7\u6837\u6743\u91cd",
+      "name_en": "Softmax / tilted importance weights",
+      "sources": "PILOT\u3001FLOWR.ROOT",
+      "target": "\u6700\u5927\u5316\u7c7b\u6307\u6807\u7684\u5bcc\u96c6\uff1adocking\u3001QED\u3001SA\u3001pIC50/pKi/pKd/pEC50 \u7b49",
+      "formula": "$w_k=\\dfrac{\\exp(f_\\delta(M_k,P)/\\tau)}{\\sum_j\\exp(f_\\delta(M_j,P)/\\tau)}$\uff0c$l'_i\\sim{\\rm Multinomial}(B,w)$\uff1b\u76ee\u6807\u5206\u5e03\u5199\u6cd5 $p_\\phi(l\\mid y,P)\\propto r(y\\mid l,P)\\,p_\\theta(l\\mid P)$\uff1bFLOWR \u5f0f $w_i=\\dfrac{\\exp(\\lambda r(l_{i,\\tau},P))}{\\sum_j\\exp(\\lambda r(l_{j,\\tau},P))}$",
+      "variables": "$M_k,l_i$ \u7b2c $k$ \u4e2a\u7c92\u5b50/\u8f68\u8ff9\uff0c$f,r$ \u53ef\u4e3a\u9ed1\u7bb1 reward\uff0c$\\tau,\\lambda$ \u6e29\u5ea6/\u503e\u659c\u5f3a\u5ea6\uff0c\u6700\u5c0f\u5316\u65f6\u4ee4\u5206\u6570\u53d6\u8d1f",
+      "gradient_target": "\u79cd\u7fa4\u4e2a\u4f53\uff08\u591a\u7c92\u5b50/\u591a\u8f68\u8ff9\uff09",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "affinity",
+        "property_maximize"
+      ],
+      "role": "population_weight",
+      "prerequisites": [
+        "score_direction",
+        "temperature",
+        "live_population"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 49
+      },
+      "original_row": "| softmax / tilted \u91cd\u8981\u6027\u91c7\u6837\u6743\u91cd | PILOT\u3001FLOWR.ROOT | \u6700\u5927\u5316\u7c7b\u6307\u6807\u7684\u5bcc\u96c6\uff1adocking\u3001QED\u3001SA\u3001pIC50/pKi/pKd/pEC50 \u7b49 | $w_k=\\dfrac{\\exp(f_\\delta(M_k,P)/\\tau)}{\\sum_j\\exp(f_\\delta(M_j,P)/\\tau)}$\uff0c$l'_i\\sim{\\rm Multinomial}(B,w)$\uff1b\u76ee\u6807\u5206\u5e03\u5199\u6cd5 $p_\\phi(l\\mid y,P)\\propto r(y\\mid l,P)\\,p_\\theta(l\\mid P)$\uff1bFLOWR \u5f0f $w_i=\\dfrac{\\exp(\\lambda r(l_{i,\\tau},P))}{\\sum_j\\exp(\\lambda r(l_{j,\\tau},P))}$ | $M_k,l_i$ \u7b2c $k$ \u4e2a\u7c92\u5b50/\u8f68\u8ff9\uff0c$f,r$ \u53ef\u4e3a\u9ed1\u7bb1 reward\uff0c$\\tau,\\lambda$ \u6e29\u5ea6/\u503e\u659c\u5f3a\u5ea6\uff0c\u6700\u5c0f\u5316\u65f6\u4ee4\u5206\u6570\u53d6\u8d1f | \u79cd\u7fa4\u4e2a\u4f53\uff08\u591a\u7c92\u5b50/\u591a\u8f68\u8ff9\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "Affinity numbers alone do not define objectives, temperature or live particle population",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S03",
+      "name": "\u76ee\u6807/\u8131\u9776\u9009\u62e9\u6027 reward",
+      "name_en": "On-target/off-target selectivity reward",
+      "sources": "FLOWR.ROOT",
+      "target": "\u5019\u9009\u5bf9\u76ee\u6807\u9776\u70b9\u4e0e\u8131\u9776\u9776\u70b9\u7684\u9884\u6d4b\u6548\u529b\u4e4b\u5dee\uff08\u9009\u62e9\u6027\u7a97\uff09",
+      "formula": "$r_{sel}=a\\,\\hat y_{on}(l,P_{on})-b\\,\\hat y_{off}(l,P_{off})$\uff08\u4e5f\u53ef\u4f5c\u4e3a\u4e24\u4e2a\u76ee\u6807\u5206\u522b\u91cd\u91c7\u6837\u800c\u975e\u5355\u4e00\u5dee\u503c\uff09",
+      "variables": "$\\hat y_{on/off}$ \u540c\u4e00\u5019\u9009\u5728\u4e24\u4e2a\u53e3\u888b\u73af\u5883\u4e2d\u7684\u9884\u6d4b\u6548\u529b\u5206\u6570\uff0c$a,b>0$ \u6743\u91cd",
+      "gradient_target": "\u79cd\u7fa4\u4e2a\u4f53\uff08\u8f68\u8ff9\u590d\u5236\u6982\u7387\uff09",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "selectivity"
+      ],
+      "role": "population_score",
+      "prerequisites": [
+        "matched_off_target_scores",
+        "weights"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 50
+      },
+      "original_row": "| \u76ee\u6807/\u8131\u9776\u9009\u62e9\u6027 reward | FLOWR.ROOT | \u5019\u9009\u5bf9\u76ee\u6807\u9776\u70b9\u4e0e\u8131\u9776\u9776\u70b9\u7684\u9884\u6d4b\u6548\u529b\u4e4b\u5dee\uff08\u9009\u62e9\u6027\u7a97\uff09 | $r_{sel}=a\\,\\hat y_{on}(l,P_{on})-b\\,\\hat y_{off}(l,P_{off})$\uff08\u4e5f\u53ef\u4f5c\u4e3a\u4e24\u4e2a\u76ee\u6807\u5206\u522b\u91cd\u91c7\u6837\u800c\u975e\u5355\u4e00\u5dee\u503c\uff09 | $\\hat y_{on/off}$ \u540c\u4e00\u5019\u9009\u5728\u4e24\u4e2a\u53e3\u888b\u73af\u5883\u4e2d\u7684\u9884\u6d4b\u6548\u529b\u5206\u6570\uff0c$a,b>0$ \u6743\u91cd | \u79cd\u7fa4\u4e2a\u4f53\uff08\u8f68\u8ff9\u590d\u5236\u6982\u7387\uff09 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No same-candidate matched off-target scores",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S04",
+      "name": "SPSA \u96f6\u9636\u68af\u5ea6\u4f30\u8ba1",
+      "name_en": "SPSA gradient estimation",
+      "sources": "ChemGuide",
+      "target": "\u5728\u8bc4\u4ef7\u5668\u4e0d\u53ef\u5fae\uff08\u6216\u4e0d\u4fbf\u7aef\u5230\u7aef\u53cd\u4f20\uff09\u65f6\uff0c\u5bf9\u5750\u6807\u6f5c\u53d8\u91cf\u7ed9\u51fa\u7a33\u5b9a\u5316\u66f4\u65b0\u65b9\u5411",
+      "formula": "$\\widehat\\nabla_{z_x}\\mathcal F\\approx\\dfrac{\\mathcal F(z_x+\\zeta U,z_h)-\\mathcal F(z_x-\\zeta U,z_h)}{2\\zeta}\\,U$",
+      "variables": "$\\mathcal F$ \u9ed1\u7bb1\u8bc4\u4ef7\uff08\u5982 xTB\uff09\uff0c$\\zeta$ \u5fae\u5c0f\u6270\u52a8\u5c3a\u5ea6\uff0c$U$ \u96f6\u5747\u503c\u968f\u673a\u5411\u91cf\uff0c$z_x,z_h$ \u5750\u6807\uff0f\u5143\u7d20\u6f5c\u53d8\u91cf",
+      "gradient_target": "\u5750\u6807\u6f5c\u53d8\u91cf $z_x$\uff08\u539f\u6587\u4e0d\u66f4\u65b0 $z_h$\uff09\uff0c\u4ec5\u540e\u6bb5\u82e5\u5e72\u6b65\u542f\u7528",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "blackbox",
+        "gradient"
+      ],
+      "role": "gradient_estimator",
+      "prerequisites": [
+        "reevaluable_oracle",
+        "perturbable_dof",
+        "budget"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 51
+      },
+      "original_row": "| SPSA \u96f6\u9636\u68af\u5ea6\u4f30\u8ba1 | ChemGuide | \u5728\u8bc4\u4ef7\u5668\u4e0d\u53ef\u5fae\uff08\u6216\u4e0d\u4fbf\u7aef\u5230\u7aef\u53cd\u4f20\uff09\u65f6\uff0c\u5bf9\u5750\u6807\u6f5c\u53d8\u91cf\u7ed9\u51fa\u7a33\u5b9a\u5316\u66f4\u65b0\u65b9\u5411 | $\\widehat\\nabla_{z_x}\\mathcal F\\approx\\dfrac{\\mathcal F(z_x+\\zeta U,z_h)-\\mathcal F(z_x-\\zeta U,z_h)}{2\\zeta}\\,U$ | $\\mathcal F$ \u9ed1\u7bb1\u8bc4\u4ef7\uff08\u5982 xTB\uff09\uff0c$\\zeta$ \u5fae\u5c0f\u6270\u52a8\u5c3a\u5ea6\uff0c$U$ \u96f6\u5747\u503c\u968f\u673a\u5411\u91cf\uff0c$z_x,z_h$ \u5750\u6807\uff0f\u5143\u7d20\u6f5c\u53d8\u91cf | \u5750\u6807\u6f5c\u53d8\u91cf $z_x$\uff08\u539f\u6587\u4e0d\u66f4\u65b0 $z_h$\uff09\uff0c\u4ec5\u540e\u6bb5\u82e5\u5e72\u6b65\u542f\u7528 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "Estimator, not reward; missing reevaluable oracle, perturbable runtime state and budget",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S05",
+      "name": "Pareto \u975e\u652f\u914d\u6392\u5e8f + \u7ed3\u6784\u51c0\u7a7a\uff08SAES\uff09",
+      "name_en": "Pareto ranking and structural diversity",
+      "sources": "DEMO",
+      "target": "\u591a\u76ee\u6807\u6298\u4e2d\u9762\u7684\u8986\u76d6\u5ea6\u4e0e\u5019\u9009\u96c6\u5408\u7684\u7ed3\u6784\u591a\u6837\u6027",
+      "formula": "\u8bb0 $F(M)=(f_1,\\dots,f_K)$\uff0c\u4fdd\u7559\u975e\u652f\u914d\u4e2a\u4f53\uff1b\u518d\u8981\u6c42\u5019\u9009\u5230\u5df2\u9009\u96c6\u5408\u7684\u6700\u5c0f\u8ddd\u79bb $d_j=\\min_iD_{ij}\\ge\\tau$\uff0c$D_{ij}$ \u7ec4\u5408\u4e8c\u7ef4\u62d3\u6251\u8ddd\u79bb\u4e0e\u4e09\u7ef4\u51e0\u4f55\u8ddd\u79bb",
+      "variables": "$f_k$ \u9ed1\u7bb1\u6027\u8d28\uff0c$\\tau$ \u7ed3\u6784\u51c0\u7a7a\u9608\u503c\uff0c$D_{ij}$ \u7ed3\u6784\u8ddd\u79bb\u5ea6\u91cf",
+      "gradient_target": "\u5019\u9009\u96c6\u5408\uff08\u79cd\u7fa4\u4e2a\u4f53\uff09\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "multiobjective",
+        "diversity"
+      ],
+      "role": "selection_strategy",
+      "prerequisites": [
+        "objectives",
+        "population",
+        "distance_metric"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 52
+      },
+      "original_row": "| Pareto \u975e\u652f\u914d\u6392\u5e8f + \u7ed3\u6784\u51c0\u7a7a\uff08SAES\uff09 | DEMO | \u591a\u76ee\u6807\u6298\u4e2d\u9762\u7684\u8986\u76d6\u5ea6\u4e0e\u5019\u9009\u96c6\u5408\u7684\u7ed3\u6784\u591a\u6837\u6027 | \u8bb0 $F(M)=(f_1,\\dots,f_K)$\uff0c\u4fdd\u7559\u975e\u652f\u914d\u4e2a\u4f53\uff1b\u518d\u8981\u6c42\u5019\u9009\u5230\u5df2\u9009\u96c6\u5408\u7684\u6700\u5c0f\u8ddd\u79bb $d_j=\\min_iD_{ij}\\ge\\tau$\uff0c$D_{ij}$ \u7ec4\u5408\u4e8c\u7ef4\u62d3\u6251\u8ddd\u79bb\u4e0e\u4e09\u7ef4\u51e0\u4f55\u8ddd\u79bb | $f_k$ \u9ed1\u7bb1\u6027\u8d28\uff0c$\\tau$ \u7ed3\u6784\u51c0\u7a7a\u9608\u503c\uff0c$D_{ij}$ \u7ed3\u6784\u8ddd\u79bb\u5ea6\u91cf | \u5019\u9009\u96c6\u5408\uff08\u79cd\u7fa4\u4e2a\u4f53\uff09\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No declared multiobjective population or diversity metric",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S06",
+      "name": "\u6279\u6b21\u5b8c\u6574\u6027\u5206\u6570\uff08\u566a\u58f0\u6df1\u5ea6\u6821\u51c6\uff09",
+      "name_en": "Depth-calibrated batch integrity score",
+      "sources": "DEMO",
+      "target": "\u7f16\u8f91\u2014\u53bb\u566a\u64cd\u4f5c\u7684\u300c\u4fee\u8865\u80fd\u529b vs \u7236\u4ee3\u4fdd\u771f\u300d\u6743\u8861\uff08\u9009\u62e9\u6700\u6d45\u6709\u6548\u566a\u58f0\u5c42 $t'$\uff09",
+      "formula": "$Score(t')=Validity\\_Rate(t')\\times Atom\\_Stability\\_Rate(t')$\uff0c\u53d6\u5e73\u53f0\u5de6\u4fa7\u62d0\u70b9\u5bf9\u5e94\u7684\u6700\u6d45 $t'$",
+      "variables": "$t'$ \u7f16\u8f91\u566a\u58f0\u6df1\u5ea6\uff0c$Validity$ \u6709\u6548\u5206\u5b50\u6bd4\u4f8b\uff0c$Atom\\_Stability$ \u539f\u5b50\u7a33\u5b9a\u6bd4\u4f8b",
+      "gradient_target": "\u7f16\u8f91\u8d85\u53c2\u6570\uff08\u566a\u58f0\u6df1\u5ea6\uff09\uff0c\u975e\u4e2a\u4f53\u68af\u5ea6",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "validity",
+        "depth"
+      ],
+      "role": "hyperparameter_strategy",
+      "prerequisites": [
+        "calibrated_depth_batches",
+        "parent_identity"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 53
+      },
+      "original_row": "| \u6279\u6b21\u5b8c\u6574\u6027\u5206\u6570\uff08\u566a\u58f0\u6df1\u5ea6\u6821\u51c6\uff09 | DEMO | \u7f16\u8f91\u2014\u53bb\u566a\u64cd\u4f5c\u7684\u300c\u4fee\u8865\u80fd\u529b vs \u7236\u4ee3\u4fdd\u771f\u300d\u6743\u8861\uff08\u9009\u62e9\u6700\u6d45\u6709\u6548\u566a\u58f0\u5c42 $t'$\uff09 | $Score(t')=Validity\\_Rate(t')\\times Atom\\_Stability\\_Rate(t')$\uff0c\u53d6\u5e73\u53f0\u5de6\u4fa7\u62d0\u70b9\u5bf9\u5e94\u7684\u6700\u6d45 $t'$ | $t'$ \u7f16\u8f91\u566a\u58f0\u6df1\u5ea6\uff0c$Validity$ \u6709\u6548\u5206\u5b50\u6bd4\u4f8b\uff0c$Atom\\_Stability$ \u539f\u5b50\u7a33\u5b9a\u6bd4\u4f8b | \u7f16\u8f91\u8d85\u53c2\u6570\uff08\u566a\u58f0\u6df1\u5ea6\uff09\uff0c\u975e\u4e2a\u4f53\u68af\u5ea6 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "Saved individual snapshots do not provide calibrated editing-depth batches",
+      "backend_implemented": false
+    },
+    {
+      "function_id": "S07",
+      "name": "\u4e09\u7fa4\u7ed3\u6784\u7f5a\u4e0e\u5316\u5b66\u6709\u6548\u6027\u7f5a",
+      "name_en": "Three-population validity penalties",
+      "sources": "DEMO",
+      "target": "\u8de8\u8d8a\u4e0d\u8fde\u7eed\u53ef\u884c\u57df\uff1a\u63a2\u7d22\u65b0\u9aa8\u67b6\u3001\u7cbe\u4fee\u76ee\u6807\u7247\u6bb5\u3001\u4fdd\u7559\u540c\u65f6\u5408\u683c\u7684\u53ef\u884c\u89e3",
+      "formula": "$\\psi(M)$ \u4e3a\u57fa\u672c\u5316\u5b66\u65e0\u6548\u6307\u793a\uff0c$\\phi(M)$ \u4e3a\u76ee\u6807\u7247\u6bb5\u672a\u5b8c\u6574\u88c5\u5165\u6307\u793a\uff1b\u63a2\u7d22\u7fa4\u4f18\u5316 $-\\phi$\uff0c\u5c40\u90e8\u7cbe\u4fee\u7fa4\u6700\u5c0f\u5316 $\\phi$\uff0c\u7cbe\u82f1\u7fa4\u53ea\u63a5\u53d7 $\\phi=0,\\psi=0$",
+      "variables": "$\\psi,\\phi$ \u4e3a\u4e8c\u503c\u68c0\u67e5\u5668\u8f93\u51fa\uff08\u9ed1\u7bb1\uff09",
+      "gradient_target": "\u79cd\u7fa4\u5206\u5de5\u4e0e\u51c6\u5165\u6761\u4ef6\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570",
+      "section": "\u4e09\u3001\u7ec8\u6001\u8bc4\u4f30\u4e0e\u641c\u7d22\u7c7b",
+      "tags": [
+        "graph_connectivity",
+        "chemical_validity"
+      ],
+      "role": "population_strategy",
+      "prerequisites": [
+        "fragment_target",
+        "population",
+        "checkers"
+      ],
+      "source": {
+        "file": "Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
+        "sha256": "138779f85ad5f41bd4423b50ce81c5df5cc7d15710d90ca622faedeb90b5bab5",
+        "line": 54
+      },
+      "original_row": "| \u4e09\u7fa4\u7ed3\u6784\u7f5a\u4e0e\u5316\u5b66\u6709\u6548\u6027\u7f5a | DEMO | \u8de8\u8d8a\u4e0d\u8fde\u7eed\u53ef\u884c\u57df\uff1a\u63a2\u7d22\u65b0\u9aa8\u67b6\u3001\u7cbe\u4fee\u76ee\u6807\u7247\u6bb5\u3001\u4fdd\u7559\u540c\u65f6\u5408\u683c\u7684\u53ef\u884c\u89e3 | $\\psi(M)$ \u4e3a\u57fa\u672c\u5316\u5b66\u65e0\u6548\u6307\u793a\uff0c$\\phi(M)$ \u4e3a\u76ee\u6807\u7247\u6bb5\u672a\u5b8c\u6574\u88c5\u5165\u6307\u793a\uff1b\u63a2\u7d22\u7fa4\u4f18\u5316 $-\\phi$\uff0c\u5c40\u90e8\u7cbe\u4fee\u7fa4\u6700\u5c0f\u5316 $\\phi$\uff0c\u7cbe\u82f1\u7fa4\u53ea\u63a5\u53d7 $\\phi=0,\\psi=0$ | $\\psi,\\phi$ \u4e3a\u4e8c\u503c\u68c0\u67e5\u5668\u8f93\u51fa\uff08\u9ed1\u7bb1\uff09 | \u79cd\u7fa4\u5206\u5de5\u4e0e\u51c6\u5165\u6761\u4ef6\uff0c\u4e0d\u4ea7\u751f\u5750\u6807\u5bfc\u6570 |",
+      "retrieval_score": 0.0,
+      "retrieval_components": {
+        "lexical_bm25": 0.0,
+        "category_bonus": 0,
+        "locality_bonus": 0.0
+      },
+      "matched_categories": [],
+      "decision": "deferred",
+      "decision_reason": "No target fragment and no three-population search adapter",
+      "backend_implemented": false
+    }
+  ],
+  "reward": "-tau*log(mean(exp(w*F/tau)))-rho*sum(w*F)-lambda_graph*C_G",
+  "program_id": "rp_7e2c8115c0e164f2c5c3c2ce"
+}

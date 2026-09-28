@@ -1,0 +1,4313 @@
+{
+  "schema_version": "2.0.0",
+  "kind": "DiagnosticReport",
+  "packet_id": "sp_ea21f649076801a7bbb9cad0",
+  "identity": {
+    "target_id": "5i0b_A__5vef_M77",
+    "ligand_id": "ligand_002",
+    "stage": "t_0.75",
+    "stage_t": 0.75
+  },
+  "assessment": "risks_observed",
+  "summary": "1 endpoint risk regions; 1 raw-state groups; 4 coverage root causes.",
+  "findings": [
+    {
+      "finding_id": "risk_b8f1b2bd5579cb30",
+      "category": "local_geometry",
+      "scope": "predicted_endpoint",
+      "priority": "elevated",
+      "views": [
+        "prediction",
+        "sdf"
+      ],
+      "atom_ids": [
+        1,
+        10,
+        14
+      ],
+      "chemical_context": {
+        "atoms": [
+          {
+            "atom_id": 1,
+            "element": "N",
+            "formal_charge": 1,
+            "declared_bond_order_sum": 3.0,
+            "implicit_hydrogens": 1,
+            "total_valence": 4,
+            "hybridization": "SP2",
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 0.9994469285011292
+              },
+              {
+                "category": "C",
+                "probability": 0.0003881937882397324
+              },
+              {
+                "category": "O",
+                "probability": 0.00013914401642978191
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 1,
+                "probability": 0.8553202152252197
+              },
+              {
+                "category": 0,
+                "probability": 0.14448176324367523
+              },
+              {
+                "category": -1,
+                "probability": 0.00015647444524802268
+              }
+            ]
+          },
+          {
+            "atom_id": 10,
+            "element": "N",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 1,
+            "total_valence": 3,
+            "hybridization": "SP2",
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 0.5831184387207031
+              },
+              {
+                "category": "C",
+                "probability": 0.4165381193161011
+              },
+              {
+                "category": "O",
+                "probability": 0.0003211315197404474
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 0.9999462366104126
+              },
+              {
+                "category": -1,
+                "probability": 5.2131486881989986e-05
+              },
+              {
+                "category": 1,
+                "probability": 1.311653250013478e-06
+              }
+            ]
+          },
+          {
+            "atom_id": 14,
+            "element": "N",
+            "formal_charge": -1,
+            "declared_bond_order_sum": 2.0,
+            "implicit_hydrogens": 0,
+            "total_valence": 2,
+            "hybridization": "SP2",
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 0.9990869760513306
+              },
+              {
+                "category": "O",
+                "probability": 0.0006823799340054393
+              },
+              {
+                "category": "C",
+                "probability": 0.00018409715266898274
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": -1,
+                "probability": 0.9440078735351562
+              },
+              {
+                "category": 0,
+                "probability": 0.05335643142461777
+              },
+              {
+                "category": 1,
+                "probability": 0.0023802416399121284
+              }
+            ]
+          }
+        ],
+        "bonds": [
+          {
+            "atom_ids": [
+              1,
+              10
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.2968179965106303,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 0.9718037247657776
+              },
+              {
+                "category": 2,
+                "probability": 0.02786371298134327
+              },
+              {
+                "category": 0,
+                "probability": 0.0003305957361590117
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              1,
+              14
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 1.0794261759725574,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 0.9987443685531616
+              },
+              {
+                "category": 1,
+                "probability": 0.0011534345103427768
+              },
+              {
+                "category": 3,
+                "probability": 8.287085802294314e-05
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              10,
+              14
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.337696589910982,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 0.9999141693115234
+              },
+              {
+                "category": 1,
+                "probability": 4.7857723984634504e-05
+              },
+              {
+                "category": 2,
+                "probability": 3.7538138712989166e-05
+              }
+            ]
+          }
+        ],
+        "source_metric": {
+          "view": "prediction",
+          "metric_id": "chemistry_context"
+        }
+      },
+      "primary_evidence_ids": [
+        "ev_74f5a1f0f7cb682fd1fd",
+        "ev_6178e07afdcc7c01097e",
+        "ev_b54555bde86be45f8bab",
+        "ev_2ec654725d0559e69b9b",
+        "ev_9bddaab180361a2258fb",
+        "ev_8ea6360c331b429f0384"
+      ],
+      "supporting_evidence_ids": [
+        "ev_66806c6ebe4d15e52a2b",
+        "ev_f8a253fd72d9555a82a9",
+        "ev_cd7ce45a2564d58de779",
+        "ev_af6bf23c7640f46910d9",
+        "ev_b3e2c37e3c5d76282ad3",
+        "ev_7a0a24b67aa1e53ff462",
+        "ev_042cd49d297e543e2467",
+        "ev_c5860b99303a6d8d8857",
+        "ev_f82fb651e75e07512db3"
+      ],
+      "evidence_ids": [
+        "ev_74f5a1f0f7cb682fd1fd",
+        "ev_6178e07afdcc7c01097e",
+        "ev_b54555bde86be45f8bab",
+        "ev_2ec654725d0559e69b9b",
+        "ev_9bddaab180361a2258fb",
+        "ev_8ea6360c331b429f0384",
+        "ev_66806c6ebe4d15e52a2b",
+        "ev_f8a253fd72d9555a82a9",
+        "ev_cd7ce45a2564d58de779",
+        "ev_af6bf23c7640f46910d9",
+        "ev_b3e2c37e3c5d76282ad3",
+        "ev_7a0a24b67aa1e53ff462",
+        "ev_042cd49d297e543e2467",
+        "ev_c5860b99303a6d8d8857",
+        "ev_f82fb651e75e07512db3"
+      ],
+      "representative_evidence_ids": [
+        "ev_6178e07afdcc7c01097e",
+        "ev_b54555bde86be45f8bab",
+        "ev_74f5a1f0f7cb682fd1fd"
+      ],
+      "unique_primary_observation_count": 3,
+      "source_observation_count": 15,
+      "trajectory": {
+        "previous_t": 0.5,
+        "atom_changes": [
+          {
+            "atom_id": 1,
+            "previous_element": "N",
+            "element": "N",
+            "previous_charge": 0,
+            "formal_charge": 1
+          },
+          {
+            "atom_id": 10,
+            "previous_element": "C",
+            "element": "N",
+            "previous_charge": 0,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 14,
+            "previous_element": "C",
+            "element": "N",
+            "previous_charge": 0,
+            "formal_charge": -1
+          }
+        ],
+        "bond_changes": [
+          {
+            "atom_ids": [
+              1,
+              10
+            ],
+            "previous_order": 0.0,
+            "bond_order": 1.0
+          },
+          {
+            "atom_ids": [
+              1,
+              14
+            ],
+            "previous_order": 1.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              10,
+              14
+            ],
+            "previous_order": 1.0,
+            "bond_order": 0.0
+          }
+        ],
+        "interpretation": "Local chemical identity changed; do not claim persistence of the same chemical constraint."
+      },
+      "molecule_context": [
+        {
+          "view": "prediction",
+          "metric_id": "valence",
+          "status": "ok",
+          "values": {
+            "sanitized": true
+          },
+          "thresholds": {}
+        },
+        {
+          "view": "prediction",
+          "metric_id": "mmff_strain",
+          "status": "ok",
+          "values": {
+            "strain_proxy_kcal_mol": 115.44122600491177,
+            "hydrogen_relaxation_status": 0,
+            "minimization_status": 0
+          },
+          "thresholds": {
+            "screening_strain_kcal_mol": 20.0
+          }
+        },
+        {
+          "view": "prediction",
+          "metric_id": "posebusters",
+          "status": "ok",
+          "values": {
+            "all_reported_checks_pass": true
+          },
+          "thresholds": {}
+        }
+      ],
+      "calibrated_probability": null,
+      "interpretation_limit": "Current-state measurements do not establish final persistence. MMFF and substructure references are screening models, not experimental chemical feasibility. Global energy and PoseBusters findings are molecule-level support, not localized energy attribution."
+    }
+  ],
+  "raw_state_findings": [
+    {
+      "finding_id": "risk_472ff27779913d37",
+      "category": "raw_graph_validity",
+      "scope": "observed_noisy_state",
+      "priority": "high",
+      "views": [
+        "state"
+      ],
+      "atom_ids": [
+        0,
+        2,
+        3,
+        7,
+        9,
+        11,
+        12,
+        16,
+        17,
+        18,
+        19
+      ],
+      "chemical_context": {
+        "atoms": [
+          {
+            "atom_id": 0,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 13.0,
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 2,
+            "element": "O",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 7.0,
+            "atomics_top3": [
+              {
+                "category": "O",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 3,
+            "element": null,
+            "formal_charge": 0,
+            "declared_bond_order_sum": 9.0,
+            "atomics_top3": [
+              {
+                "category": null,
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 7,
+            "element": "O",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 5.0,
+            "atomics_top3": [
+              {
+                "category": "O",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 9,
+            "element": "N",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 10.5,
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 11,
+            "element": "O",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 7.0,
+            "atomics_top3": [
+              {
+                "category": "O",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 12,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 15.5,
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 16,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 12.5,
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 17,
+            "element": "N",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 10.0,
+            "atomics_top3": [
+              {
+                "category": "N",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 18,
+            "element": "C",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 9.0,
+            "atomics_top3": [
+              {
+                "category": "C",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_id": 19,
+            "element": "O",
+            "formal_charge": 0,
+            "declared_bond_order_sum": 8.0,
+            "atomics_top3": [
+              {
+                "category": "O",
+                "probability": 1.0
+              },
+              {
+                "category": "I",
+                "probability": 0.0
+              },
+              {
+                "category": "Bi",
+                "probability": 0.0
+              }
+            ],
+            "charges_top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": -3,
+                "probability": 0.0
+              },
+              {
+                "category": -1,
+                "probability": 0.0
+              }
+            ]
+          }
+        ],
+        "bonds": [
+          {
+            "atom_ids": [
+              0,
+              2
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.9523776647860593,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              3
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 5.539896909347387,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              7
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.269616867312146,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              9
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.1692037070113126,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              11
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.397450221756374,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              12
+            ],
+            "bond_order": 3.0,
+            "distance_angstrom": 2.9876505553481696,
+            "top3": [
+              {
+                "category": 3,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 2,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              16
+            ],
+            "bond_order": 3.0,
+            "distance_angstrom": 4.625880955318435,
+            "top3": [
+              {
+                "category": 3,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 2,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.898972435882674,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              18
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.3841471530473057,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              0,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.977982497927035,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              3
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 5.633752231581547,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              7
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.1938810780666214,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              9
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.8193887142382645,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              11
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.1104148815058439,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              12
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.3163406118179184,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              16
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 4.436036343722976,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.477064382982503,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.7654176347376562,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              2,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.039425159266619,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              7
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 6.731250694766441,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              9
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.8424204263025565,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              11
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 5.035571912130258,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              12
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.5569340854711746,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              16
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.6212882424570163,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.49732696289355,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 5.56475141710729,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              3,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 6.492555286768414,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              9
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.14775057422675,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              11
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.0008039979592773,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              12
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.972680264653183,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              16
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 5.685399753381009,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.836364313173681,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.090669014442609,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              7,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.339722336074188,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              11
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.2867279089308687,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              12
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.112362226084407,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              16
+            ],
+            "bond_order": 1.5,
+            "distance_angstrom": 2.713766775663044,
+            "top3": [
+              {
+                "category": 1.5,
+                "probability": 1.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              },
+              {
+                "category": 2,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.069485875112457,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.22351546636348,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              9,
+              19
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 3.5088395832951913,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              11,
+              12
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.243154240358772,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              11,
+              16
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.8234978943273212,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              11,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.4382239867859727,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              11,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 1.9151875873268969,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              11,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 3.092427282731047,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              12,
+              16
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.658762534902648,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              12,
+              17
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 2.9281193396659493,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              12,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.524029806206004,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              12,
+              19
+            ],
+            "bond_order": 2.0,
+            "distance_angstrom": 3.820455774226975,
+            "top3": [
+              {
+                "category": 2,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              16,
+              17
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 2.4367750080617,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              16,
+              18
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 4.791730734424525,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              16,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 5.921998013585944,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              17,
+              18
+            ],
+            "bond_order": 3.0,
+            "distance_angstrom": 3.7088521374754007,
+            "top3": [
+              {
+                "category": 3,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 2,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              17,
+              19
+            ],
+            "bond_order": 0.0,
+            "distance_angstrom": 4.602530740266653,
+            "top3": [
+              {
+                "category": 0,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          },
+          {
+            "atom_ids": [
+              18,
+              19
+            ],
+            "bond_order": 1.0,
+            "distance_angstrom": 1.4116617944388645,
+            "top3": [
+              {
+                "category": 1,
+                "probability": 1.0
+              },
+              {
+                "category": 1.5,
+                "probability": 0.0
+              },
+              {
+                "category": 3,
+                "probability": 0.0
+              }
+            ]
+          }
+        ],
+        "source_metric": {
+          "view": "state",
+          "metric_id": "chemistry_context"
+        }
+      },
+      "primary_evidence_ids": [
+        "ev_d1cc0ea01210a7862f6a",
+        "ev_49135d941a41e97f47a7",
+        "ev_042dc502d864746b57ed",
+        "ev_61d54e62c402f945af26",
+        "ev_32e061a00f43022ceba5",
+        "ev_0ee0a299adeb8db2b9ae",
+        "ev_8bb15c7cdd2546e08172",
+        "ev_e4ef698861cb5e368112",
+        "ev_edaa9ad9d9ffad702d20",
+        "ev_634dd7eb6f9780897bd6",
+        "ev_8b040f968cc35d214b4d",
+        "ev_0988bd9f269cba9555d3"
+      ],
+      "supporting_evidence_ids": [],
+      "evidence_ids": [
+        "ev_d1cc0ea01210a7862f6a",
+        "ev_49135d941a41e97f47a7",
+        "ev_042dc502d864746b57ed",
+        "ev_61d54e62c402f945af26",
+        "ev_32e061a00f43022ceba5",
+        "ev_0ee0a299adeb8db2b9ae",
+        "ev_8bb15c7cdd2546e08172",
+        "ev_e4ef698861cb5e368112",
+        "ev_edaa9ad9d9ffad702d20",
+        "ev_634dd7eb6f9780897bd6",
+        "ev_8b040f968cc35d214b4d",
+        "ev_0988bd9f269cba9555d3"
+      ],
+      "representative_evidence_ids": [
+        "ev_0988bd9f269cba9555d3",
+        "ev_e4ef698861cb5e368112",
+        "ev_8bb15c7cdd2546e08172",
+        "ev_634dd7eb6f9780897bd6"
+      ],
+      "unique_primary_observation_count": 12,
+      "source_observation_count": 12,
+      "trajectory": {
+        "previous_t": 0.5,
+        "atom_changes": [
+          {
+            "atom_id": 0,
+            "previous_element": "F",
+            "element": "C",
+            "previous_charge": 0,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 3,
+            "previous_element": "N",
+            "element": null,
+            "previous_charge": 1,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 7,
+            "previous_element": "Bi",
+            "element": "O",
+            "previous_charge": 0,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 11,
+            "previous_element": "H",
+            "element": "O",
+            "previous_charge": 0,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 12,
+            "previous_element": "C",
+            "element": "C",
+            "previous_charge": 2,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 16,
+            "previous_element": "Se",
+            "element": "C",
+            "previous_charge": 0,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 17,
+            "previous_element": "P",
+            "element": "N",
+            "previous_charge": 1,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 18,
+            "previous_element": "C",
+            "element": "C",
+            "previous_charge": -1,
+            "formal_charge": 0
+          },
+          {
+            "atom_id": 19,
+            "previous_element": null,
+            "element": "O",
+            "previous_charge": 0,
+            "formal_charge": 0
+          }
+        ],
+        "bond_changes": [
+          {
+            "atom_ids": [
+              0,
+              2
+            ],
+            "previous_order": 3.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              0,
+              7
+            ],
+            "previous_order": 3.0,
+            "bond_order": 1.0
+          },
+          {
+            "atom_ids": [
+              0,
+              9
+            ],
+            "previous_order": 3.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              0,
+              11
+            ],
+            "previous_order": 3.0,
+            "bond_order": 1.0
+          },
+          {
+            "atom_ids": [
+              0,
+              12
+            ],
+            "previous_order": 0.0,
+            "bond_order": 3.0
+          },
+          {
+            "atom_ids": [
+              0,
+              16
+            ],
+            "previous_order": 1.0,
+            "bond_order": 3.0
+          },
+          {
+            "atom_ids": [
+              0,
+              19
+            ],
+            "previous_order": 2.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              2,
+              3
+            ],
+            "previous_order": 1.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              2,
+              11
+            ],
+            "previous_order": 1.5,
+            "bond_order": 1.0
+          },
+          {
+            "atom_ids": [
+              2,
+              16
+            ],
+            "previous_order": 1.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              2,
+              17
+            ],
+            "previous_order": 2.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              3,
+              7
+            ],
+            "previous_order": 0.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              3,
+              12
+            ],
+            "previous_order": 1.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              7,
+              12
+            ],
+            "previous_order": 3.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              7,
+              16
+            ],
+            "previous_order": 1.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              7,
+              17
+            ],
+            "previous_order": 1.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              7,
+              18
+            ],
+            "previous_order": 1.5,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              9,
+              12
+            ],
+            "previous_order": 1.5,
+            "bond_order": 1.0
+          },
+          {
+            "atom_ids": [
+              9,
+              16
+            ],
+            "previous_order": 0.0,
+            "bond_order": 1.5
+          },
+          {
+            "atom_ids": [
+              9,
+              17
+            ],
+            "previous_order": 2.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              9,
+              19
+            ],
+            "previous_order": 0.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              11,
+              12
+            ],
+            "previous_order": 3.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              11,
+              17
+            ],
+            "previous_order": 3.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              12,
+              16
+            ],
+            "previous_order": 2.0,
+            "bond_order": 0.0
+          },
+          {
+            "atom_ids": [
+              12,
+              17
+            ],
+            "previous_order": 3.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              12,
+              19
+            ],
+            "previous_order": 0.0,
+            "bond_order": 2.0
+          },
+          {
+            "atom_ids": [
+              17,
+              18
+            ],
+            "previous_order": 0.0,
+            "bond_order": 3.0
+          },
+          {
+            "atom_ids": [
+              17,
+              19
+            ],
+            "previous_order": 1.5,
+            "bond_order": 0.0
+          }
+        ],
+        "interpretation": "Local chemical identity changed; do not claim persistence of the same chemical constraint."
+      },
+      "molecule_context": [],
+      "calibrated_probability": null,
+      "interpretation_limit": "Current-state measurements do not establish final persistence. MMFF and substructure references are screening models, not experimental chemical feasibility. Global energy and PoseBusters findings are molecule-level support, not localized energy attribution."
+    }
+  ],
+  "evidence_gaps": [
+    {
+      "reason_code": "unresolved_chemical_graph",
+      "affected_observations": [
+        {
+          "view": "state",
+          "metric_id": "valence",
+          "status": "partial"
+        },
+        {
+          "view": "state",
+          "metric_id": "mmff_local_geometry",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "ring_planarity",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "double_bond_planarity",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "intramolecular_clashes",
+          "status": "partial"
+        },
+        {
+          "view": "state",
+          "metric_id": "stereochemistry",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "molecular_weight",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "logp",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "tpsa",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "hbd",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "hba",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "rotatable_bonds",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "qed",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "fraction_csp3",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "sa_score",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "structural_alerts",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "mmff_energy",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "mmff_strain",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "protein_clashes",
+          "status": "partial"
+        },
+        {
+          "view": "state",
+          "metric_id": "aromatic_contacts",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "burial_sasa",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "posebusters",
+          "status": "unavailable"
+        }
+      ],
+      "details": [
+        "Explicit heavy-atom valence alone cannot determine missing hydrogen count or chemical instability.",
+        "Sanitized graph unavailable: Active PAD/unknown atom or charge token",
+        "1-4 pairs are retained. This screen is not the PoseBusters distance-geometry check.",
+        "Waters/cofactors/metals are excluded from this protein-only check.",
+        "SASA needs known elements"
+      ]
+    },
+    {
+      "reason_code": "raw_geometry_without_valid_reference",
+      "affected_observations": [
+        {
+          "view": "state",
+          "metric_id": "bond_lengths",
+          "status": "partial"
+        },
+        {
+          "view": "state",
+          "metric_id": "bond_angles",
+          "status": "partial"
+        }
+      ],
+      "details": [
+        "Broad radius fallback is provisional on chemically unresolved intermediate states.",
+        "Endpoint violations couple bond length and angle; they do not isolate angular strain."
+      ]
+    },
+    {
+      "reason_code": "receptor_preparation",
+      "affected_observations": [
+        {
+          "view": "state",
+          "metric_id": "hydrogen_bond_candidates",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "hydrophobic_contacts",
+          "status": "unavailable"
+        },
+        {
+          "view": "state",
+          "metric_id": "salt_bridge_candidates",
+          "status": "partial"
+        },
+        {
+          "view": "state",
+          "metric_id": "prolif",
+          "status": "unavailable"
+        },
+        {
+          "view": "prediction",
+          "metric_id": "hydrogen_bond_candidates",
+          "status": "partial"
+        },
+        {
+          "view": "prediction",
+          "metric_id": "hydrophobic_contacts",
+          "status": "partial"
+        },
+        {
+          "view": "prediction",
+          "metric_id": "salt_bridge_candidates",
+          "status": "partial"
+        },
+        {
+          "view": "prediction",
+          "metric_id": "prolif",
+          "status": "unavailable"
+        },
+        {
+          "view": "sdf",
+          "metric_id": "hydrogen_bond_candidates",
+          "status": "partial"
+        },
+        {
+          "view": "sdf",
+          "metric_id": "hydrophobic_contacts",
+          "status": "partial"
+        },
+        {
+          "view": "sdf",
+          "metric_id": "salt_bridge_candidates",
+          "status": "partial"
+        },
+        {
+          "view": "sdf",
+          "metric_id": "prolif",
+          "status": "unavailable"
+        }
+      ],
+      "details": [
+        "Sanitized graph unavailable: Active PAD/unknown atom or charge token",
+        "Assumes ASP/GLU negative and LYS/ARG positive; HIS and termini unassigned. Atom pairs are not unique salt bridges. No pH/protonation verification.",
+        "ProLIF needs a prepared receptor PDB with explicit H, residue metadata and verified world coordinates",
+        "Protein donor/acceptor typing, protonation and D-H-A angle are not verified. These are polar candidates, not confirmed hydrogen bonds. Absence is not a defect.",
+        "Protein chemical typing is approximate without an explicit prepared graph. This count is not an affinity score."
+      ]
+    },
+    {
+      "reason_code": "vina_not_available",
+      "affected_observations": [
+        {
+          "view": "state",
+          "metric_id": "vina_score",
+          "status": "unavailable"
+        },
+        {
+          "view": "prediction",
+          "metric_id": "vina_score",
+          "status": "unavailable"
+        },
+        {
+          "view": "sdf",
+          "metric_id": "vina_score",
+          "status": "unavailable"
+        }
+      ],
+      "details": [
+        "No provenance-verified Vina score result provided; affinity heads are not Vina"
+      ]
+    }
+  ],
+  "coverage": {
+    "error": 0,
+    "not_applicable": 9,
+    "ok": 81,
+    "partial": 12,
+    "unavailable": 27
+  },
+  "history": [
+    {
+      "previous_packet_id": "sp_fbf649b9b6f080b21f6a6229",
+      "previous_t": 0.5,
+      "persistent_locations": []
+    }
+  ],
+  "evidence_index": {
+    "ev_d1cc0ea01210a7862f6a": {
+      "view": "state",
+      "metric_id": "atom_inventory",
+      "status": "ok",
+      "method": "Adapter vocabulary decoding over active mask",
+      "interpretation_class": "direct_computational_check",
+      "thresholds": {},
+      "units": {
+        "counts": "atoms"
+      },
+      "evidence": {
+        "atom_ids": [
+          3
+        ],
+        "severity": "warning",
+        "message": "Active special tokens do not specify chemical elements",
+        "evidence_id": "ev_d1cc0ea01210a7862f6a"
+      }
+    },
+    "ev_49135d941a41e97f47a7": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [],
+        "severity": "warning",
+        "message": "Active PAD/unknown atom or charge token",
+        "problem_type": "graph_unavailable",
+        "evidence_id": "ev_49135d941a41e97f47a7"
+      }
+    },
+    "ev_042dc502d864746b57ed": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          0
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "C",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 13.0,
+        "conservative_valence_lower_bound": 13.0,
+        "ordinary_valence_cap": 4,
+        "evidence_id": "ev_042dc502d864746b57ed"
+      }
+    },
+    "ev_61d54e62c402f945af26": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          2
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "O",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 7.0,
+        "conservative_valence_lower_bound": 6.0,
+        "ordinary_valence_cap": 2,
+        "evidence_id": "ev_61d54e62c402f945af26"
+      }
+    },
+    "ev_32e061a00f43022ceba5": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          7
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "O",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 5.0,
+        "conservative_valence_lower_bound": 5.0,
+        "ordinary_valence_cap": 2,
+        "evidence_id": "ev_32e061a00f43022ceba5"
+      }
+    },
+    "ev_0ee0a299adeb8db2b9ae": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          9
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "N",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 10.5,
+        "conservative_valence_lower_bound": 10.0,
+        "ordinary_valence_cap": 3,
+        "evidence_id": "ev_0ee0a299adeb8db2b9ae"
+      }
+    },
+    "ev_8bb15c7cdd2546e08172": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          11
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "O",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 7.0,
+        "conservative_valence_lower_bound": 7.0,
+        "ordinary_valence_cap": 2,
+        "evidence_id": "ev_8bb15c7cdd2546e08172"
+      }
+    },
+    "ev_e4ef698861cb5e368112": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          12
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "C",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 15.5,
+        "conservative_valence_lower_bound": 15.0,
+        "ordinary_valence_cap": 4,
+        "evidence_id": "ev_e4ef698861cb5e368112"
+      }
+    },
+    "ev_edaa9ad9d9ffad702d20": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          16
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "C",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 12.5,
+        "conservative_valence_lower_bound": 12.0,
+        "ordinary_valence_cap": 4,
+        "evidence_id": "ev_edaa9ad9d9ffad702d20"
+      }
+    },
+    "ev_634dd7eb6f9780897bd6": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          17
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "N",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 10.0,
+        "conservative_valence_lower_bound": 10.0,
+        "ordinary_valence_cap": 3,
+        "evidence_id": "ev_634dd7eb6f9780897bd6"
+      }
+    },
+    "ev_8b040f968cc35d214b4d": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          18
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "C",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 9.0,
+        "conservative_valence_lower_bound": 9.0,
+        "ordinary_valence_cap": 4,
+        "evidence_id": "ev_8b040f968cc35d214b4d"
+      }
+    },
+    "ev_0988bd9f269cba9555d3": {
+      "view": "state",
+      "metric_id": "valence",
+      "status": "partial",
+      "method": "RDKit sanitization and DetectChemistryProblems; implicit H allowed only by RDKit",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          19
+        ],
+        "severity": "high",
+        "message": "Known neutral atom has excessive declared bond demand",
+        "problem_type": "local_valence_lower_bound",
+        "element": "O",
+        "formal_charge": 0,
+        "declared_bond_order_sum": 8.0,
+        "conservative_valence_lower_bound": 8.0,
+        "ordinary_valence_cap": 2,
+        "evidence_id": "ev_0988bd9f269cba9555d3"
+      }
+    },
+    "ev_1d428412c03a27fe095a": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          0,
+          5
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.817165532522863,
+        "lower_angstrom": 1.04,
+        "upper_angstrom": 2.2399999999999998,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_1d428412c03a27fe095a"
+      }
+    },
+    "ev_3a458c228947a56f973e": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          0,
+          8
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.5993786146032223,
+        "lower_angstrom": 0.9880000000000001,
+        "upper_angstrom": 2.1279999999999997,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_3a458c228947a56f973e"
+      }
+    },
+    "ev_16d4cbec77cff348979b": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          0,
+          12
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.9876505553481696,
+        "lower_angstrom": 0.9880000000000001,
+        "upper_angstrom": 2.1279999999999997,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_16d4cbec77cff348979b"
+      }
+    },
+    "ev_170460b9db36ea0cf818": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          0,
+          16
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 4.625880955318435,
+        "lower_angstrom": 0.9880000000000001,
+        "upper_angstrom": 2.1279999999999997,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_170460b9db36ea0cf818"
+      }
+    },
+    "ev_6261ae55dcec5fbfa38e": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          2
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.718466435249559,
+        "lower_angstrom": 0.8905000000000001,
+        "upper_angstrom": 1.918,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_6261ae55dcec5fbfa38e"
+      }
+    },
+    "ev_88216d25c41862382b67": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          8
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 4.9695196570288145,
+        "lower_angstrom": 0.9555,
+        "upper_angstrom": 2.058,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_88216d25c41862382b67"
+      }
+    },
+    "ev_18f175b3051c4e2b305b": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          11
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.7672156648155553,
+        "lower_angstrom": 0.8905000000000001,
+        "upper_angstrom": 1.918,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_18f175b3051c4e2b305b"
+      }
+    },
+    "ev_d24123d22acd2cb90a90": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          2,
+          5
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.6316420914435317,
+        "lower_angstrom": 0.9750000000000001,
+        "upper_angstrom": 2.0999999999999996,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_d24123d22acd2cb90a90"
+      }
+    },
+    "ev_dfa0cde7569ad1cc503c": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          2,
+          14
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.0918097252428516,
+        "lower_angstrom": 0.8905000000000001,
+        "upper_angstrom": 1.918,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_dfa0cde7569ad1cc503c"
+      }
+    },
+    "ev_5175ad347a076e39a3c9": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          4,
+          6
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 5.3860851740694295,
+        "lower_angstrom": 0.6955000000000001,
+        "upper_angstrom": 1.498,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_5175ad347a076e39a3c9"
+      }
+    },
+    "ev_9616cb4d6cf07ef67c0e": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          4,
+          8
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.2323011773208954,
+        "lower_angstrom": 0.6955000000000001,
+        "upper_angstrom": 1.498,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_9616cb4d6cf07ef67c0e"
+      }
+    },
+    "ev_cc6b02d17df8678761fc": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          4,
+          11
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.471478443312363,
+        "lower_angstrom": 0.6305,
+        "upper_angstrom": 1.3579999999999999,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_cc6b02d17df8678761fc"
+      }
+    },
+    "ev_8b90b7e7c79245f262e7": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          4,
+          12
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.6191533192421,
+        "lower_angstrom": 0.6955000000000001,
+        "upper_angstrom": 1.498,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_8b90b7e7c79245f262e7"
+      }
+    },
+    "ev_325c57f25719c069a501": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          4,
+          19
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 5.751274914345956,
+        "lower_angstrom": 0.6305,
+        "upper_angstrom": 1.3579999999999999,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_325c57f25719c069a501"
+      }
+    },
+    "ev_183111e3f00ed9eaf285": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          5,
+          6
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.491055722643895,
+        "lower_angstrom": 1.04,
+        "upper_angstrom": 2.2399999999999998,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_183111e3f00ed9eaf285"
+      }
+    },
+    "ev_ab3b6bf77df0a3f635c5": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          5,
+          8
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 0.9687677574994435,
+        "lower_angstrom": 1.04,
+        "upper_angstrom": 2.2399999999999998,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_ab3b6bf77df0a3f635c5"
+      }
+    },
+    "ev_0b19d1765f49adc4cd59": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          5,
+          9
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 0.9321103684306078,
+        "lower_angstrom": 1.0074999999999998,
+        "upper_angstrom": 2.1699999999999995,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_0b19d1765f49adc4cd59"
+      }
+    },
+    "ev_81102d3f73833f256d48": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          5,
+          18
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.1008138888001073,
+        "lower_angstrom": 1.04,
+        "upper_angstrom": 2.2399999999999998,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_81102d3f73833f256d48"
+      }
+    },
+    "ev_8805a7f0941082cd9a4b": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          6,
+          8
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 4.136212811876906,
+        "lower_angstrom": 0.9880000000000001,
+        "upper_angstrom": 2.1279999999999997,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_8805a7f0941082cd9a4b"
+      }
+    },
+    "ev_3f3239d23db24e0c9ed5": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          6,
+          12
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.760468597362619,
+        "lower_angstrom": 0.9880000000000001,
+        "upper_angstrom": 2.1279999999999997,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_3f3239d23db24e0c9ed5"
+      }
+    },
+    "ev_6e168cefdeb3984e30ac": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          6,
+          15
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.8399897480218192,
+        "lower_angstrom": 1.04,
+        "upper_angstrom": 2.2399999999999998,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_6e168cefdeb3984e30ac"
+      }
+    },
+    "ev_52d8049f75049ecdece7": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          6,
+          19
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.331150735505723,
+        "lower_angstrom": 0.9229999999999999,
+        "upper_angstrom": 1.9879999999999998,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_52d8049f75049ecdece7"
+      }
+    },
+    "ev_d5e14c02ed1ba3c1eafa": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          7,
+          16
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 5.685399753381009,
+        "lower_angstrom": 0.9229999999999999,
+        "upper_angstrom": 1.9879999999999998,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_d5e14c02ed1ba3c1eafa"
+      }
+    },
+    "ev_6c5809329495ecb5087c": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          9,
+          13
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.9956985128753777,
+        "lower_angstrom": 1.3649999999999998,
+        "upper_angstrom": 2.9399999999999995,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_6c5809329495ecb5087c"
+      }
+    },
+    "ev_5094b4b488e2590d9e71": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          9,
+          16
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.713766775663044,
+        "lower_angstrom": 0.9555,
+        "upper_angstrom": 2.058,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_5094b4b488e2590d9e71"
+      }
+    },
+    "ev_fbac953fcf7323b432b5": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          9,
+          19
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.5088395832951913,
+        "lower_angstrom": 0.8905000000000001,
+        "upper_angstrom": 1.918,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_fbac953fcf7323b432b5"
+      }
+    },
+    "ev_c5f5b07ebd87234e5b18": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          10,
+          12
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.3630674372903337,
+        "lower_angstrom": 1.157,
+        "upper_angstrom": 2.492,
+        "bond_order": 1.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_c5f5b07ebd87234e5b18"
+      }
+    },
+    "ev_f9194ec081a01bc27b19": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          10,
+          13
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 6.48339015930519,
+        "lower_angstrom": 1.5665000000000002,
+        "upper_angstrom": 3.374,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_f9194ec081a01bc27b19"
+      }
+    },
+    "ev_b2415f2f5566828c16a2": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          10,
+          16
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 5.994073267664298,
+        "lower_angstrom": 1.157,
+        "upper_angstrom": 2.492,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_b2415f2f5566828c16a2"
+      }
+    },
+    "ev_79402ed2ae1014e11f5a": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          11,
+          13
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.859142609184755,
+        "lower_angstrom": 1.3325,
+        "upper_angstrom": 2.8699999999999997,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_79402ed2ae1014e11f5a"
+      }
+    },
+    "ev_b9d8000e29a2d41d3e2a": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          12,
+          17
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 2.9281193396659493,
+        "lower_angstrom": 0.9555,
+        "upper_angstrom": 2.058,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_b9d8000e29a2d41d3e2a"
+      }
+    },
+    "ev_75bc49e35372f694f92f": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          12,
+          19
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.820455774226975,
+        "lower_angstrom": 0.9229999999999999,
+        "upper_angstrom": 1.9879999999999998,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_75bc49e35372f694f92f"
+      }
+    },
+    "ev_0b998f1cfc4020e92f7c": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          13,
+          14
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 7.6355674860298715,
+        "lower_angstrom": 1.3649999999999998,
+        "upper_angstrom": 2.9399999999999995,
+        "bond_order": 2.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_0b998f1cfc4020e92f7c"
+      }
+    },
+    "ev_a17e37db25094a638784": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          14,
+          15
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 5.539333612526293,
+        "lower_angstrom": 1.0074999999999998,
+        "upper_angstrom": 2.1699999999999995,
+        "bond_order": 1.5,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_a17e37db25094a638784"
+      }
+    },
+    "ev_b27fccb8fab15cfad315": {
+      "view": "state",
+      "metric_id": "bond_lengths",
+      "status": "partial",
+      "method": "Observed bond distances with declared topology-dependent bounds",
+      "interpretation_class": "partial_computational_check",
+      "thresholds": {
+        "covalent_radius_sum_lower_multiplier": 0.65,
+        "covalent_radius_sum_upper_multiplier": 1.4,
+        "bond_order_sensitive": false
+      },
+      "units": {
+        "distance": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          17,
+          18
+        ],
+        "severity": "warning",
+        "message": "Bond distance outside screening bounds",
+        "distance_angstrom": 3.7088521374754007,
+        "lower_angstrom": 0.9555,
+        "upper_angstrom": 2.058,
+        "bond_order": 3.0,
+        "basis": "broad covalent-radius screening (order-insensitive)",
+        "evidence_id": "ev_b27fccb8fab15cfad315"
+      }
+    },
+    "ev_042cd49d297e543e2467": {
+      "view": "prediction",
+      "metric_id": "atom_confidence",
+      "status": "ok",
+      "method": "Shannon entropy / log(K), maximum probability and top-two margin",
+      "interpretation_class": "model_category_uncertainty",
+      "thresholds": {
+        "maximum_probability_below": 0.6
+      },
+      "units": {
+        "entropy": "normalized [0,1]",
+        "probability": "[0,1]"
+      },
+      "evidence": {
+        "atom_ids": [
+          10
+        ],
+        "severity": "warning",
+        "message": "Diffuse model category distribution",
+        "confidence": 0.5831184387207031,
+        "normalized_entropy": 0.2519014112563144,
+        "margin": 0.16658031940460205,
+        "evidence_id": "ev_042cd49d297e543e2467"
+      }
+    },
+    "ev_74f5a1f0f7cb682fd1fd": {
+      "view": "prediction",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          10
+        ],
+        "severity": "warning",
+        "message": "Local bond length departs from MMFF reference",
+        "kind": "bond_length",
+        "bond_order": 1.0,
+        "distance_angstrom": 1.2968179965106303,
+        "reference_angstrom": 1.46,
+        "relative_deviation": -0.11176849554066412,
+        "mmff_parameter_type": 0,
+        "force_constant": 2.76308378307355,
+        "mmff_atom_types": [
+          54,
+          10
+        ],
+        "evidence_id": "ev_74f5a1f0f7cb682fd1fd"
+      }
+    },
+    "ev_6178e07afdcc7c01097e": {
+      "view": "prediction",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Local bond length departs from MMFF reference",
+        "kind": "bond_length",
+        "bond_order": 2.0,
+        "distance_angstrom": 1.0794261759725574,
+        "reference_angstrom": 1.46,
+        "relative_deviation": -0.2606670027585223,
+        "mmff_parameter_type": 0,
+        "force_constant": 2.76308378307355,
+        "mmff_atom_types": [
+          54,
+          8
+        ],
+        "evidence_id": "ev_6178e07afdcc7c01097e"
+      }
+    },
+    "ev_b54555bde86be45f8bab": {
+      "view": "prediction",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          10,
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Local angle departs from MMFF reference",
+        "kind": "bond_angle",
+        "center_atom_id": 1,
+        "angle_degrees": 159.2434706429337,
+        "reference_degrees": 119.5,
+        "deviation_degrees": 39.74347064293369,
+        "mmff_parameter_type": 0,
+        "force_constant": 1.1269868561715377,
+        "mmff_atom_types": [
+          10,
+          54,
+          8
+        ],
+        "evidence_id": "ev_b54555bde86be45f8bab"
+      }
+    },
+    "ev_66806c6ebe4d15e52a2b": {
+      "view": "prediction",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "PAINS",
+        "alert": "azo_A(324)",
+        "interpretation": "Substructure screening match, not an established chemical defect",
+        "evidence_id": "ev_66806c6ebe4d15e52a2b"
+      }
+    },
+    "ev_f8a253fd72d9555a82a9": {
+      "view": "prediction",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "BRENK",
+        "alert": "diazo_group",
+        "interpretation": "Broad non-ring N=N match, not a complete functional-group assignment",
+        "evidence_id": "ev_f8a253fd72d9555a82a9"
+      }
+    },
+    "ev_cd7ce45a2564d58de779": {
+      "view": "prediction",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          10
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "BRENK",
+        "alert": "Oxygen-nitrogen_single_bond",
+        "interpretation": "Non-ring O/N to O/N match; may be N-N and does not require oxygen",
+        "evidence_id": "ev_cd7ce45a2564d58de779"
+      }
+    },
+    "ev_c5860b99303a6d8d8857": {
+      "view": "prediction",
+      "metric_id": "mmff_strain",
+      "status": "ok",
+      "method": "E(original heavy-atom pose with relaxed H) minus E(local unconstrained MMFF94s minimum)",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "screening_strain_kcal_mol": 20.0
+      },
+      "units": {
+        "energy": "kcal/mol",
+        "displacement": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          14,
+          10,
+          2,
+          12
+        ],
+        "severity": "warning",
+        "message": "Large MMFF local relaxation energy drop",
+        "strain_proxy_kcal_mol": 115.44122600491177,
+        "localization": "Atoms with largest relaxation displacement; not an energy decomposition",
+        "evidence_id": "ev_c5860b99303a6d8d8857"
+      }
+    },
+    "ev_2ec654725d0559e69b9b": {
+      "view": "sdf",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          10
+        ],
+        "severity": "warning",
+        "message": "Local bond length departs from MMFF reference",
+        "kind": "bond_length",
+        "bond_order": 1.0,
+        "distance_angstrom": 1.2968542477857712,
+        "reference_angstrom": 1.46,
+        "relative_deviation": -0.1117436659001567,
+        "mmff_parameter_type": 0,
+        "force_constant": 2.76308378307355,
+        "mmff_atom_types": [
+          54,
+          10
+        ],
+        "evidence_id": "ev_2ec654725d0559e69b9b"
+      }
+    },
+    "ev_9bddaab180361a2258fb": {
+      "view": "sdf",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Local bond length departs from MMFF reference",
+        "kind": "bond_length",
+        "bond_order": 2.0,
+        "distance_angstrom": 1.0793620615900859,
+        "reference_angstrom": 1.46,
+        "relative_deviation": -0.2607109167191193,
+        "mmff_parameter_type": 0,
+        "force_constant": 2.76308378307355,
+        "mmff_atom_types": [
+          54,
+          8
+        ],
+        "evidence_id": "ev_9bddaab180361a2258fb"
+      }
+    },
+    "ev_8ea6360c331b429f0384": {
+      "view": "sdf",
+      "metric_id": "mmff_local_geometry",
+      "status": "ok",
+      "method": "MMFF94s local reference geometry on a copy; original atom coordinates unchanged",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "bond_relative_deviation": 0.1,
+        "angle_absolute_deviation_degrees": 30.0,
+        "calibration": "Uncalibrated prioritization screens; force-field references are not experimental limits"
+      },
+      "units": {
+        "distance": "angstrom",
+        "angle": "degree"
+      },
+      "evidence": {
+        "atom_ids": [
+          10,
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Local angle departs from MMFF reference",
+        "kind": "bond_angle",
+        "center_atom_id": 1,
+        "angle_degrees": 159.23932571132772,
+        "reference_degrees": 119.5,
+        "deviation_degrees": 39.73932571132772,
+        "mmff_parameter_type": 0,
+        "force_constant": 1.1269868561715377,
+        "mmff_atom_types": [
+          10,
+          54,
+          8
+        ],
+        "evidence_id": "ev_8ea6360c331b429f0384"
+      }
+    },
+    "ev_af6bf23c7640f46910d9": {
+      "view": "sdf",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "PAINS",
+        "alert": "azo_A(324)",
+        "interpretation": "Substructure screening match, not an established chemical defect",
+        "evidence_id": "ev_af6bf23c7640f46910d9"
+      }
+    },
+    "ev_b3e2c37e3c5d76282ad3": {
+      "view": "sdf",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          14
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "BRENK",
+        "alert": "diazo_group",
+        "interpretation": "Broad non-ring N=N match, not a complete functional-group assignment",
+        "evidence_id": "ev_b3e2c37e3c5d76282ad3"
+      }
+    },
+    "ev_7a0a24b67aa1e53ff462": {
+      "view": "sdf",
+      "metric_id": "structural_alerts",
+      "status": "ok",
+      "method": "RDKit PAINS and BRENK substructure filters; separate spatial matches",
+      "interpretation_class": "catalog_screen",
+      "thresholds": {},
+      "units": {},
+      "evidence": {
+        "atom_ids": [
+          1,
+          10
+        ],
+        "severity": "warning",
+        "message": "Structural screening alert",
+        "catalog": "BRENK",
+        "alert": "Oxygen-nitrogen_single_bond",
+        "interpretation": "Non-ring O/N to O/N match; may be N-N and does not require oxygen",
+        "evidence_id": "ev_7a0a24b67aa1e53ff462"
+      }
+    },
+    "ev_f82fb651e75e07512db3": {
+      "view": "sdf",
+      "metric_id": "mmff_strain",
+      "status": "ok",
+      "method": "E(original heavy-atom pose with relaxed H) minus E(local unconstrained MMFF94s minimum)",
+      "interpretation_class": "parameter_dependent_screen",
+      "thresholds": {
+        "screening_strain_kcal_mol": 20.0
+      },
+      "units": {
+        "energy": "kcal/mol",
+        "displacement": "angstrom"
+      },
+      "evidence": {
+        "atom_ids": [
+          1,
+          14,
+          10,
+          2,
+          12
+        ],
+        "severity": "warning",
+        "message": "Large MMFF local relaxation energy drop",
+        "strain_proxy_kcal_mol": 115.45277340291457,
+        "localization": "Atoms with largest relaxation displacement; not an energy decomposition",
+        "evidence_id": "ev_f82fb651e75e07512db3"
+      }
+    }
+  },
+  "appendix": {
+    "evidence_ids": [
+      "ev_1d428412c03a27fe095a",
+      "ev_3a458c228947a56f973e",
+      "ev_16d4cbec77cff348979b",
+      "ev_170460b9db36ea0cf818",
+      "ev_6261ae55dcec5fbfa38e",
+      "ev_88216d25c41862382b67",
+      "ev_18f175b3051c4e2b305b",
+      "ev_d24123d22acd2cb90a90",
+      "ev_dfa0cde7569ad1cc503c",
+      "ev_5175ad347a076e39a3c9",
+      "ev_9616cb4d6cf07ef67c0e",
+      "ev_cc6b02d17df8678761fc",
+      "ev_8b90b7e7c79245f262e7",
+      "ev_325c57f25719c069a501",
+      "ev_183111e3f00ed9eaf285",
+      "ev_ab3b6bf77df0a3f635c5",
+      "ev_0b19d1765f49adc4cd59",
+      "ev_81102d3f73833f256d48",
+      "ev_8805a7f0941082cd9a4b",
+      "ev_3f3239d23db24e0c9ed5",
+      "ev_6e168cefdeb3984e30ac",
+      "ev_52d8049f75049ecdece7",
+      "ev_d5e14c02ed1ba3c1eafa",
+      "ev_6c5809329495ecb5087c",
+      "ev_5094b4b488e2590d9e71",
+      "ev_fbac953fcf7323b432b5",
+      "ev_c5f5b07ebd87234e5b18",
+      "ev_f9194ec081a01bc27b19",
+      "ev_b2415f2f5566828c16a2",
+      "ev_79402ed2ae1014e11f5a",
+      "ev_b9d8000e29a2d41d3e2a",
+      "ev_75bc49e35372f694f92f",
+      "ev_0b998f1cfc4020e92f7c",
+      "ev_a17e37db25094a638784",
+      "ev_b27fccb8fab15cfad315"
+    ],
+    "reason": "Raw-state derived or remaining evidence retained without dominating endpoint diagnosis."
+  },
+  "representation_merging": {
+    "prediction_sdf_merged": true,
+    "rule": "Verified atom mapping, coordinates, formal charges and graph identity; SDF is not independent corroboration."
+  },
+  "limitations": [
+    "Atom IDs are zero-based tensor slots; element and bond roles can change across stages.",
+    "Raw X_t observations and head endpoint estimates describe different representations.",
+    "MMFF local thresholds and global strain thresholds are uncalibrated prioritization screens.",
+    "Missing or zero-evaluable measurements are not passes. Optional tool gaps do not invalidate completed core checks.",
+    "Structural filter names are catalog labels; matches do not establish toxicity, chemical instability or poor experimental affinity."
+  ]
+}

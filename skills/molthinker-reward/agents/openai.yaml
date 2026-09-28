@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Reward Reasoning"
+  short_description: "Derive molecular rewards from localized evidence"
+  default_prompt: "Use $molthinker-reward to derive an evidence-bound reward specification from this StatePacket, DiagnosticReport and control-function knowledge base."

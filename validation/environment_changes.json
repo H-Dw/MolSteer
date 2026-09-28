@@ -1,0 +1,11 @@
+{
+  "added": {
+    "referencing": "0.37.0",
+    "jsonschema-specifications": "2025.9.1",
+    "rpds-py": "2026.6.3",
+    "jsonschema": "4.26.0"
+  },
+  "changed": {},
+  "removed": [],
+  "project_install": "MolSteer editable at /data1/dhuang/flowr_root/MolSteer"
+}

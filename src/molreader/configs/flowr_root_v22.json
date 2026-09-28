@@ -1,0 +1,38 @@
+{
+  "adapter_id": "flowr-root-v2.2-crossdocked-stage-runner-20260922",
+  "atomic_tokens": [null, "H", "B", "C", "N", "O", "F", "Si", "P", "S", "Cl", "Se", "Br", "I", "Bi"],
+  "charge_tokens": [null, 0, 1, 2, 3, -1, -2, -3],
+  "bond_orders": [0, 1, 2, 3, 1.5],
+  "categorical_encoding": "probabilities",
+  "coord_scale": 1.0,
+  "coordinate_tolerance_angstrom": 0.001,
+  "probability_tolerance": 0.00001,
+  "thresholds": {
+    "version": "screening-v2-uncalibrated",
+    "mmff_local_bond_relative_deviation": 0.10,
+    "mmff_local_angle_deviation_degrees": 30.0,
+    "low_confidence": 0.6,
+    "bond_relative_tolerance": 0.25,
+    "angle_endpoint_relative_tolerance": 0.25,
+    "planarity_max_angstrom": 0.25,
+    "intra_vdw_ratio": 0.7,
+    "protein_vdw_ratio": 0.75,
+    "contact_distance_angstrom": 4.5,
+    "polar_distance_angstrom": 3.5,
+    "hydrophobic_distance_angstrom": 4.0,
+    "salt_distance_angstrom": 4.0,
+    "ring_center_distance_angstrom": 5.5,
+    "strain_kcal_mol": 20.0,
+    "mmff_max_iterations": 1000,
+    "sasa_probe_angstrom": 1.4,
+    "sasa_points": 256
+  },
+  "provenance": {
+    "atomic_tokens": "flowr/constants.py CORE_ATOMS + PAD; flowr/scriptutil.py _build_vocab",
+    "charge_tokens": "flowr/scriptutil.py _build_vocab_charges",
+    "bond_orders": "flowr/util/rdkit.py IDX_BOND_MAP",
+    "coord_scale": "flowr_root_v2.2.ckpt hyper_parameters.coord_scale = 1.0",
+    "encoding": "fm_pocket.py _get_predictions applies softmax before saving",
+    "world_transform": "stage_runner.world_prediction: scale then add system.com, masked"
+  }
+}

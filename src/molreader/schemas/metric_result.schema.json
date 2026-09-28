@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MetricResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_id",
+    "metric_version",
+    "view",
+    "identity",
+    "context_hash",
+    "source_hashes",
+    "config_hash",
+    "status",
+    "values",
+    "units",
+    "evidence",
+    "notes",
+    "method",
+    "thresholds",
+    "elapsed_seconds"
+  ],
+  "properties": {
+    "metric_id": {
+      "type": "string"
+    },
+    "metric_version": {
+      "type": "string"
+    },
+    "view": {
+      "enum": [
+        "state",
+        "prediction",
+        "sdf"
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "target_id",
+        "ligand_id",
+        "stage",
+        "stage_t"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "type": "string"
+        },
+        "ligand_id": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "stage_t": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "context_hash": {
+      "type": "string"
+    },
+    "source_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "config_hash": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "not_applicable",
+        "error"
+      ]
+    },
+    "values": {
+      "type": "object"
+    },
+    "units": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "evidence_id",
+          "atom_ids",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^ev_[0-9a-f]{20}$"
+          },
+          "atom_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "high"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "method": {
+      "type": "string"
+    },
+    "thresholds": {
+      "type": "object"
+    },
+    "elapsed_seconds": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}

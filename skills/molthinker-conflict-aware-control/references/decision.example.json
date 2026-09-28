@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "decision_id": "example-not-executed-001",
+  "status": "defer",
+  "execution_authorized": false,
+  "state_binding": {
+    "statepacket_id": "sp_demo",
+    "statepacket_hash": "sha256:unavailable",
+    "diagnostic_report_id": "dr_demo",
+    "generation_step": 42,
+    "state_view": "noisy_state",
+    "representation": "declared_by_runtime",
+    "atom_mapping": "branch-A-map-0",
+    "units": "recorded_in_statepacket"
+  },
+  "control_scope": {
+    "editable_coordinates": "latent_subset:unknown",
+    "fixed_variables": ["atom_identity", "hard_constraint_fields"],
+    "branches": ["branch-A", "branch-B"],
+    "time_direction": "not_run",
+    "injection_convention": "not_verified",
+    "step_budget": "not_run",
+    "cumulative_budget": "not_run"
+  },
+  "evidence_ledger": [
+    {
+      "id": "obs-1",
+      "kind": "diagnostic_observation",
+      "causal_class": "correlation",
+      "claim": "A risk signal was reported; mechanism not established.",
+      "source": "diagnostic_report:dr_demo",
+      "confidence": "unknown"
+    }
+  ],
+  "objective_ledger": [
+    {
+      "id": "obj-1",
+      "name": "declared_objective_pending_definition",
+      "formula": "not_run",
+      "direction": "minimize",
+      "target": "unknown",
+      "scale": "unknown",
+      "scale_source": "unavailable",
+      "aggregation_group": "pending",
+      "differentiability": "unknown"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "hard-identity",
+      "predicate": "branch identity remains valid",
+      "tolerance": "declared_by_runtime",
+      "enforcement_scope": "proposal_and_final_acceptance",
+      "fail_closed": true,
+      "rollback": "restore_saved_state_and_rng"
+    }
+  ],
+  "branch_decisions": [
+    {"branch_id": "branch-A", "applicability": "not_run", "continuous_solve": "not_run", "continuation": "not_run"},
+    {"branch_id": "branch-B", "applicability": "not_run", "continuous_solve": "not_run", "continuation": "not_run"}
+  ],
+  "conflict_solution": {
+    "coordinate_space": "not_verified",
+    "metric": "not_verified",
+    "gradient_diagnostics": "unavailable",
+    "qp_status": "not_run",
+    "weights": "unknown",
+    "direction": "unknown",
+    "residuals": "unavailable"
+  },
+  "local_potential": {
+    "formula": "Phi_t = sum_i alpha_i(t) f_i (not instantiated)",
+    "validity_window": "none_until_scales_and_branch_are_bound"
+  },
+  "controller": {
+    "branch_policy": "defer",
+    "weight_recompute": "not_run",
+    "schedule": "not_run",
+    "budget_policy": "fail_closed"
+  },
+  "continuation_evaluation": {
+    "protocol": "matched_state_and_rng_required",
+    "horizon": "unknown",
+    "budget": "unknown",
+    "sample_count": 0,
+    "outcomes": "not_run",
+    "uncertainty": "not_run",
+    "limitations": ["No empirical continuation was executed in this example."]
+  },
+  "retrieval_trace": [
+    {
+      "tool": "search_reward_knowledge",
+      "status": "not_run",
+      "query": "not_run",
+      "corpus": "unknown",
+      "observations": []
+    }
+  ],
+  "checks": [
+    {"name": "state_binding", "status": "unavailable", "evidence": "example only"},
+    {"name": "editable_space_finite_difference", "status": "not_run", "evidence": null},
+    {"name": "hard_constraints", "status": "not_run", "evidence": null},
+    {"name": "matched_continuation", "status": "not_run", "evidence": null},
+    {"name": "adapter_sign", "status": "not_run", "evidence": null}
+  ],
+  "limitations": [
+    "This is an unexecuted contract example.",
+    "No runtime tools, knowledge retrieval, computation, or tests are claimed."
+  ],
+  "next_action": "Bind a real StatePacket, retrieve applicable evidence, define scales and constraints, then run checks before proposing execution."
+}

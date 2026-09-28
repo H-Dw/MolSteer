@@ -1,0 +1,20 @@
+# Never copy host credentials, traces or virtual environments into images
+.env
+.env.*
+**/.env
+**/.env.*
+configs/secrets.local.json
+**/secrets.local.json
+**/secrets.*.local.json
+outputs/
+**/outputs/
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.git/

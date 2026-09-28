@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Selection"
+  short_description: "Select localized reference reward mechanisms"
+  default_prompt: "Use $molthinker-reward-selection to select and adapt reported functions for the diagnosed local defect."

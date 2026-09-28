@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Creativity"
+  short_description: "Compose evidence-grounded molecular rewards"
+  default_prompt: "Use $novel_conf_molthinker-reward-creativity to derive a reward from this StatePacket, DiagnosticReport and knowledge base."

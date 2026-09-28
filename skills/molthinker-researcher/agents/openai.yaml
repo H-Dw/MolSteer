@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Researcher"
+  short_description: "Research evidence-backed chemical reward hypotheses"
+  default_prompt: "Use $molthinker-researcher to compare this intermediate and its matched unguided outcome, investigate supported chemical alternatives, and return falsifiable reward hypotheses."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolThinker Creativity"
+  short_description: "Compose knowledge-grounded molecular reward functions"
+  default_prompt: "Use $molthinker-reward-creativity to retrieve a function basis, compose normalized molecular deficits, compare reward architectures, and compile an evidence-grounded RewardProgram."

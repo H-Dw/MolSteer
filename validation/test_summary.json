@@ -1,0 +1,14 @@
+{
+  "interpreter": "/data1/dhuang/flowr_root/.venv/bin/python",
+  "reader_regression": {
+    "passed": 26,
+    "failed": 0
+  },
+  "reward_tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "total_passed": 36,
+  "real_data_verification": "../examples/verification.json",
+  "full_sampler_ablation": "not_run"
+}

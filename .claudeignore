@@ -1,0 +1,19 @@
+# Advisory context exclusions, not OS permissions or an absolute DLP boundary
+.env
+.env.*
+**/.env
+**/.env.*
+configs/secrets.local.json
+**/secrets.local.json
+**/secrets.*.local.json
+outputs/
+**/outputs/
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
