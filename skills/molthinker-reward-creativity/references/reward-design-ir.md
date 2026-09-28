@@ -84,9 +84,9 @@ Generate all families whose prerequisites are satisfied. Hard constraints remain
 
 Retrieve a linear aggregation architecture only when objectives are independently meaningful, normalized and scientifically compensable. Reject it when a severe local failure could be bought away by many small improvements. Derive its actual expression from the active objective nodes rather than retaining a generic template.
 
-### Dominant-gap aggregation with persistent secondary progress
+### Intersection or bottleneck of mandatory target sets
 
-Use when the largest normalized deficit should dominate while secondary objectives must continue to improve. Retrieve a primary operator with the required dominance behavior and, when needed, a distinct coverage operator that prevents premature gradient starvation. The common set contains only evaluable, compatible soft objectives; it excludes missing measurements, hard constraints and unrelated terminal scores. Derive the final mathematical form from the retrieved operators and current objective semantics, then inspect its component sensitivities instead of copying a stored composite formula.
+Use when several independent repair predicates must all hold. Derive an objective whose zero or acceptable set is their intersection, or use explicit constraints when a scalar objective would permit compensation. A worst-violation envelope, norm or region-wise constraint is a candidate only after checking sensitivities, feasible directions and behavior at ties. The common set contains only evaluable, compatible soft objectives; it excludes missing measurements, hard constraints and unrelated terminal scores. The present function table grounds local shapes but does not by itself validate a new aggregation rule.
 
 ### Staged or lexicographic control
 

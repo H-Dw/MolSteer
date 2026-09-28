@@ -145,4 +145,7 @@ def validate_spec(spec, packet, report=None):
     for group in spec['reward_groups']:
         if any(t['view']!=group['view'] for t in spec['terms'] if t['term_id'] in group['term_ids']):
             raise ValueError('Cannot mix representations in one reward group')
+    if 'design' in spec:
+        from .composition import validate_design_record
+        validate_design_record(spec['design'],spec['terms'])
     return True

@@ -203,8 +203,8 @@ class AgentMixedReward(MolecularReward):
     """Apply checked Agent terms to their declared state or prediction view."""
 
     def __init__(self, program, baseline, receptor, vocabulary):
-        if program.get('mode')!='agent_selection' or program.get('evaluator')!='agent_mixed':
-            raise ValueError('Expected a compiled agent selection program')
+        if program.get('mode') not in ('agent_selection','agent_design') or program.get('evaluator')!='agent_mixed':
+            raise ValueError('Expected a compiled agent coordinate program')
         super().__init__({**program,'mode':'selection'},baseline,receptor,vocabulary)
         self.spec=program
         self.uses_state_view=any(term['view']=='state' for term in program['terms'])
@@ -232,7 +232,11 @@ class AgentMixedReward(MolecularReward):
                 raise ValueError('Unsupported agent reward primitive: '+term['family'])
             components[term['term_id']]=term['weight']*interval(
                 value,term['lower'],term['upper'],term['scale'])
-        reward=-sum(components.values(),pred['coords'].sum()*0)
+        if 'design' in self.spec:
+            from molsteer.molthinker.composition import objective_value
+            reward=-objective_value(self.spec['design']['objective_tree'],components)
+        else:
+            reward=-sum(components.values(),pred['coords'].sum()*0)
         return reward,dict(components={k:float(v.detach()) for k,v in components.items()},
             graph_changed=chemistry['signature']!=self.reference_graph,
             smiles=chemistry['smiles'],max_protein_overlap=float(protein.max().detach()),

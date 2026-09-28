@@ -30,7 +30,8 @@ class Thinker:
         from molsteer.molthinker.planner import validate_spec
         validate_spec(spec,packet,report); return spec
 
-def thinker_tools(packet, report, knowledge_path, *, search_fn=None, compute_fn=None, feedback=None):
+def thinker_tools(packet, report, knowledge_path, *, search_fn=None, compute_fn=None, feedback=None,
+                  mode='selection'):
     from .tools import default_thinker_tools
     base = __import__('molsteer.molthinker.planner', fromlist=['derive']).derive(packet, report, knowledge_path); result={}
     tools=default_thinker_tools(packet,str(knowledge_path),approved_knowledge_root=knowledge_path.parent,search_fn=search_fn,compute_fn=compute_fn)
@@ -48,7 +49,7 @@ def thinker_tools(packet, report, knowledge_path, *, search_fn=None, compute_fn=
         return {"candidate":deepcopy(base),"feedback":feedback or {},"limits":"Evidence-bound terms only; no invented target bounds."}
     @tool
     def submit_reward_plan(term_ids:list[str],weights:list[float],scales:list[float]) -> dict:
-        """Submit candidate IDs and checked weights/scales for host validation."""
+        """Selection mode only: submit candidate IDs and checked weights/scales."""
         if len(term_ids)!=len(set(term_ids)) or not len(term_ids)==len(weights)==len(scales): raise ValueError("term IDs and parameters must align")
         by_id={t["term_id"]:t for t in base["terms"]}
         if any(t not in by_id for t in term_ids): raise ValueError("unknown candidate term")
@@ -59,7 +60,63 @@ def thinker_tools(packet, report, knowledge_path, *, search_fn=None, compute_fn=
         spec["reward_groups"]=[dict(g,term_ids=[t for t in g["term_ids"] if t in term_ids]) for g in base["reward_groups"]]; spec["reward_groups"]=[g for g in spec["reward_groups"] if g["term_ids"]]; spec.pop("reward_id"); spec["reward_id"]="rw_"+digest(spec)[:24]
         from molsteer.molthinker.planner import validate_spec
         validate_spec(spec,packet,report); result["spec"]=spec; return {"status":"accepted","reward_spec":spec}
-    return tools+[record_task_plan,derive_reward_candidates,submit_reward_plan],result,base
+    @tool
+    def submit_reward_design(term_ids:list[str],design:dict) -> dict:
+        """Submit an evidence-bound target selection and declarative objective tree; no Python expressions."""
+        if 'deferral' in result:
+            raise ValueError('Reward design was already deferred')
+        from molsteer.molthinker.composition import validate_design_record
+        if not isinstance(term_ids,list) or not term_ids or len(term_ids)!=len(set(term_ids)):
+            raise ValueError('Select distinct supported term IDs')
+        by_id={t['term_id']:t for t in base['terms']}
+        if not set(term_ids)<=set(by_id):
+            raise ValueError('Unknown candidate term')
+        if not isinstance(design,dict) or not isinstance(design.get('normalizations'),list):
+            raise ValueError('Reward design normalizations are required')
+        if any(not isinstance(x,dict) or 'term_id' not in x or 'scale' not in x
+               for x in design['normalizations']):
+            raise ValueError('Invalid normalization entry')
+        scale_by_id={x['term_id']:x['scale'] for x in design['normalizations']}
+        if set(scale_by_id)!=set(term_ids):
+            raise ValueError('Normalizations must cover selected terms')
+        selected=[dict(by_id[t],weight=1.,scale=scale_by_id[t]) for t in term_ids]
+        validate_design_record(design,selected,set(by_id))
+        spec=deepcopy(base)
+        spec['terms']=selected
+        spec['reward_groups']=[dict(g,term_ids=[t for t in g['term_ids'] if t in term_ids])
+                               for g in base['reward_groups']]
+        spec['reward_groups']=[g for g in spec['reward_groups'] if g['term_ids']]
+        spec['design']=deepcopy(design)
+        spec['goal']='Repair selected evidence-bound core targets under a declared objective tree'
+        spec.pop('reward_id')
+        spec['reward_id']='rw_'+digest(spec)[:24]
+        from molsteer.molthinker.planner import validate_spec
+        validate_spec(spec,packet,report)
+        result['spec']=spec
+        return {'status':'accepted','reward_spec':spec}
+    @tool
+    def defer_reward_design(core_target_evidence_ids:list[str],reason:str,
+                            missing_requirements:list[str],proposed_shape:str) -> dict:
+        """Keep an unsupported core-target design for review without compiling a template reward."""
+        if 'spec' in result:
+            raise ValueError('An executable reward was already submitted')
+        if (not isinstance(core_target_evidence_ids,list)
+                or not set(core_target_evidence_ids)<=set(report['evidence_index'])):
+            raise ValueError('Unknown core-target evidence ID')
+        if (not isinstance(reason,str) or len(reason.strip())<12
+                or not isinstance(proposed_shape,str) or len(proposed_shape.strip())<12
+                or not isinstance(missing_requirements,list) or not missing_requirements
+                or any(not isinstance(x,str) or len(x.strip())<5 for x in missing_requirements)):
+            raise ValueError('Explain the unsupported design and missing requirements')
+        result['deferral']={'status':'design_only','core_target_evidence_ids':core_target_evidence_ids,
+                            'reason':reason,'missing_requirements':missing_requirements,
+                            'proposed_shape':proposed_shape}
+        return deepcopy(result['deferral'])
+    if mode=='creativity':
+        return tools+[record_task_plan,derive_reward_candidates,submit_reward_design,defer_reward_design],result,base
+    if mode=='selection':
+        return tools+[record_task_plan,derive_reward_candidates,submit_reward_plan],result,base
+    raise ValueError('Unknown MolThinker reward mode')
 
 def thinker_node(state, thinker):
     spec=thinker.run(state["packet"],state["diagnostic_report"]); state["reward_spec"]=spec; state["execution_request"]={**state.get("execution_request",{}),"reward_spec":spec}; state["route"]="executor"; state["status"]="executing"; state["step"]=state.get("step",0)+1

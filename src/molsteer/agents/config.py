@@ -88,7 +88,7 @@ class RuntimeConfig(StrictModel):
     max_repairs: int = Field(default=2, ge=0)
     max_replans: int = Field(default=2, ge=0)
     max_segments: int = Field(default=20, ge=1)
-    skill: Path = Path("skills/molthinker-conflict-aware-control/SKILL.md")
+    skill: Path = Path("skills/molthinker-reward-creativity/SKILL.md")
     trace_dir: Path = Path("outputs/agent_runs")
     secrets_file: Path = Path("configs/secrets.local.json")
     langsmith_tracing: bool = False

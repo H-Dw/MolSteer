@@ -4,7 +4,7 @@ import math
 from langchain_core.tools import tool
 from molsteer.common import digest
 from molsteer.molthinker.planner import validate_spec
-from molsteer.molexecutor.offline import run_offline_trial
+from molsteer.molexecutor.offline import run_offline_trial, run_offline_design_trial
 
 
 def validate_and_test_reward(packet, spec, report=None, *, iterations=3, strength=1.):
@@ -13,6 +13,12 @@ def validate_and_test_reward(packet, spec, report=None, *, iterations=3, strengt
     if spec['coordinate_hashes'] != {k:v['coordinate_hash'] for k,v in packet['steering']['coordinate_snapshots'].items()}: raise ValueError('coordinate provenance mismatch')
     if not math.isfinite(strength) or not 0<strength<=1: raise ValueError('invalid strength')
     if isinstance(iterations,bool) or not isinstance(iterations,int) or not 1<=iterations<=20: raise ValueError('invalid test iterations')
+    if 'design' in spec:
+        trial=run_offline_design_trial(packet,spec,iterations=iterations,learning_rate=.25*strength)
+        if not all(trial[k] for k in ('fixed_atoms_unchanged','input_snapshot_unchanged','monotone_penalty_descent')) or not trial['numerical_gradient']['passed']:
+            raise ValueError('creative objective numerical validation failed')
+        return dict(kind='RewardValidation',passed=True,reward_id=spec['reward_id'],trials=[trial],
+            status='tested',limitation='Frozen-graph joint coordinate-copy test only; no live generator Jacobian or final outcome')
     trials=[]
     for group in spec['reward_groups']:
         view=group['view']

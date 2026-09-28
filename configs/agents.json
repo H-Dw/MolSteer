@@ -41,7 +41,7 @@
     "max_repairs": 2,
     "max_replans": 2,
     "max_segments": 20,
-    "skill": "skills/molthinker-conflict-aware-control/SKILL.md",
+    "skill": "skills/molthinker-reward-creativity/SKILL.md",
     "trace_dir": "outputs/agent_runs",
     "secrets_file": "configs/secrets.local.json",
     "langsmith_tracing": false

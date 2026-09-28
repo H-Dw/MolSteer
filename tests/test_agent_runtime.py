@@ -9,6 +9,7 @@ from molsteer.agents.runtime import AgentRuntime
 from molsteer.agents.loop import run_tools
 from molsteer.agents.monitor import RobustMonitor
 from molsteer.molthinker.planner import derive
+from molsteer.molexecutor.agent_bridge import compile_validated_agent_checkpoint
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / 'examples/5i0b_A__5vef_M77/ligand_002/t_0.50'
@@ -86,15 +87,38 @@ class ScriptModel:
 def test_all_four_api_agents_use_actual_tool_calls(config, inputs):
     config.mode = 'api'
     base = derive(*inputs, ROOT/'knowledge/Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md')
+    term_ids=[base['terms'][i]['term_id'] for i in (0,2)]
+    design={
+        'target_groups':[{'role':'repair','term_ids':term_ids,
+                          'repair_predicate':'The selected local distances satisfy their evidenced intervals.',
+                          'rationale':'This synthetic API test exercises an explicitly chosen core target set.',
+                          'falsifier':'Independent geometry screening can remain abnormal despite objective descent.'}],
+        'normalizations':[{'term_id':t['term_id'],'scale':t['scale'],
+                           'origin':'Reported screening scale retained for this bounded API test.'}
+                          for t in base['terms'] if t['term_id'] in term_ids],
+        'omitted':[{'term_id':t['term_id'],'role':'monitor',
+                    'reason':'This synthetic test leaves the other diagnostic candidate under monitoring.'}
+                   for t in base['terms'] if t['term_id'] not in term_ids],
+        'objective_tree':{'op':'lp_norm','p':2,'children':[{'op':'term','term_id':t} for t in term_ids]},
+        'architecture_reason':'An L2 violation norm requires simultaneous progress on the selected local deficits.',
+        'rejected_alternatives':['A flat sum can hide a persistent local violation behind several smaller gains.'],
+    }
     models = {
         'molreader':ScriptModel([(n,{}) for n in ['inspect_geometry','inspect_chemistry','inspect_uncertainty','submit_diagnosis']]),
-        'molthinker':ScriptModel([('derive_reward_candidates',{}),('search_reviewed_reward_knowledge',{'query':'geometry'}),('submit_reward_plan',{
-            'term_ids':[t['term_id'] for t in base['terms']], 'weights':[t['weight'] for t in base['terms']], 'scales':[t['scale'] for t in base['terms']]})]),
+        'molthinker':ScriptModel([('derive_reward_candidates',{}),('search_reviewed_reward_knowledge',{'query':'geometry'}),
+                                  ('submit_reward_design',{'term_ids':term_ids,'design':design})]),
         'molexecutor':ScriptModel([('inspect_reward_program',{}),('test_reward_program',{}),('submit_tested_program',{})]),
         'molmonitor':ScriptModel([('inspect_monitor_event',{}),('acknowledge_monitor_route',{})]),
     }
     state = AgentRuntime(config,models=models).run(*inputs)
     assert state['status'] == 'validated', state['errors']
+    assert state['reward_spec']['design']['objective_tree']['op']=='lp_norm'
+    assert len(state['reward_spec']['terms'])==2
+    guard=json.loads((ROOT/'experiments/guidance/creativity.json').read_text(encoding='utf-8'))
+    program,_,editable,_=compile_validated_agent_checkpoint(state['checkpoint_path'],guard)
+    assert program['mode']=='agent_design'
+    assert program['design']['objective_tree']['op']=='lp_norm'
+    assert editable==sorted({a for t in state['reward_spec']['terms'] for a in t['atom_ids']})
     assert all(m.invocations == 1 for m in models.values())
     assert 'PRIVATE_PROVIDER_REASONING' not in json.dumps(state)
     assert 'PRIVATE_PROVIDER_REASONING' not in Path(state['trace_path']).read_text(encoding='utf-8')
@@ -108,6 +132,26 @@ def test_model_failure_does_not_fall_back(config, inputs):
     state=AgentRuntime(config,models=models).run(*inputs)
     assert state['status']=='failed'
     assert 'must-not-leak' not in json.dumps(state)
+
+
+def test_creative_agent_can_defer_unsupported_shape_without_template(config, inputs):
+    config.mode='api'
+    _,report=inputs
+    evidence_id=next(iter(report['evidence_index']))
+    models={
+        'molreader':ScriptModel([(n,{}) for n in ['inspect_geometry','inspect_chemistry','inspect_uncertainty','submit_diagnosis']]),
+        'molthinker':ScriptModel([('defer_reward_design',{
+            'core_target_evidence_ids':[evidence_id],
+            'reason':'The core defect requires a coupled physical energy unavailable in this backend.',
+            'missing_requirements':['Validated graph-dependent force-field parameters'],
+            'proposed_shape':'A graph-conditioned local strain energy with explicit preservation constraints.'})]),
+        'molexecutor':ScriptModel([]),'molmonitor':ScriptModel([]),
+    }
+    state=AgentRuntime(config,models=models).run(*inputs)
+    assert state['status']=='design_deferred'
+    assert state['reward_spec']=={}
+    assert state['reward_design_deferral']['status']=='design_only'
+    assert models['molexecutor'].invocations==models['molmonitor'].invocations==0
 
 
 def test_tool_loop_keeps_openrouter_reasoning_details_only_in_memory():

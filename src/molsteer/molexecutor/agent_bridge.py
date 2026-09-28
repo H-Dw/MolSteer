@@ -77,14 +77,16 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
         selected['source_term_digest']=digest(term)
         compiled_terms.append(selected)
     editable=sorted({atom for term in terms for atom in term['atom_ids']})
+    designed='design' in spec
     program={
-        'kind':'RewardProgram', 'mode':'agent_selection', 'evaluator':'agent_mixed',
+        'kind':'RewardProgram', 'mode':'agent_design' if designed else 'agent_selection', 'evaluator':'agent_mixed',
         'packet_id':packet['packet_id'], 'identity':deepcopy(packet['identity']),
         'source_reward_id':spec['reward_id'], 'agent_run_id':checkpoint['run_id'],
         'source_packet_digest':digest(packet), 'source_report_digest':digest(report),
         'terms':compiled_terms, 'region_atom_ids':editable,
         'active_objectives':[], 'weights':[], 'lambda_graph':0.,
-        'reward':'negative sum of view-bound dimensionless interval penalties',
+        'reward':('negative validated declarative objective tree' if designed else
+                  'negative sum of view-bound dimensionless interval penalties'),
         'graph_policy':'Native graph may change; reject invalid candidate endpoints',
         'constraints':['validated source evidence','editable atom mask','gradient screen',
                        'same-time proposal guards','per-step and path budget'],
@@ -92,6 +94,9 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
         'retrieval':deepcopy(spec.get('retrieval',[])),
         'runtime_mapping':'Host FLOWR adapter supplies full checkpoint, editable mask and bounded strength',
     }
+    if designed:
+        program['design']=deepcopy(spec['design'])
+        program['inactive_compatibility_fields']=['tau','rho','lambda_graph','weights']
     program.update({k:deepcopy(guard_template[k]) for k in _GUARD_FIELDS})
     program['program_id']='rp_'+digest(program)[:24]
     return program,float(strength),editable,checkpoint

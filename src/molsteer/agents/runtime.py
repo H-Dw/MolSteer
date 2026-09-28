@@ -60,14 +60,32 @@ class AgentRuntime:
         return state
 
     def thinker(self,state):
+        creative = self.config.skill_path.parent.name!='molthinker-reward-selection'
         tools,result,base=thinker_tools(state['packet'],state['diagnostic_report'],self.knowledge_path,
-                                       search_fn=self.search_fn,compute_fn=self.compute_fn,feedback=state.get('monitor_event'))
+                                       search_fn=self.search_fn,compute_fn=self.compute_fn,feedback=state.get('monitor_event'),
+                                       mode='creativity' if creative else 'selection')
         if self.config.mode=='offline':
             result['spec']=base
             append_trace(state,node='thinker',kind='tool',summary='Explicit offline evidence-bound derivation',tool_name='derive_reward_candidates',output=base)
         else:
+            instructions = ('First record_task_plan with concise steps and evidence IDs. Inspect candidate measurements and '
+                'retrieve reviewed function entries. Discover the smallest sufficient core repair targets, distinguish '
+                'proxies from causes, and submit_reward_design with target groups, physical normalizations, omitted '
+                'candidate dispositions, a justified declarative objective tree and a rejected alternative. '
+                'If the correct shape, prerequisites or constraints cannot be represented by the safe backend, '
+                'call defer_reward_design with the missing requirements; never substitute a flat weight list. '
+                'Do not copy any previous balance formula. No raw chain of thought.'
+                if creative else
+                'First record_task_plan with concise steps and evidence IDs. Use derive_reward_candidates and reviewed '
+                'retrieval, then submit_reward_plan with candidate term IDs, weights and scales. No raw chain of thought.')
             self._loop(state,'thinker',tools,{'report':state['diagnostic_report'],'feedback':state.get('monitor_event',{})},
-                       state['skill_text']+'\nFirst record_task_plan with concise steps and evidence IDs. Use derive_reward_candidates and reviewed retrieval, then submit_reward_plan with candidate term IDs, weights and scales. No raw chain of thought.',lambda:'spec' in result)
+                       state['skill_text']+'\n'+instructions,lambda:'spec' in result or 'deferral' in result)
+        if 'deferral' in result:
+            state['reward_design_deferral']=result['deferral']
+            state['status']='design_deferred';state['route']='done'
+            append_trace(state,node='thinker',kind='decision',summary='Creative reward design deferred; no template compiled',
+                         output=result['deferral'])
+            return state
         state['reward_spec']=result['spec']
         state['plan']={'kind':'ControlPlan','reward_id':result['spec']['reward_id'],
                        'task_plan':result.get('task_plan',{'status':'not_provided'}),
@@ -75,7 +93,11 @@ class AgentRuntime:
                        'constraints':['fixed input packet','frozen graph tests only','host adapter required for inference'],
                        'continuation':{'strength':state['strength'],'max_segments':self.config.runtime.max_segments},
                        'retrieval':result['spec']['retrieval'],'checks':result['spec']['required_validation'],
-                       'summary':'Selected supported evidence-bound coordinate penalties; live control remains adapter-dependent.'}
+                       'reward_design':result['spec'].get('design'),
+                       'summary':('Selected evidence-bound core targets and a declarative objective architecture'
+                                  if result['spec'].get('design') else
+                                  'Selected supported evidence-bound coordinate penalties')+
+                                 '; live control remains adapter-dependent.'}
         state['validation']={}; state['route']='executor'
         append_trace(state,node='thinker',kind='decision',summary=state['plan']['summary'],output=state['plan'])
         return state
@@ -146,6 +168,9 @@ class AgentRuntime:
         if type(execute) is not bool: raise ValueError('execute must be boolean')
         if execute and (not self.approve_inference or not callable(self.inference_adapter)): raise ValueError('execute requires an explicitly approved inference adapter')
         skill=self.config.skill_path.read_text(encoding='utf-8')
+        if self.config.skill_path.parent.name=='molthinker-reward-creativity':
+            reference=self.config.skill_path.parent/'references'/'core-target-and-shape.md'
+            skill+='\n\n# Required core-target and mathematical-shape reference\n'+reference.read_text(encoding='utf-8')
         state=initial_state(run_id=run_id,packet=deepcopy(packet),diagnostic_report=deepcopy(diagnostic_report))
         state.update(execute=execute,segments=0,strength=self.config.monitoring.max_strength,skill_text=skill,
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),

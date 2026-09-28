@@ -28,7 +28,7 @@
 
 采用 ReAct（用户所述 RecAct 的思考—执行循环）：先规划，再按需调用 StatePack、知识检索和计算工具，消费 observation 后修订方案。Web 搜索和外部计算由宿主注册的适配器提供；未接入时明确返回 unavailable，不捏造检索结果。
 
-默认指引为 `skills/molthinker-conflict-aware-control/SKILL.md`，中文版本与数学/决策契约在同目录。涵盖因果归因、尺度统一、可编辑空间投影、优化权重、硬约束、后续生成价值、知识函数检索、机制组合、势函数与控制器分离、离散/连续分支协调。
+默认指引为 `skills/molthinker-reward-creativity/SKILL.md`，先挖掘最小且足够的核心目标，再按证据、可接受集合和实时导数路径选择函数形状与组合策略。`skills/molthinker-conflict-aware-control/SKILL.md` 用于需要约束式多目标求解的情形。API 奖励提交现在记录目标分组、未采用候选的去向及声明式目标树；当前可执行树算子为 `maximum`、`mean` 与 `lp_norm`。如果合适的函数形状或约束超出后端能力，Agent 可提交 `design_deferred` 设计记录，停止编译。数值检查只是坐标副本验证，不能替代 FLOWR 完整续推。
 
 `optimization.conflict_weights` 求解单纯形上的最小范数多目标梯度组合。输入必须已拉回同一可编辑变量、坐标系和度量；函数对固定坐标投影，并显式使用正尺度归一化。输出无量纲权重、余弦冲突、方向导数、对偶间隙与驻点状态。它不是完整约束求解器，也不设置梯度注入强度。零梯度/相反梯度产生的驻点不能当成成功修复。
 

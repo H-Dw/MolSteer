@@ -13,6 +13,8 @@ Bind the DiagnosticReport to its StatePacket, provenance, representation, atom m
 
 Consolidate duplicate alerts into independent causal regions. For each region, record the implicated chemical identities, bonds, neighboring chemistry, receptor patch, observed values, references, competing graph or microstate hypotheses, smallest credible editable support and the surrounding structure that must remain valid. Compare with a matched native continuation when available; otherwise mark persistence as unknown rather than blocking first-pass design.
 
+Before retrieving a reward family, apply [core-target discovery and shape audit](references/core-target-and-shape.md). State the independent outcome, identify which defects persist or matter to it, test whether each proposed observable can be optimized without repairing the named defect, and retain the smallest sufficient set of core targets. The available diagnostic terms are candidates, not a mandatory objective list. Give every omitted alert an explicit monitoring, constraint, counterevidence or deferred role.
+
 ## 2. Build the RewardDesignIR
 
 Before choosing a formula, construct a reward-design intermediate representation. Read [RewardDesignIR and architecture selection](references/reward-design-ir.md) for the required fields and decision rules.
@@ -42,39 +44,35 @@ Build a **function basis** for every optimization goal rather than selecting one
 
 Do not inflate the basis with weakly related entries. Every retained function must change the design decision, cover an independent failure mode, or falsify a proposed repair. Record a lineage table from each knowledge entry through its specialization to its final role. A formula without this function-level ancestry is not eligible for selection.
 
-Map each relevant entry through **observable → evidenced target or reference → function shape → regional aggregation → gradient or selection operator → validity conditions**. Record whether the architecture is retained, specialized, combined, replaced or deferred, and explain any transformation. Parameter availability does not establish chemical applicability. A newly composed objective must not be attributed to a cited method.
+Map each relevant entry through **observable → evidenced target or reference → function shape → gradient or selection operator → validity conditions**. Derive any regional or cross-region composition separately. Record whether the local shape is retained, specialized, combined, replaced or deferred, and explain any transformation. Parameter availability does not establish chemical applicability. A newly composed objective must not be attributed to a cited method. A population-weighting entry cannot justify within-molecule aggregation merely because both contain a softmax.
 
 When coordinates alone cannot address a credible residual, categorical alternatives may be considered through verified transition guidance, proposal ranking, resampling or explicit enumeration. Uncalibrated marginal scores are model preferences rather than joint chemical probabilities. State whether each discrete signal proposes alternatives, ranks them, affects acceptance or only explains uncertainty.
 
-## 4. Compose normalized deficits before choosing an architecture
+## 4. Define repair sets and residuals before choosing an architecture
 
-Convert each compatible soft objective into a nonnegative dimensionless deficit $F_k$ whose zero set means that the evidenced target is satisfied. Keep the raw measurement and transformation beside it. A maximize-type utility may join this set only after it is expressed as a target- or matched-reference deficit with a defensible scale; otherwise keep it as a terminal selector or oracle.
+For each selected core target, define an evidenced acceptable set and choose a local residual whose zero set, derivative direction, symmetries and curvature fit the physical relation. A nonnegative dimensionless deficit $F_k$ is one possible representation; it is not a requirement to create multiple $F_k$ or to combine all available alerts. Keep the raw measurement, target, scale and transformation together. A maximize-type utility may join a continuous objective only after it has a defensible target or matched reference, scale and live derivative; otherwise keep it as a terminal selector or oracle.
 
 Construct local objectives hierarchically:
 
 1. specialize knowledge functions into relation-level residuals;
 2. aggregate duplicate or coupled relations inside each causal region without counting alert multiplicity as importance;
-3. form the common evaluable set $A$ from independent, simultaneously meaningful regional and task deficits;
+3. form a common evaluable set only from independent targets that truly require simultaneous soft optimization; a single core target or a constrained formulation is valid;
 4. keep hard validity, severe new clashes, fixed variables and unsupported measurements outside the soft aggregation;
 5. attach graph or microstate preference as a separate ranking regularizer with its actual derivative semantics.
 
-For every $F_k$, record units before normalization, scale origin, active support, gradient path, valid graph hypothesis and the knowledge functions that justify both its shape and role. Missing objectives are omitted from $A$, not assigned zero.
+For every retained residual, record units before normalization, scale origin, active support, gradient path, valid graph hypothesis and the knowledge functions that justify its *local shape and role*. Missing objectives are omitted, not assigned zero. The aggregation rule needs its own mathematical justification; the present knowledge table does not automatically supply one.
 
 ## 5. Generate and compare candidate architectures
 
-Construct every materially distinct architecture that is feasible for the RewardDesignIR. Whenever at least two compatible soft deficits remain concurrently relevant, include a candidate generated from these requirements unless their prerequisites fail:
+Construct materially distinct architectures that fit the discovered core targets and execution path. Compare at least a direct localized repair, an architecture that handles every independently mandatory repair predicate, and an explicit constrained or branch-wise alternative when applicable. Do not add an architecture solely to reach a fixed candidate count. Determine the required response law from the zero/acceptable sets and the projected gradient geometry; then derive the operator and its sensitivity. The earlier balance equation is historical evidence that sensitivity matters, not a syntax, term count, parameter schedule or aggregation template to reuse. The supplied knowledge base may ground local functions while the composition remains a new, explicitly derived mathematical proposal.
 
-- its primary aggregation behavior responds preferentially to the most important current normalized deficit;
-- a secondary coverage mechanism prevents the remaining retained deficits from becoming gradient-inactive;
-- graph or microstate preference remains a separate operator with its actual proposal, ranking and derivative semantics;
-- hard constraints and unavailable measurements remain outside the soft composition.
-
-Retrieve possible aggregation and coverage mechanisms from the supplied knowledge base, then adapt and compare them. Do not copy a previous composite equation as the candidate. Derive the composition from the present function basis, deficit semantics and execution path. State why all members of $A$ are compatible and why each excluded measurement is a constraint, oracle, discrete operator or unavailable input.
+Keep graph or microstate preference in its actual proposal/ranking role. Keep hard constraints and unavailable measurements outside soft composition. If the core target is one independently sufficient defect, do not manufacture secondary soft terms. If several conditions must all pass, reject compensation that allows one failure to be bought off by improvement elsewhere.
 
 Also consider, when justified:
 
-- a normalized direct sum for commensurate, scientifically compensable objectives;
-- a hierarchical composition when several relations belong to one region and several regions must then be coordinated;
+- a normalized direct sum only when compensation is scientifically justified, with an explicit counterexample test;
+- a hierarchical or set-based construction when several relations describe one mechanism or every independent region must pass;
+- a common-descent or constrained direction in the actual editable tangent space when scalarization loses a feasible objective or violates preservation;
 - staged or lexicographic control when a priority defect must enter an acceptable range before a task utility is activated;
 - explicit constrained optimization when local validity or preservation cannot be traded for task gain;
 - a hybrid continuous objective plus a separate discrete operator when chemical identity changes are required.
@@ -87,11 +85,11 @@ Treat staged or lexicographic control as a conditional architecture, not a safe 
 
 Use prerequisite validity and noncompensable constraints as gates. Among surviving candidates, prefer the architecture that directly measures repair of the priority region, preserves required chemistry and remains executable. Use terminal utility and convenience only after those conditions.
 
-Derive active objectives from the RewardDesignIR. Derive scales from evidenced tolerances, reference variability or matched native behavior. Derive weights from scientific priority after normalization, not from raw numerical magnitude. For every proposed aggregator, derive and report its sensitivity to each component, then verify that its allocation matches the intended behavior: priority deficits receive stronger pressure, retained secondary objectives do not silently lose all pressure, and categorical preferences are not described as continuous gradients without a valid estimator. Reject an aggregator whose sensitivity pattern contradicts the design intent even if its scalar value appears reasonable.
+Derive active objectives from the RewardDesignIR and scales from evidenced tolerances, reference variability or matched native behavior. Do not introduce weights unless the selected optimization problem needs them. For every proposed scalar objective, derive and report component sensitivity, the exact zero or optimum set, and the derivative under a repaired and an unrepaired case. Verify that independent mandatory predicates cannot be traded away, still-failing targets do not silently lose all pressure, and categorical preferences are not called coordinate gradients without a valid estimator. Reject a scalar objective whose derivative pattern contradicts the design intent even if its value appears reasonable. For a constrained direction, report the primal problem, active constraints and feasibility or solver status instead of presenting its dual multipliers as fixed reward weights.
 
-Keep objective weights separate from the external guidance strength $\eta$. Before selecting either, inspect per-term raw and post-mask gradient norms, projection losses, expected injected displacement relative to the matched native step, clipping frequency and path-budget use. Use $w_k$ to express priority among normalized deficits; use $\eta$ to control the total intervention. Do not compensate for a weak or invalid objective by increasing either quantity. When calibration data are absent, require a bounded pilot and declare the parameter uncalibrated.
+Keep any objective parameters separate from the external guidance strength $\eta$. Before selecting either, inspect raw and post-mask gradient norms, projection losses, expected injected displacement relative to the matched native step, clipping frequency and path-budget use. Use $\eta$ to control total intervention, never to repair an invalid observable or shape. When calibration data are absent, require a bounded pilot and declare the parameter uncalibrated.
 
-Derive aggregation parameters, coverage strength, graph-ranking influence and activation schedules from the intended decision rule and available calibration; do not inherit a previous composite formula, fixed objective list or fixed numeric defaults. Mark remaining assumptions as uncalibrated and define the observation that would revise them.
+Derive any aggregation parameter, graph-ranking influence and activation schedule from the intended decision rule and available calibration. Do not inherit a previous composite formula, fixed objective list, fixed numeric defaults or a mandatory worst-gap-plus-coverage pattern. Mark remaining assumptions as uncalibrated and define the observation that would revise them.
 
 ## 7. Compile the RewardProgram
 

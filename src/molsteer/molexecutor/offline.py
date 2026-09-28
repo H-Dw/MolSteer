@@ -4,6 +4,7 @@ from molsteer.common import digest
 from molsteer.molthinker.planner import validate_spec
 from molsteer.molmonitor.checks import gradient_check, screen_copy
 from .energies import energy, observable, term_energy
+from molsteer.molthinker.composition import objective_value
 
 
 def run_offline_trial(packet, spec, view, demo_movable_atom_ids, iterations=30,
@@ -71,6 +72,77 @@ def run_offline_trial(packet, spec, view, demo_movable_atom_ids, iterations=30,
         trial_coordinates_angstrom=coords.tolist(), original_atom_ids=slots,
         rebound=None, population_ESS=None, full_sampler_ablation='not_run',
         conclusion='Numerical feasibility only; not evidence of generator control, stable chemistry or improved final binding')
+
+
+def run_offline_design_trial(packet, spec, iterations=3, learning_rate=.25,
+                             max_step_angstrom=.03, trust_radius_angstrom=.20):
+    """Check the selected tree jointly across its declared coordinate views on copies."""
+    validate_spec(spec, packet)
+    if 'design' not in spec or not 1<=iterations<=20 or min(learning_rate,max_step_angstrom,trust_radius_angstrom)<=0:
+        raise ValueError('Invalid creative copy trial')
+    views=[v for v in ('prediction','state') if any(t['view']==v for t in spec['terms'])]
+    snapshots={v:packet['steering']['coordinate_snapshots'][v] for v in views}
+    if any(digest(snapshots[v]['coords_angstrom'])!=spec['coordinate_hashes'][v] for v in views):
+        raise ValueError('Snapshot changed after reward design')
+    if packet['steering']['graph_signatures']!=spec['graph_signatures']:
+        raise ValueError('Chemical graph changed; rederive the reward')
+    lengths={v:len(snapshots[v]['atom_ids']) for v in views}
+    starts={v:sum(lengths[w] for w in views[:i]) for i,v in enumerate(views)}
+    indices={v:{a:i for i,a in enumerate(snapshots[v]['atom_ids'])} for v in views}
+    original=torch.cat([torch.tensor(snapshots[v]['coords_angstrom'],dtype=torch.float64) for v in views])
+    selected={v:{a for t in spec['terms'] if t['view']==v for a in t['atom_ids']} for v in views}
+    mask=torch.cat([torch.tensor([a in selected[v] for a in snapshots[v]['atom_ids']],dtype=torch.float64)
+                    for v in views])[:,None]
+
+    def pieces(coords):
+        return {v:coords[starts[v]:starts[v]+lengths[v]] for v in views}
+
+    def components(coords):
+        by_view=pieces(coords)
+        return {t['term_id']:term_energy(t,by_view[t['view']],indices[t['view']]) for t in spec['terms']}
+
+    fn=lambda coords:objective_value(spec['design']['objective_tree'],components(coords))
+    numerical=gradient_check(fn,original)
+    if not numerical['passed']:
+        raise ValueError('Creative objective finite-difference validation failed')
+    coords=original.clone()
+    trace=[float(fn(coords))]
+    for _ in range(iterations):
+        current=coords.detach().requires_grad_(True)
+        gradient=torch.autograd.grad(fn(current),current)[0]*mask
+        if not torch.isfinite(gradient).all():
+            raise ValueError('Creative objective has nonfinite gradients')
+        delta=-learning_rate*gradient
+        delta*=torch.clamp(max_step_angstrom/delta.norm(dim=1,keepdim=True).clamp(min=1e-30),max=1.)
+        accepted=False
+        for _ in range(12):
+            offset=(coords+delta-original)*mask
+            offset*=torch.clamp(trust_radius_angstrom/offset.norm(dim=1,keepdim=True).clamp(min=1e-30),max=1.)
+            candidate=original+offset
+            value=float(fn(candidate))
+            if torch.isfinite(candidate).all() and value<=trace[-1]+1e-14:
+                coords=candidate.detach();trace.append(value);accepted=True;break
+            delta*=.5
+        if not accepted or trace[-1]<1e-12:
+            break
+    before=components(original)
+    after=components(coords)
+    term_records=[dict(term_id=t['term_id'],view=t['view'],unit=t['unit'],
+                       value_before=float(observable(t,pieces(original)[t['view']],indices[t['view']])),
+                       value_after=float(observable(t,pieces(coords)[t['view']],indices[t['view']])),
+                       penalty_before=float(before[t['term_id']]),penalty_after=float(after[t['term_id']]))
+                  for t in spec['terms']]
+    fixed=mask[:,0]==0
+    return dict(kind='ExecutionMonitor',packet_id=packet['packet_id'],reward_id=spec['reward_id'],
+        view='joint_declared_views',mode='offline_frozen_graph_coordinate_copy',
+        numerical_gradient=numerical,penalty_before=trace[0],penalty_after=trace[-1],
+        reward_before=-trace[0],reward_after=-trace[-1],trace=trace,terms=term_records,
+        fixed_atoms_unchanged=bool(torch.equal(coords[fixed],original[fixed])),
+        input_snapshot_unchanged=all(digest(snapshots[v]['coords_angstrom'])==spec['coordinate_hashes'][v] for v in views),
+        monotone_penalty_descent=all(b<=a+1e-14 for a,b in zip(trace,trace[1:])),
+        screen_before={v:screen_copy(packet,v,pieces(original)[v].tolist()) for v in views},
+        screen_after={v:screen_copy(packet,v,pieces(coords)[v].tolist()) for v in views},
+        limitation='Independent view-coordinate copy test; live endpoint Jacobian and full FLOWR continuation not tested')
 
 
 def execute_live(config=None):

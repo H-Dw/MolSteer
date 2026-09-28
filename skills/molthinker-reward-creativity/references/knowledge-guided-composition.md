@@ -39,21 +39,21 @@ When several measurements describe one causal region, first remove duplicate vie
 
 This produces region deficits $F_r$. Whole-molecule task utilities may become deficits only when a target, matched reference or non-regression margin makes their zero set meaningful.
 
-## 3. Generate a persistent composition for concurrent soft goals
+## 3. Derive a composition only when several targets require it
 
-When the common evaluable set contains several deficits that remain meaningful at the same time, derive the aggregator instead of selecting a remembered final equation.
+When the selected core-target set contains several independent deficits, first decide whether they are compensable, jointly mandatory, ordered by a validated priority, or incompatible in the actual editable space. A single sufficient target needs no cross-target aggregator. Derive any aggregator instead of selecting a remembered final equation.
 
-First state the desired response law in words. Decide whether the controller should focus on the current worst deficit, a robust upper tail, a priority ordering, proportional progress, or another behavior supported by the knowledge base. Then retrieve an aggregation mechanism whose sensitivity has that behavior. If the primary mechanism can starve non-dominant objectives, retrieve or derive a distinct coverage mechanism that keeps justified secondary objectives active. Keep graph or microstate operations separate unless a verified estimator connects them to the same derivative path.
+First state the desired response law and acceptable joint set. Decide whether the controller should repair one cause, satisfy the intersection of several target sets, permit a measured tradeoff, enforce priority, or solve for a feasible common direction. Derive a composition whose zero set and sensitivities have that behavior. A maximum, norm, constrained solve or scalar sum is a candidate only when its assumptions fit. Keep graph or microstate operations separate unless a verified estimator connects them to the same derivative path. The provided function table may justify the constituent local potentials while offering no citation for the new aggregation operator.
 
 The generated composition must answer:
 
-- which component receives the largest marginal pressure in each relevant regime;
+- which component receives marginal pressure in each relevant regime and whether a failed mandatory target can be compensated;
 - whether any retained component can receive exactly zero pressure before its repair predicate passes;
 - how behavior changes when two deficits exchange rank or approach their targets;
-- which parameters control focus, coverage, smoothness and graph ranking;
-- which knowledge entries justify each operator and what was changed during specialization.
+- which parameters control curvature, smoothing, priority and graph ranking, and how their scales were obtained;
+- which knowledge entries justify each *local function* and which composition rules are newly derived.
 
-Derive the component sensitivities symbolically or automatically for the proposed composition and compare them with the intended response law. Reject the composition if these differ. Use hierarchical composition when relation-level failures must first be coordinated inside a region and region-level failures must then be coordinated across the molecule. Do not place hard constraints, missing measurements or unrelated raw scores in the common set.
+Derive the component sensitivities symbolically or automatically and compare them with the intended response law. Reject the composition if these differ or if a named repair can remain failed at its optimum. Use a hierarchy only when the mechanism structure requires one. Do not place hard constraints, missing measurements or unrelated raw scores in a common soft set.
 
 ## 4. Add knowledge-derived components by role
 

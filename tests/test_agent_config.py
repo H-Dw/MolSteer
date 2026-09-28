@@ -52,7 +52,7 @@ def test_default_config_selects_openrouter_glm_without_secrets(monkeypatch, tmp_
     assert config.runtime.max_segments == 20
     assert config.monitoring.window == 8
     assert config.monitoring.decay == 0.5
-    assert config.skill_path == REPO_ROOT / "skills/molthinker-conflict-aware-control/SKILL.md"
+    assert config.skill_path == REPO_ROOT / "skills/molthinker-reward-creativity/SKILL.md"
     assert config.secrets_file == REPO_ROOT / "configs/secrets.local.json"
     assert config.trace_dir == REPO_ROOT / "outputs/agent_runs"
 

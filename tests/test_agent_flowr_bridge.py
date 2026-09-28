@@ -57,3 +57,26 @@ def test_agent_mixed_reward_scores_each_view_separately():
     assert state_grad.abs().sum() > 0
     with pytest.raises(ValueError, match='state-world'):
         reward.evaluate({'coords': prediction})
+
+
+def test_agent_design_tree_changes_marginal_pressure():
+    reward = object.__new__(AgentMixedReward)
+    reward.spec = {'terms': [
+        {'term_id':'near','view':'prediction','family':'flat_bottom_distance',
+         'atom_ids':[0,1],'lower':0.,'upper':1.,'scale':1.,'weight':1.},
+        {'term_id':'far','view':'state','family':'minimum_distance',
+         'atom_ids':[0],'reference_coords':[0.,0.,0.],
+         'lower':1.,'upper':None,'scale':1.,'weight':1.}],
+        'design':{'objective_tree':{'op':'maximum','children':[
+            {'op':'term','term_id':'near'},{'op':'term','term_id':'far'}]}}}
+    reward.uses_state_view=True
+    reward.reference_graph='same'
+    reward.chemistry=lambda pred:{'signature':'same','smiles':'C'}
+    reward.overlaps=lambda coords,chemistry:(coords.new_zeros(1),coords.new_zeros(1))
+    prediction=torch.tensor([[0.,0.,0.],[2.,0.,0.]],requires_grad=True)
+    state=torch.tensor([[.5,0.,0.],[0.,0.,0.]],requires_grad=True)
+    value,_=reward.evaluate({'coords':prediction},state_coords=state)
+    prediction_grad,state_grad=torch.autograd.grad(value,(prediction,state))
+    assert value.item()==pytest.approx(-.5)
+    assert prediction_grad.abs().sum()>0
+    assert state_grad.abs().sum()==0
