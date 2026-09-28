@@ -75,7 +75,8 @@ def run(config):
     RDLogger.DisableLog('rdApp.warning')
     for arm in config.get('arms',['unguided','selection','creativity']):
         adapter.restore(checkpoint)
-        program=json.loads(Path(config['reward_programs'][arm if arm!='unguided' else 'creativity']).read_text(encoding='utf-8'))
+        program_key=arm if arm!='unguided' else next(iter(config['reward_programs']))
+        program=json.loads(Path(config['reward_programs'][program_key]).read_text(encoding='utf-8'))
         reward=evaluator(program)
         armout=output/arm
         armout.mkdir(parents=True,exist_ok=True)
@@ -114,7 +115,7 @@ def main():
     p.add_argument('--output',help='Fresh output directory override')
     p.add_argument('--resume',help='Complete runtime checkpoint override')
     p.add_argument('--revision-response',help='Validated response to a pending monitor revision request')
-    p.add_argument('--arm',choices=['unguided','selection','creativity'],action='append')
+    p.add_argument('--arm',choices=['unguided','selection','creativity','agent'],action='append')
     a=p.parse_args()
     config=json.loads(Path(a.config).read_text(encoding='utf-8'))
     if a.output:config['output']=a.output

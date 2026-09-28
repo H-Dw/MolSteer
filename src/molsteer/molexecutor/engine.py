@@ -4,6 +4,7 @@ from pathlib import Path
 import time
 import torch
 from .interfaces import GuidanceBudget, bounded_displacement
+from .program import evaluate_with_state
 from molsteer.molmonitor.guidance_dynamics import step_comparison, vector_cosine, linear_flow_retention
 
 
@@ -23,7 +24,16 @@ def run_suffix(adapter, reward, output, budget, arm):
     if len(interval)!=2 or not 0<=interval[0]<interval[1]<=1:
         raise ValueError('Guidance interval must satisfy 0 <= start < end <= 1')
     mask=torch.zeros_like(adapter.curr['mask'],dtype=torch.bool)
-    mask[adapter.index]=adapter.curr['mask'][adapter.index].bool()
+    active=adapter.curr['mask'][adapter.index].bool()
+    editable=adapter.config.get('editable_atom_ids')
+    if editable is None:
+        mask[adapter.index]=active
+    else:
+        if (not isinstance(editable,list) or not editable or
+                any(type(i) is not int or i<0 or i>=len(active) for i in editable) or
+                len(set(editable))!=len(editable) or not bool(active[editable].all())):
+            raise ValueError('editable_atom_ids must name unique active target atoms')
+        mask[adapter.index,editable]=True
     path_used=torch.zeros_like(mask,dtype=adapter.curr['coords'].dtype)
     if adapter.guidance_state:
         if adapter.guidance_state['arm']!=arm or adapter.guidance_state['program_id']!=reward.spec['program_id']:
@@ -50,7 +60,7 @@ def run_suffix(adapter, reward, output, budget, arm):
                 pred,cond=adapter.predict(coordinates=x)
                 try:
                     endpoint=adapter.endpoint(pred)
-                    value,detail=reward.evaluate(endpoint)
+                    value,detail=evaluate_with_state(reward,adapter,endpoint,x)
                     gradient,endpoint_gradient=torch.autograd.grad(value,(x,endpoint['coords']))
                     if not torch.isfinite(gradient).all():raise ValueError('Nonfinite gradient')
                     row.update(reward_before=float(value.detach()),reward_detail=detail,
@@ -84,7 +94,8 @@ def run_suffix(adapter, reward, output, budget, arm):
                 base_pred,_=adapter.predict(times=comparison_times)
                 base_endpoint=adapter.endpoint(base_pred)
                 try:
-                    base_value,base_detail=reward.evaluate(base_endpoint)
+                    base_value,base_detail=evaluate_with_state(
+                        reward,adapter,base_endpoint,adapter.curr['coords'])
                     row['next_base_reward']=float(base_value)
                     row['next_base_detail']=base_detail
                     for backtrack in range(4):
@@ -93,7 +104,8 @@ def run_suffix(adapter, reward, output, budget, arm):
                         candidate=adapter.endpoint(candidate_pred)
                         failures=reward.feasible(candidate,base_endpoint)
                         try:
-                            score,detail=reward.evaluate(candidate)
+                            score,detail=evaluate_with_state(
+                                reward,adapter,candidate,adapter.curr['coords']+proposal_delta)
                             if not torch.isfinite(score):failures.append('nonfinite_reward')
                             elif score<base_value-1e-7:failures.append('reward_regression_at_same_time')
                         except ValueError as exc:failures.append(str(exc))

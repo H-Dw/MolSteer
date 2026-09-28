@@ -1,13 +1,20 @@
 """Numerical screen of the complete endpoint-to-current-state derivative."""
 import torch
+from molsteer.molexecutor.program import evaluate_with_state
 
 
 def check_live_gradient(adapter, reward, epsilons=(.002,.005,.01), sample_count=3):
     x=adapter.curr['coords'].detach().requires_grad_(True)
     pred,_=adapter.predict(coordinates=x)
-    value,_=reward.evaluate(adapter.endpoint(pred))
+    value,_=evaluate_with_state(reward,adapter,adapter.endpoint(pred),x)
     gradient,=torch.autograd.grad(value,x)
-    ids=gradient[adapter.index].detach().abs().reshape(-1).topk(sample_count).indices.tolist()
+    magnitudes=gradient[adapter.index].detach().abs()
+    editable=adapter.config.get('editable_atom_ids')
+    if editable is not None:
+        mask=torch.zeros(magnitudes.shape[0],dtype=torch.bool,device=magnitudes.device)
+        mask[editable]=True
+        magnitudes=magnitudes.masked_fill(~mask[:,None],-1)
+    ids=magnitudes.reshape(-1).topk(min(sample_count,3*len(editable) if editable is not None else magnitudes.numel())).indices.tolist()
     samples=[]
     for eps in epsilons:
         for index in ids:
@@ -16,7 +23,8 @@ def check_live_gradient(adapter, reward, epsilons=(.002,.005,.01), sample_count=
             with torch.no_grad():
                 pp,_=adapter.predict(coordinates=x+d);pm,_=adapter.predict(coordinates=x-d)
                 ep,em=adapter.endpoint(pp),adapter.endpoint(pm)
-                vp,_=reward.evaluate(ep);vm,_=reward.evaluate(em)
+                vp,_=evaluate_with_state(reward,adapter,ep,x+d)
+                vm,_=evaluate_with_state(reward,adapter,em,x-d)
             fd=float((vp-vm)/(2*eps));ag=float(gradient[adapter.index,atom,axis])
             samples.append(dict(epsilon=eps,atom_id=atom,axis=axis,autograd=ag,finite_difference=fd,
                 relative_error=abs(fd-ag)/max(abs(fd),abs(ag),1e-8),same_discrete_graph=reward.graph(ep)==reward.graph(em)))

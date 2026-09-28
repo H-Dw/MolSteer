@@ -199,7 +199,56 @@ class MolecularReward:
         return reasons
 
 
+class AgentMixedReward(MolecularReward):
+    """Apply checked Agent terms to their declared state or prediction view."""
+
+    def __init__(self, program, baseline, receptor, vocabulary):
+        if program.get('mode')!='agent_selection' or program.get('evaluator')!='agent_mixed':
+            raise ValueError('Expected a compiled agent selection program')
+        super().__init__({**program,'mode':'selection'},baseline,receptor,vocabulary)
+        self.spec=program
+        self.uses_state_view=any(term['view']=='state' for term in program['terms'])
+        if not program['terms'] or any(term['view'] not in ('state','prediction') for term in program['terms']):
+            raise ValueError('Agent program requires supported, view-bound terms')
+
+    def evaluate(self, pred, state_coords=None):
+        chemistry=self.chemistry(pred)
+        protein,intra=self.overlaps(pred['coords'],chemistry)
+        if self.uses_state_view and state_coords is None:
+            raise ValueError('Live state-world coordinates are required')
+        if state_coords is not None and state_coords.shape!=pred['coords'].shape:
+            raise ValueError('State/prediction coordinate shape mismatch')
+        components={}
+        for term in self.spec['terms']:
+            coords=pred['coords'] if term['view']=='prediction' else state_coords
+            ids=term['atom_ids']
+            if term['family']=='flat_bottom_angle':
+                value=angle(coords,ids)
+            elif term['family']=='flat_bottom_distance':
+                value=(coords[ids[0]]-coords[ids[1]]).norm()
+            elif term['family']=='minimum_distance':
+                value=(coords[ids[0]]-coords.new_tensor(term['reference_coords'])).norm()
+            else:
+                raise ValueError('Unsupported agent reward primitive: '+term['family'])
+            components[term['term_id']]=term['weight']*interval(
+                value,term['lower'],term['upper'],term['scale'])
+        reward=-sum(components.values(),pred['coords'].sum()*0)
+        return reward,dict(components={k:float(v.detach()) for k,v in components.items()},
+            graph_changed=chemistry['signature']!=self.reference_graph,
+            smiles=chemistry['smiles'],max_protein_overlap=float(protein.max().detach()),
+            max_intra_overlap=float(intra.max().detach()))
+
+
+def evaluate_with_state(reward, adapter, endpoint, state_coordinates):
+    if getattr(reward,'uses_state_view',False):
+        return reward.evaluate(endpoint,
+            state_coords=adapter.world_state_coordinates(state_coordinates))
+    return reward.evaluate(endpoint)
+
+
 def make_reward(program,baseline,receptor,vocabulary,control=None):
+    if program.get('evaluator')=='agent_mixed':
+        return AgentMixedReward(program,baseline,receptor,vocabulary)
     if program.get('evaluator')=='augmented_lagrangian':
         from .augmented_lagrangian_reward import AugmentedLagrangianReward
         if control is None:raise ValueError('Augmented-Lagrangian guidance requires a matched control trajectory')

@@ -13,6 +13,26 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+
+def _locate_flowr_root() -> Path:
+    """Find the generator from this integration or a copied stage runner."""
+    override = os.environ.get("FLOWR_ROOT")
+    if override:
+        root = Path(override).expanduser().resolve()
+        if not (root / "flowr" / "__init__.py").is_file():
+            raise RuntimeError(f"FLOWR_ROOT does not contain the flowr package: {root}")
+        return root
+    for parent in Path(__file__).resolve().parents:
+        for candidate in (parent, parent / "flowr_root"):
+            if (candidate / "flowr" / "__init__.py").is_file():
+                return candidate
+    raise RuntimeError("FLOWR.ROOT not found; set FLOWR_ROOT to its checkout")
+
+
+FLOWR_ROOT = _locate_flowr_root()
+if str(FLOWR_ROOT) not in sys.path:
+    sys.path.insert(0, str(FLOWR_ROOT))
+
 import torch
 import numpy as np
 from rdkit import Chem
@@ -339,14 +359,18 @@ def generate_batch(model, prior, data, args, device, target_dir: Path, ligand_of
 
 
 def build_args(pdb_file, ligand_file, save_dir, ckpt, gpu=0):
-    sys.argv = ["stage_runner", "--pdb_file", str(pdb_file), "--ligand_file", str(ligand_file),
-                "--arch", "pocket", "--pocket_type", "holo", "--chain_id", "A",
-                "--cut_pocket", "--pocket_cutoff", "7", "--gpus", "1", "--mp_index", str(gpu),
-                "--num_workers", "0", "--batch_cost", "4", "--ckpt_path", str(ckpt),
-                "--save_dir", str(save_dir), "--sample_n_molecules_per_target", "3",
-                "--max_sample_iter", "1", "--integration_steps", "100", "--categorical_strategy", "uniform-sample",
-                "--ode_sampling_strategy", "linear", "--seed", "20260922"]
-    return get_args()
+    original_argv = sys.argv
+    try:
+        sys.argv = ["stage_runner", "--pdb_file", str(pdb_file), "--ligand_file", str(ligand_file),
+                    "--arch", "pocket", "--pocket_type", "holo", "--chain_id", "A",
+                    "--cut_pocket", "--pocket_cutoff", "7", "--gpus", "1", "--mp_index", str(gpu),
+                    "--num_workers", "0", "--batch_cost", "4", "--ckpt_path", str(ckpt),
+                    "--save_dir", str(save_dir), "--sample_n_molecules_per_target", "3",
+                    "--max_sample_iter", "1", "--integration_steps", "100", "--categorical_strategy", "uniform-sample",
+                    "--ode_sampling_strategy", "linear", "--seed", "20260922"]
+        return get_args()
+    finally:
+        sys.argv = original_argv
 
 
 def run_target(model, hparams, vocab, vocab_charges, vocab_hybridization, vocab_aromatic,
@@ -379,6 +403,8 @@ def main():
     parser.add_argument('--checkpoint',required=True,help='FLOWR.ROOT model checkpoint')
     parser.add_argument('--gpu',type=int,default=0)
     parser.add_argument('--precision',choices=['highest','high'],default='highest')
+    parser.add_argument('--target',action='append',choices=['2pqw_A__2rhy_MLZ','5i0b_A__5vef_M77'],
+                        help='Generate only the selected target; may be repeated (default: both)')
     options=parser.parse_args()
     root=Path(options.output_root).resolve()
     if root.exists():raise ValueError('Use a new output root; historical generation files are preserved')
@@ -390,6 +416,9 @@ def main():
         {"key": "2pqw_A__2rhy_MLZ", "receptor_file": "2pqw_A_rec_2rhy_mlz_lig_tt_min_0_pocket10.pdb", "ligand_file": "2pqw_A_rec_2rhy_mlz_lig_tt_min_0.sdf"},
         {"key": "5i0b_A__5vef_M77", "receptor_file": "5i0b_A_rec_5vef_m77_lig_tt_min_0_pocket10.pdb", "ligand_file": "5i0b_A_rec_5vef_m77_lig_tt_min_0.sdf"},
     ]
+    if options.target:
+        selected=set(options.target)
+        specs=[spec for spec in specs if spec['key'] in selected]
     # Use the parser solely to construct a complete args namespace for checkpoint loading.
     args = build_args(root / "inputs" / specs[0]["receptor_file"], root / "inputs" / specs[0]["ligand_file"],
                       root, ckpt, options.gpu)

@@ -112,6 +112,12 @@ class FlowrRootAdapter:
             result['affinity']={k:v[self.index].reshape(()) for k,v in predicted['affinity'].items()}
         return result
 
+    def world_state_coordinates(self, coordinates):
+        """Map the live X_t batch to the same receptor-world frame as StatePacket."""
+        world=self.runner.world_prediction(self.model,
+            {'coords':coordinates,'mask':self.curr['mask']},self.pocket)
+        return world['coords'][self.index]
+
     def inject(self, gradient, step_size):
         # dX/dt = native velocity + strength * grad_X R. Positive forward time.
         return step_size*gradient
@@ -175,12 +181,20 @@ class FlowrRootAdapter:
             resume_fidelity=getattr(self,'resume_fidelity','Legacy runtime; inspect initial checkpoint provenance')))
 
     def restore(self, checkpoint):
-        if checkpoint['source_hash']!=self.source_hash or checkpoint['model_checkpoint']!=self.config['checkpoint']:
+        def same_file(first, second):
+            if str(first)==str(second):return True
+            try:return Path(first).resolve(strict=True)==Path(second).resolve(strict=True)
+            except (OSError,ValueError):return False
+
+        if checkpoint['source_hash']!=self.source_hash or not same_file(
+                checkpoint['model_checkpoint'],self.config['checkpoint']):
             raise ValueError('Resume source/checkpoint mismatch')
         native=checkpoint.get('format')=='flowr_root_live_runtime'
         keys=['receptor','reference_ligand','target_id'] if native else ['receptor','reference_ligand','target_id','ligand_index','saved_stage']
         for key in keys:
-            if checkpoint['config'][key]!=self.config[key]:raise ValueError('Resume context mismatch: '+key)
+            first,second=checkpoint['config'][key],self.config[key]
+            equal=same_file(first,second) if key in ('receptor','reference_ligand','saved_stage') else first==second
+            if not equal:raise ValueError('Resume context mismatch: '+key)
         if checkpoint.get('precision') and checkpoint['precision']!=self.precision:
             raise ValueError('Resume numerical precision mismatch')
         if 'cuda_device_index' in checkpoint and checkpoint['cuda_device_index']!=self.device.index:
