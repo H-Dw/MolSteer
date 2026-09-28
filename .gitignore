@@ -7,6 +7,7 @@ configs/secrets.local.json
 **/secrets.local.json
 **/secrets.*.local.json
 # Generated runs and environments
+/flowr_root/
 outputs/
 **/outputs/
 .venv/
