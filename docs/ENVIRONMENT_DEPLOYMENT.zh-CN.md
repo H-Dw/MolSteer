@@ -19,7 +19,7 @@ generator 的上游 `flowr_root/pyproject.toml` 与 `uv.lock` 针对 CUDA 13 / G
 | [`environment.agent.yml`](../environment.agent.yml) | MolSteer Agent、奖励验证与独立评估；无需生成器源码即可创建 |
 | [`environment.yml`](../environment.yml) | MolSteer + FLOWR 生成与续推；包含 generator 的直接运行依赖 |
 
-两个文件固定主依赖版本，由 pip 安装其传递依赖；它们是可重建的环境规格，不是逐个 wheel 哈希锁。创建环境前切换到仓库根目录，因为文件最后以 editable 方式安装 `.`。如已在其他环境中运行作业，请勿原地替换；新建环境后分别验证。
+两个文件固定主依赖版本，由 pip 安装其传递依赖；它们是可重建的环境规格，不是逐个 wheel 哈希锁。依赖建好后，从仓库根目录以 editable 方式安装当前 MolSteer 源码。Docker 构建也按这个顺序分层，使源码更新不会重装整套 CUDA 依赖。如已在其他环境中运行作业，请勿原地替换；新建环境后分别验证。
 
 ```bash
 cd /data1/dhuang/MolSteer
@@ -29,13 +29,14 @@ cd /data1/dhuang/MolSteer
 # 在 Bash 中启用 Conda 后选择一个环境
 eval "$(/data1/dhuang/miniconda3/bin/conda shell.bash hook)"
 conda activate molsteer-flowr
+python -m pip install --no-deps -e .
 export FLOWR_ROOT="$PWD/flowr_root"
 export PYTHONPATH="$FLOWR_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 python -c 'import molsteer, flowr, langchain_core, torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())'
 python -m pytest tests -q
 ```
 
-若只运行 Agent，请激活 `molsteer-agent`。如需从纯 Agent 环境执行 FLOWR 续推，应改用 `molsteer-flowr`；两种环境都从宿主进程读取 `OPENROUTER_API_KEY`，不从仓库文件读取。
+若只运行 Agent，请激活 `molsteer-agent`，并同样执行 `python -m pip install --no-deps -e .`。如需从纯 Agent 环境执行 FLOWR 续推，应改用 `molsteer-flowr`；两种环境都从宿主进程读取 `OPENROUTER_API_KEY`，不从仓库文件读取。
 
 ## Docker 镜像
 

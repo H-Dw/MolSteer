@@ -13,17 +13,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV PATH=/opt/conda/bin:$PATH
 WORKDIR /opt/MolSteer
-COPY . .
+COPY environment.yml environment.agent.yml ./
 
 FROM base AS agent
 RUN conda env create -f environment.agent.yml && conda clean -afy
 ENV PATH=/opt/conda/envs/molsteer-agent/bin:/opt/conda/bin:$PATH
+COPY . .
+RUN python -m pip install --no-deps -e .
 CMD ["python", "-m", "molsteer.cli", "--help"]
 
 FROM base AS flowr
-RUN test -f flowr_root/flowr/__init__.py && \
-    conda env create -f environment.yml && conda clean -afy
+RUN conda env create -f environment.yml && conda clean -afy
 ENV PATH=/opt/conda/envs/molsteer-flowr/bin:/opt/conda/bin:$PATH \
     FLOWR_ROOT=/opt/MolSteer/flowr_root \
     PYTHONPATH=/opt/MolSteer/flowr_root
+COPY . .
+RUN test -f flowr_root/flowr/__init__.py && python -m pip install --no-deps -e .
 CMD ["python", "-m", "molsteer.cli", "--help"]
