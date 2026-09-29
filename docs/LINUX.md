@@ -1,5 +1,7 @@
 # Linux setup and execution
 
+For the current server's Conda and Docker setup, see the [environment deployment guide](ENVIRONMENT_DEPLOYMENT.zh-CN.md).
+
 Use Python 3.10 or newer. For CUDA generation, install a PyTorch build suitable for the host driver and CUDA environment before installing MolSteer.
 
 ```bash

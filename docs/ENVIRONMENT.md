@@ -1,5 +1,7 @@
 # Environment and reproduction
 
+This page preserves the 2026-09-23 experiment paths and dependencies. For the current nested FLOWR deployment, see the [Conda and Docker guide](ENVIRONMENT_DEPLOYMENT.zh-CN.md).
+
 Deployment: `/data1/dhuang/flowr_root/MolSteer`. Interpreter: `/data1/dhuang/flowr_root/.venv/bin/python`. Original inputs remain in `output/crossdocked_100target_stage_test`; new artifacts are in `output/molsteer_reports_20260923`.
 
 ## Dependencies

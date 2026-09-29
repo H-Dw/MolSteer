@@ -1,5 +1,7 @@
 # 环境安装与复现
 
+本页保留 2026-09-23 历史实验的路径与依赖记录。当前顶层仓库的 Conda、Docker 和嵌套 FLOWR 部署配置见[环境部署说明](ENVIRONMENT_DEPLOYMENT.zh-CN.md)。
+
 已部署位置：`/data1/dhuang/flowr_root/MolSteer`。运行环境：`/data1/dhuang/flowr_root/.venv/bin/python`。原始生成输入仍位于`output/crossdocked_100target_stage_test`；本次派生结果位于`output/molsteer_reports_20260923`。
 
 ## 依赖及本次变更

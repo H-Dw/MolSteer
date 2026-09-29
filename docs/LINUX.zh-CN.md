@@ -1,5 +1,7 @@
 # Linux 安装与运行
 
+当前服务器的完整 Conda 环境和 Docker 镜像配置见[环境部署说明](ENVIRONMENT_DEPLOYMENT.zh-CN.md)。
+
 在 Linux 上使用 Python 3.10 或更新版本，从仓库根目录创建独立环境。若要运行 CUDA 生成，请先按该机器的驱动和 CUDA 环境安装适配的 PyTorch，再安装 MolSteer。
 
 ```bash
