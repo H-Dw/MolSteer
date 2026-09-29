@@ -10,6 +10,8 @@ generator 的上游 `flowr_root/pyproject.toml` 与 `uv.lock` 针对 CUDA 13 / G
 
 `flowr_root/.venv` 原先缺少 LangChain Agent 包。现已安装 `langchain-core 1.6.5`、LangChain `1.4.2`、LangGraph `1.2.12`、OpenRouter 适配包 `0.2.9` 及相关依赖，并将 MolSteer editable 安装路径改为顶层仓库。修复后 `flowr`、`molsteer` 和 `langchain_core` 可从同一解释器导入，CUDA 仍可用。默认 `activate.sh` 继续选用已安装 Agent 依赖的 `.venv-molsteer`；需要显式使用 generator 原环境时设置 `MOLSTEER_FLOWR_ENV=base`。
 
+该主机的联合进程存在原生扩展导入顺序问题：先导入完整 Agent 模块、再导入 `flowr.gen.generate_from_pdb` 会发生段错误；反向顺序正常，两个既有虚拟环境都可复现。`agent_continuation.py` 因此在加载 Agent 执行模块之前预载并核验指定的 FLOWR 源码。自行编写同进程入口时也应先导入生成器；独立 Agent API 作业不受此顺序约束。
+
 ## Conda 文件
 
 | 文件 | 用途 |

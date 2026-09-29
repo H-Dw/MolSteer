@@ -4,13 +4,25 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
+import sys
 from pathlib import Path
 
 import torch
 
-from molsteer.molexecutor.agent_bridge import compile_validated_agent_checkpoint
-from molsteer.molexecutor.runner import run
+
+def _load_generator_first(flowr_root: Path) -> Path:
+    """Load FLOWR's native extensions before the Agent dependency graph."""
+    model_root=flowr_root.resolve(strict=True)
+    if not (model_root/'flowr/__init__.py').is_file():
+        raise ValueError('flowr_root does not contain the generator package')
+    if str(model_root) not in sys.path:
+        sys.path.insert(0,str(model_root))
+    module=importlib.import_module('flowr.gen.generate_from_pdb')
+    if not Path(module.__file__).resolve().is_relative_to(model_root):
+        raise ValueError('Loaded FLOWR package does not match --flowr-root')
+    return model_root
 
 
 def _sha(path: Path) -> str:
@@ -26,10 +38,9 @@ def _within(path: Path, root: Path) -> bool:
 
 
 def prepare(agent_checkpoint: Path, flowr_config: Path, flowr_root: Path, output_root: Path):
-    model_root=flowr_root.resolve(strict=True)
+    model_root=_load_generator_first(flowr_root)
+    from molsteer.molexecutor.agent_bridge import compile_validated_agent_checkpoint
     output_root=output_root.resolve()
-    if not (model_root/'flowr/__init__.py').is_file():
-        raise ValueError('flowr_root does not contain the generator package')
     output_dir=model_root/'output'
     if not output_dir.is_dir() or not _within(output_root.resolve(),output_dir):
         raise ValueError('A fresh output root under flowr_root/output is required')
@@ -111,6 +122,8 @@ def main():
     parser.add_argument('--output-root',type=Path,required=True)
     parser.add_argument('--prepare-only',action='store_true')
     args=parser.parse_args()
+    _load_generator_first(args.flowr_root)
+    from molsteer.molexecutor.runner import run
     output_root=args.output_root.resolve()
     config=prepare(args.agent_checkpoint.resolve(strict=True),args.flowr_config.resolve(strict=True),
                    args.flowr_root,output_root)
