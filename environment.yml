@@ -1,0 +1,63 @@
+name: molsteer-flowr
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip=25.0
+  - setuptools
+  - wheel
+  - pip:
+      # Verified stack on the RTX 3090 host. Do not resolve FLOWR's upstream
+      # torch 2.11 / CUDA 13 lock on this CUDA 12.1 installation.
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - torch==2.5.1+cu121
+      - tensordict==0.5.0
+      - torch-geometric==2.8.0.post1
+      - torchmetrics==1.9.0
+      - lightning==2.6.5
+      - lightning-utilities==0.15.3
+      - numpy==2.5.3
+      - scipy==1.18.1
+      - pandas==3.0.5
+      - scikit-learn==1.9.0
+      - networkx==3.6.1
+      - matplotlib==3.11.1
+      - seaborn==0.13.2
+      - rdkit==2026.3.6
+      - openbabel-wheel==3.1.1.23
+      - OpenMM==8.3.1
+      - pdbfixer==1.12.0
+      - datamol==0.12.5
+      - biotite==1.7.1
+      - hydride==1.2.3
+      - pdbinf==0.0.4
+      - prolif==2.2.1
+      - biopython==1.88
+      - biopandas==0.5.2
+      - MDAnalysis==2.10.0
+      - ProDy==2.6.1
+      - rmsd==1.6.5
+      - lmdb==2.3.0
+      - dill==0.4.1
+      - PyYAML==6.0.3
+      - wandb==0.30.0
+      - mlflow==3.16.0
+      - tqdm==4.70.0
+      - requests==2.34.2
+      - rich==15.0.0
+      - omegaconf==2.3.1
+      - hydra-core==1.3.6
+      - typing-extensions==4.16.0
+      - jsonschema==4.26.0
+      - langchain==1.4.2
+      - langgraph==1.2.12
+      - langchain-openrouter==0.2.9
+      - langchain-openai==1.6.6
+      - langchain-anthropic==1.7.4
+      - langgraph-checkpoint-sqlite==3.1.1
+      - pydantic==2.12.5
+      - markdown-it-py==4.2.0
+      - meeko==0.8.0
+      - vina==1.2.7
+      - pytest==9.1.1
+      - -e .

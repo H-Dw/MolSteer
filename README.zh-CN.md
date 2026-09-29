@@ -4,6 +4,8 @@ MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 
 
 四个 Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。
 
+Linux 服务器的 [Conda 环境与 Docker 镜像配置](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md)包含 MolSteer Agent、FLOWR 生成器和 CUDA 12.1 的当前验证版本。
+
 - MolReader：43 个独立指标、多视图 StatePacket、只报告风险的中英文 DiagnosticReport。
 - MolThinker：知识检索、适用性检查、奖励选择或组合，以及可执行 RewardProgram。
 - MolExecutor：可微奖励、明确的梯度注入、模型适配、自动启动脚本和完整运行检查点。

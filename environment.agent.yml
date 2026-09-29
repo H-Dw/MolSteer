@@ -1,0 +1,28 @@
+name: molsteer-agent
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip=25.0
+  - setuptools
+  - wheel
+  - pip:
+      # The extra index supplies the CUDA 12.1 PyTorch wheel for Linux x86_64.
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - torch==2.5.1+cu121
+      - numpy==2.5.3
+      - scipy==1.18.1
+      - rdkit==2026.3.6
+      - jsonschema==4.26.0
+      - langchain==1.4.2
+      - langgraph==1.2.12
+      - langchain-openrouter==0.2.9
+      - langchain-openai==1.6.6
+      - langchain-anthropic==1.7.4
+      - langgraph-checkpoint-sqlite==3.1.1
+      - pydantic==2.12.5
+      - markdown-it-py==4.2.0
+      - meeko==0.8.0
+      - vina==1.2.7
+      - pytest==9.1.1
+      - -e .

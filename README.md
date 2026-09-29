@@ -4,6 +4,8 @@ MolSteer separates molecular evidence extraction, reward reasoning, execution an
 
 The four agents default to `z-ai/glm-5.3` through OpenRouter. Set `OPENROUTER_API_KEY` in the host environment before an API run. A tested Linux/FLOWR.ROOT deployment and its exact-resume boundary are documented in [the 5i0b example](docs/FLOWR_ROOT_LINUX.zh-CN.md).
 
+The [Conda and Docker deployment guide](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md) records the current Python 3.12 / CUDA 12.1 dependency stack for MolSteer and FLOWR.ROOT.
+
 ## Modules
 
 | Module | Implemented responsibility | Outputs |

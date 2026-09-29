@@ -13,6 +13,15 @@ venv/
 env/
 **/.venv/
 **/venv/
+**/.venv-molsteer/
+# FLOWR is a separate ignored checkout. Package only generation code and its
+# vendored PoseBusters fork; mount weights and outputs when starting a container.
+flowr_root/*
+!flowr_root/flowr/
+!flowr_root/flowr/**
+!flowr_root/posebusters/
+!flowr_root/posebusters/**
+!flowr_root/pyproject.toml
 __pycache__/
 **/__pycache__/
 *.py[cod]

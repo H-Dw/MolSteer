@@ -1,5 +1,7 @@
 # Linux 上的 MolSteer × FLOWR.ROOT 实测
 
+当前依赖、Conda 环境与 Docker 镜像配置见[环境部署说明](ENVIRONMENT_DEPLOYMENT.zh-CN.md)。
+
 本页记录 `ml-apus.bio.sustech.edu.cn` 上的 `5i0b_A__5vef_M77/ligand_002` 实验。顶层仓库是 `/data1/dhuang/MolSteer`；生成器及其模型、虚拟环境和输出位于 `/data1/dhuang/MolSteer/flowr_root`。根目录 `.gitignore` 的 `/flowr_root/` 规则排除整个生成器目录。旧路径 `/data1/dhuang/flowr_root` 保留为指向新位置的符号链接，因为早期 `runtime.pt` 和 StatePacket 记录了这个绝对路径。
 
 ## 环境激活
