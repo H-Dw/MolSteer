@@ -122,6 +122,9 @@ def derive(packet, report, knowledge_path):
 
 def validate_spec(spec, packet, report=None):
     validate_enriched(packet)
+    if spec.get('schema_version') == '2.0.0':
+        from molsteer.agents.expert_contracts import validate_expert_spec
+        return validate_expert_spec(spec, packet, report)
     validate_reward_schema(spec)
     if spec['packet_id'] != packet['packet_id'] or spec['identity'] != packet['identity']:
         raise ValueError('Reward/packet identity mismatch')

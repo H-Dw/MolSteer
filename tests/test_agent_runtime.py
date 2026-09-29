@@ -23,6 +23,7 @@ def config(tmp_path):
     cfg = load_config()
     cfg.runtime.trace_dir = Path('outputs/test_agent_runtime')
     cfg.mode = 'offline'
+    cfg.thinker.architecture = 'single'  # Explicit legacy compatibility coverage.
     return cfg
 
 

@@ -1,0 +1,43 @@
+{
+  "change": "MolThinker biology and mathematics experts with on-demand Researcher",
+  "base_commit": "9b99c44dbf7046476349c7bca4704009e4da1f73",
+  "regression": {
+    "command": ".venv/Scripts/python.exe -X utf8 -m pytest tests -q",
+    "passed": 179,
+    "failed": 0,
+    "duration_seconds": 31.07,
+    "warnings": ["Existing discrete_gradient.py tensor-to-scalar warning"]
+  },
+  "expert_tests": {
+    "passed": 28,
+    "coverage": [
+      "Biology finding coverage and required direction deferral",
+      "Independent role model profiles and actual scripted ReAct tool loops",
+      "Both experts dispatch Researcher; fetched evidence, caching, budgets and failures",
+      "Bounded reconsideration and expert API failure without fallback",
+      "Original formulas, exact source lineage, zero hits and changed local sources",
+      "Unit/domain checks and rejection of cross-direction fixed weighted sums",
+      "Angle, dihedral, signed-volume, anchor, directional and MMFF derivatives",
+      "Common descent, opposition, satisfied/inactive and unresolved zero gradients",
+      "Nonidentity Jacobian, mixed views, fixed coordinates and post-clipping conflicts",
+      "Required constraints cannot be offset by reward improvement",
+      "Versioned FLOWR bridge and live reward graph identity",
+      "Rejected expert probes preserve the native path, conditioning and RNG"
+    ]
+  },
+  "real_llm_smoke": {
+    "command": ".venv/Scripts/python.exe -X utf8 scripts/run_dual_expert_smoke.py --output outputs/dual_expert_delivery_20260929",
+    "status": "skipped",
+    "reason": "Required OpenRouter credential is unavailable on this host",
+    "llm_calls": "not_run",
+    "artifact": "outputs/dual_expert_delivery_20260929/SmokeResult.json"
+  },
+  "gpu_continuation": "not_run",
+  "terminal_molecular_efficacy": "not_run",
+  "limitations": [
+    "Mocked/scripted LLM tests do not establish live model reasoning quality",
+    "Coordinate-copy and synthetic-adapter tests do not replace real FLOWR preflight",
+    "General constrained QP solvers and new categorical editing operators are unsupported",
+    "MMFF support is first-order and requires validated graph, protonation and applicability"
+  ]
+}

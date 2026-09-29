@@ -1,5 +1,7 @@
 # MolSteer
 
+默认 MolThinker 现采用[生物专家与数学专家](docs/DUAL_EXPERTS.zh-CN.md)：按需调度 Researcher，逐方向检索并推导公式，通过版本化表达和实际梯度冲突检查接入执行。旧单专家配置及显式离线模式继续可用。
+
 MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 [LangChain/LangGraph Agent 系统](docs/AGENT_SYSTEM.zh-CN.md)默认通过 API 调用 LLM，四个 Agent 可独立选择服务与模型，统一配置见 [configs/README.md](configs/README.md)。新 Agent 默认启用[基于证据的创造性奖励 Skill](skills/molthinker-reward-creativity/SKILL.zh-CN.md)；确需约束式多目标求解时可参考[冲突感知控制 Skill](skills/molthinker-conflict-aware-control/SKILL.zh-CN.md)。原有确定性 creativity/selection 命令仍可用于复现，但 `think` 现在要求显式选择模式；FLOWR.ROOT 实时梯度引导、恢复和通用 flow/diffusion 回调接口保留。
 
 四个 Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。

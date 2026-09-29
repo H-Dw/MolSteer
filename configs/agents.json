@@ -36,6 +36,16 @@
     "molexecutor": {"model": "default", "description": "Execution proposal agent"},
     "molmonitor": {"model": "default", "description": "Monitoring and retuning agent"}
   },
+  "thinker": {
+    "architecture": "dual_expert",
+    "experts": {},
+    "max_discussions": 2,
+    "max_research_requests": 4,
+    "research_max_steps": 6,
+    "research_max_searches": 3,
+    "research_result_limit": 5,
+    "external_research": true
+  },
   "runtime": {
     "max_agent_steps": 12,
     "max_repairs": 2,

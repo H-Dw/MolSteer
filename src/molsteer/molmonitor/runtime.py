@@ -7,6 +7,7 @@ import time
 import torch
 from molsteer.common import write_json,file_hash
 from molsteer.molexecutor.interfaces import bounded_displacement,GuidanceBudget
+from molsteer.molexecutor.program import evaluate_with_state
 from .features import snapshot
 from .reference import ReferenceTrajectory
 from .controller import MonitorPolicy,AdaptiveController
@@ -55,6 +56,9 @@ def candidate_failures(frame,base,before,temporal,policy):
 
 
 def run_monitored_suffix(adapter,reward,output,budget,arm):
+    from functools import partial
+    from molsteer.molexecutor.expert_control import probe_predict
+    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') else adapter.predict
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     interval=adapter.config.get('guidance_interval',[0.,1.])
     if len(interval)!=2 or not 0<=interval[0]<interval[1]<=1:
@@ -81,6 +85,10 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
     controller=AdaptiveController(policy,monitor_state.get('controller'))
     sentinel=monitor_state.get('sentinel');stopped=monitor_state.get('stopped',False)
     mask=torch.zeros_like(adapter.curr['mask'],dtype=torch.bool);mask[adapter.index]=adapter.curr['mask'][adapter.index].bool()
+    if hasattr(reward,'control_gradient'):
+        editable=adapter.config.get('editable_atom_ids')
+        if not editable: raise ValueError('Expert monitored controls require an explicit editable mask')
+        mask[adapter.index]=False;mask[adapter.index,editable]=True
     path_used=saved.get('path_used',torch.zeros_like(mask,dtype=adapter.curr['coords'].dtype)).clone()
     adapter.execution_arm=arm;rows=[];tensor_trace=[];started=time.perf_counter();pending=None
     start_t=float(adapter.grid[adapter.step_index]);adapter.save_stage(output,f't_{start_t:.2f}',start_t)
@@ -96,9 +104,13 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
             pred,cond=adapter.predict(coordinates=x);endpoint=adapter.endpoint(pred)
             before=snapshot(endpoint,reward,t)
             try:
-                value,detail=reward.evaluate(endpoint)
+                if hasattr(reward,'control_gradient'):
+                    gradient,value,detail=reward.control_gradient(adapter,endpoint,x,mask)
+                else:
+                    value,detail=evaluate_with_state(reward,adapter,endpoint,x)
                 if not torch.isfinite(value):raise ValueError('nonfinite_reward')
-                gradient,=torch.autograd.grad(value,x)
+                if not hasattr(reward,'control_gradient'):
+                    gradient,=torch.autograd.grad(value,x)
                 gradient=gradient.detach()
                 if not torch.isfinite(gradient).all():raise ValueError('nonfinite_gradient')
             except ValueError as exc:unavailable=str(exc);gradient=None
@@ -112,14 +124,18 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
         review=(step+1)%policy.strain_review_every==0 and next_t>=policy.strain_review_start
         trials=[];selected=None;candidate_frames={};deltas={};budget_exhausted=False
         with torch.no_grad():
-            base_pred,_=adapter.predict(times=comparison_times);base_endpoint=adapter.endpoint(base_pred)
+            base_pred,_=probe(times=comparison_times);base_endpoint=adapter.endpoint(base_pred)
             base=snapshot(base_endpoint,reward,next_t,strain=review)
             try:
                 control=reference.frame(next_t)
             except ValueError:
                 control=None
             if gradient is not None and base['valid'] and reference.dense:
-                base_value,base_detail=reward.evaluate(base_endpoint)
+                try:
+                    base_value,base_detail=evaluate_with_state(reward,adapter,base_endpoint,adapter.curr['coords'])
+                except ValueError as exc:
+                    unavailable=str(exc);gradient=None
+            if gradient is not None and base['valid'] and reference.dense:
                 unit=adapter.inject(gradient,float(dt))*mask.unsqueeze(-1)
                 norms=unit.norm(dim=-1)*adapter.model.coord_scale
                 available=torch.minimum(torch.full_like(norms,budget.max_step_angstrom),(budget.max_path_angstrom-path_used).clamp(min=0))
@@ -131,13 +147,16 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
                     delta=bounded_displacement(eta*unit,mask,path_used,budget,adapter.model.coord_scale)
                     if any(torch.allclose(delta,old,atol=1e-9,rtol=1e-6) for old in previous_deltas):continue
                     previous_deltas.append(delta)
-                    candidate_pred,_=adapter.predict(coordinates=adapter.curr['coords']+delta,times=comparison_times)
+                    candidate_pred,_=probe(coordinates=adapter.curr['coords']+delta,times=comparison_times)
                     candidate=adapter.endpoint(candidate_pred);frame=snapshot(candidate,reward,next_t,strain=review)
                     temporal=reference.temporal_evidence(before,frame,mad_scale=policy.temporal_mad_scale,
                         native_multiplier=policy.native_rate_multiplier,rate_floor=policy.rate_floor)
                     failures=reward.feasible(candidate,base_endpoint)+candidate_failures(frame,base,before,temporal,policy)
                     try:
-                        score,candidate_detail=reward.evaluate(candidate);gain=float(score-base_value)
+                        if hasattr(reward,'proposal_failures'):
+                            failures+=reward.proposal_failures(adapter,candidate,base_endpoint,
+                                adapter.curr['coords']+delta,adapter.curr['coords'],delta)
+                        score,candidate_detail=evaluate_with_state(reward,adapter,candidate,adapter.curr['coords']+delta);gain=float(score-base_value)
                         if not math.isfinite(gain):failures.append('nonfinite_reward')
                         elif gain<policy.minimum_gain:failures.append('insufficient_same_time_reward_gain')
                     except ValueError as exc:gain=None;failures.append(str(exc))
@@ -178,6 +197,8 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
             before=compact(before),native_next=compact(base),committed=compact(current),sentinel=sentinel,
             injected_path_max_angstrom=float(path_used.max()))
         rows.append(row)
+        if hasattr(reward,'control_diagnostics'):
+            row['expert_control']=reward.control_diagnostics
         if decision['action']=='request_reward_revision':
             pending=revision_request(reward.spec,decision,before,base,current,trials,controller.state['history'],bindings,sentinel,
                 execution_state=dict(budget=asdict(budget),path_used_angstrom=path_used[adapter.index].detach().cpu().tolist(),

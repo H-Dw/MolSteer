@@ -69,7 +69,9 @@ def _search_reward_knowledge(query: str, knowledge_path: str, approved_root: str
     return {"query": query, "source": {"file": kb.path.name, "sha256": kb.sha256},
             "results": [{"function_id": x["function_id"], "name": x["name"], "role": x["role"],
                          "prerequisites": x["prerequisites"], "source": x["source"],
-                         "retrieval_score": x["retrieval_score"]} for x in results]}
+                         "formula": x["formula"], "variables": x["variables"],
+                         "sources": x["sources"], "gradient_target": x["gradient_target"],
+                         "retrieval_score": x["retrieval_score"]} for x in results if x['retrieval_score'] > 0]}
 
 
 @tool

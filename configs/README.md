@@ -1,5 +1,12 @@
 # LangChain/LangGraph Agent System
 
+The shipped configuration enables `thinker.architecture: dual_expert`. The internal
+biology, mathematics and researcher roles inherit the MolThinker model unless
+`thinker.experts.<role>` names another model profile. Old configuration files that
+omit `thinker` retain the single-agent workflow. See [dual-expert configuration and
+contracts](../docs/DUAL_EXPERTS.md); explicit offline mode retains the historical
+deterministic algorithm and does not claim expert LLM calls.
+
 MolSteer now has a provider-neutral orchestration layer under `src/molsteer/agents`. It uses LangChain chat-model adapters and LangGraph state transitions while retaining the established evidence contracts and numerical domain modules.
 
 - **API-first**: the four profiles (`molreader`, `molthinker`, `molexecutor`, `molmonitor`) each reference an independent model profile and provider profile. The configured mode is `api`; `offline` must be selected explicitly.

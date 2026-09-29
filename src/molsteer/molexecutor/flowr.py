@@ -122,6 +122,16 @@ class FlowrRootAdapter:
         # dX/dt = native velocity + strength * grad_X R. Positive forward time.
         return step_size*gradient
 
+    def describe_dynamics(self):
+        """Host facts for mathematical design; a live derivative still needs preflight."""
+        return dict(kind='ModelDynamicsContext',model_type='FLOWR.ROOT flow matching',
+                    time_convention='Forward integration on the declared grid, t=0 to t=1',
+                    prediction_parameterization='model._get_predictions returns endpoint coordinates and categorical heads',
+                    coordinate_mapping='runner.world_prediction; checkpoint coord_scale and receptor translation',
+                    editable_atom_ids=self.config.get('editable_atom_ids'),live_derivative='not_run',
+                    injection_convention='inject(d,dt)=dt*d; d is a minimizing control direction in model coordinates',
+                    source='FlowrRootAdapter with stage-runner SHA256 '+self.source_hash)
+
     def native_step(self, predicted, cond, step_size):
         with torch.no_grad():
             policy=self.config.get('categorical_proposal')

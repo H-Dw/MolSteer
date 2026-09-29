@@ -19,13 +19,16 @@ def create_chat_model(
         os.environ["LANGSMITH_TRACING"] = "false"
         os.environ["LANGCHAIN_TRACING_V2"] = "false"
         os.environ["LANGCHAIN_TRACING"] = "false"
+    role = agent_name.removeprefix("molthinker.") if agent_name.startswith("molthinker.") else None
+    if role is not None and role not in ("biology", "mathematics", "researcher"):
+        raise ValueError("unknown expert profile")
     try:
-        agent = config.agents[agent_name]
+        agent = config.agents["molthinker" if role else agent_name]
     except KeyError:
         raise ValueError("unknown agent profile") from None
     if not agent.enabled:
         raise ValueError("agent profile is disabled")
-    profile = config.models[agent.model]
+    profile = config.models[config.thinker.experts.get(role, agent.model) if role else agent.model]
     if _is_placeholder(profile.model):
         raise ValueError("replace REPLACE_WITH_MODEL_ID with a selected model before API execution")
     provider = config.providers[profile.provider]

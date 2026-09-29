@@ -251,6 +251,9 @@ def evaluate_with_state(reward, adapter, endpoint, state_coordinates):
 
 
 def make_reward(program,baseline,receptor,vocabulary,control=None):
+    if program.get('evaluator')=='agent_expert':
+        from .expert_reward import ExpertReward
+        return ExpertReward(program,baseline,receptor,vocabulary)
     if program.get('evaluator')=='agent_mixed':
         return AgentMixedReward(program,baseline,receptor,vocabulary)
     if program.get('evaluator')=='augmented_lagrangian':

@@ -9,6 +9,9 @@ from molsteer.molmonitor.guidance_dynamics import step_comparison, vector_cosine
 
 
 def run_suffix(adapter, reward, output, budget, arm):
+    from functools import partial
+    from .expert_control import probe_predict
+    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') else adapter.predict
     if reward.spec.get('evaluator')=='augmented_lagrangian':
         from .augmented_lagrangian_engine import run_augmented_lagrangian_suffix
         return run_augmented_lagrangian_suffix(adapter,reward,output,budget,arm)
@@ -60,20 +63,30 @@ def run_suffix(adapter, reward, output, budget, arm):
                 pred,cond=adapter.predict(coordinates=x)
                 try:
                     endpoint=adapter.endpoint(pred)
-                    value,detail=evaluate_with_state(reward,adapter,endpoint,x)
-                    gradient,endpoint_gradient=torch.autograd.grad(value,(x,endpoint['coords']))
+                    if hasattr(reward,'control_gradient'):
+                        gradient,value,detail=reward.control_gradient(adapter,endpoint,x,mask)
+                        endpoint_gradient=None
+                        row['expert_control']=detail
+                    else:
+                        value,detail=evaluate_with_state(reward,adapter,endpoint,x)
+                        gradient,endpoint_gradient=torch.autograd.grad(value,(x,endpoint['coords']))
                     if not torch.isfinite(gradient).all():raise ValueError('Nonfinite gradient')
                     row.update(reward_before=float(value.detach()),reward_detail=detail,
                         gradient_norm=float(gradient.norm()),gradient_target='current_latent_coordinates_through_live_endpoint')
-                    row['endpoint_gradient_norm']=float(endpoint_gradient.norm())
+                    if endpoint_gradient is not None:
+                        row['endpoint_gradient_norm']=float(endpoint_gradient.norm())
+                    else:
+                        row['gradient_target']='per_direction_live_pullbacks_and_declared_controller'
                     if reward.spec.get('evaluator')=='affinity_structure':
                         row['gradient_target']='current_latent_coordinates_through_live_structure_and_affinity_heads'
                         row['endpoint_gradient_scope']='structural output coordinates only; affinity can depend directly on shared hidden features'
-                    else:
+                    elif not hasattr(reward,'control_gradient'):
                         row['pullback_norm_ratio']=float(gradient[adapter.index].norm()/endpoint_gradient.norm().clamp(min=1e-16))
                     gradient=gradient.detach()
                 except ValueError as exc:
                     row['guidance_unavailable']=str(exc)
+                    gradient=None
+                    if hasattr(reward,'control_diagnostics'):row['expert_control']=reward.control_diagnostics
         predicted_coordinates=pred['coords'].detach().clone()
         adapter.native_step(pred,cond,dt)
         native_delta=adapter.curr['coords']-before_coordinates
@@ -91,7 +104,7 @@ def run_suffix(adapter, reward, output, budget, arm):
                 # No proposal calls consume sampler RNG or replace self-conditioning.
                 comparison_times=adapter.model._update_times(adapter.times,-1e-4) if step+1==adapter.args.integration_steps else adapter.times
                 if hasattr(reward,'set_time'):reward.set_time(float(comparison_times[0][0]))
-                base_pred,_=adapter.predict(times=comparison_times)
+                base_pred,_=probe(times=comparison_times)
                 base_endpoint=adapter.endpoint(base_pred)
                 try:
                     base_value,base_detail=evaluate_with_state(
@@ -100,10 +113,13 @@ def run_suffix(adapter, reward, output, budget, arm):
                     row['next_base_detail']=base_detail
                     for backtrack in range(4):
                         proposal_delta=delta*(0.5**backtrack)
-                        candidate_pred,_=adapter.predict(coordinates=adapter.curr['coords']+proposal_delta,times=comparison_times)
+                        candidate_pred,_=probe(coordinates=adapter.curr['coords']+proposal_delta,times=comparison_times)
                         candidate=adapter.endpoint(candidate_pred)
                         failures=reward.feasible(candidate,base_endpoint)
                         try:
+                            if hasattr(reward,'proposal_failures'):
+                                failures+=reward.proposal_failures(adapter,candidate,base_endpoint,
+                                    adapter.curr['coords']+proposal_delta,adapter.curr['coords'],proposal_delta)
                             score,detail=evaluate_with_state(
                                 reward,adapter,candidate,adapter.curr['coords']+proposal_delta)
                             if not torch.isfinite(score):failures.append('nonfinite_reward')

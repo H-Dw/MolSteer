@@ -14,7 +14,11 @@ def prepare_revision_context(request,program,knowledge_path):
     if 'Chemical' in failures or 'Disconnected' in failures:tags+=['chemical_validity','graph_connectivity']
     kb=KnowledgeBase(knowledge_path)
     hits=[h for h in kb.retrieve(tags) if h['retrieval_score']>0][:6]
-    program_summary={k:v for k,v in program.items() if k not in ['terms','retrieval']}
+    program_summary={k:v for k,v in program.items() if k not in ['terms','retrieval','source_packet','source_report','expert_spec']}
+    if program.get('evaluator')=='agent_expert':
+        program_summary['expert_handoff']={k:deepcopy(program['expert_spec'][k]) for k in
+            ('biology_plan','mathematical_design','model_dynamics')}
+        program_summary['next_action']='Acquire a fresh StatePacket and DiagnosticReport, then rerun biology and mathematics; do not reuse stale graph or gradient bindings'
     program_summary['term_count']=len(program.get('terms',[]))
     program_summary['full_program_digest']=digest(program)
     retrieval=[{k:h[k] for k in ['function_id','name_en','formula','role','prerequisites','source','retrieval_score','matched_categories']} for h in hits]

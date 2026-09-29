@@ -28,13 +28,21 @@ class AgentRuntime:
     """
     def __init__(self, config: AgentSystemConfig | None=None, *, models=None,
                  knowledge_path=None, search_fn=None, compute_fn=None,
-                 inference_adapter=None, approve_inference=False):
+                 inference_adapter=None, approve_inference=False, model_dynamics=None,
+                 fetch_fn=None, research_providers=None):
         self.config=config or load_config()
         self.models=dict(models or {})
-        if set(self.models)-set(AGENT_NAMES): raise ValueError('unknown injected model agent')
+        allowed=set(AGENT_NAMES)|{'molthinker.'+r for r in ('biology','mathematics','researcher')}
+        if set(self.models)-allowed: raise ValueError('unknown injected model agent')
         self.knowledge_path=Path(knowledge_path or self.config.repo_root/'knowledge'/'Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md').resolve()
         self.knowledge_path.relative_to((self.config.repo_root/'knowledge').resolve())
         self.search_fn=search_fn; self.compute_fn=compute_fn
+        self.fetch_fn=fetch_fn; self.research_providers=dict(research_providers or {})
+        if 'local' in self.research_providers: raise ValueError('The bound local corpus cannot be overridden')
+        from .expert_contracts import ModelDynamicsContext
+        if model_dynamics is None and callable(getattr(inference_adapter,'describe_dynamics',None)):
+            model_dynamics=inference_adapter.describe_dynamics()
+        self.model_dynamics=ModelDynamicsContext.model_validate(model_dynamics or {}).model_dump()
         self.inference_adapter=inference_adapter; self.approve_inference=approve_inference
         self.monitor=None
 
@@ -60,6 +68,8 @@ class AgentRuntime:
         return state
 
     def thinker(self,state):
+        if self.config.thinker.architecture=='dual_expert' and self.config.mode=='api':
+            return self._dual_thinker(state)
         creative = self.config.skill_path.parent.name!='molthinker-reward-selection'
         tools,result,base=thinker_tools(state['packet'],state['diagnostic_report'],self.knowledge_path,
                                        search_fn=self.search_fn,compute_fn=self.compute_fn,feedback=state.get('monitor_event'),
@@ -103,6 +113,32 @@ class AgentRuntime:
         append_trace(state,node='thinker',kind='decision',summary=state['plan']['summary'],output=state['plan'])
         return state
 
+    def _dual_thinker(self,state):
+        from .experts import run_experts
+        if state.get('replans',0):
+            latest=state.get('execution_result',{}).get('packet')
+            if latest is None:
+                state.update(status='design_deferred',route='done',reward_spec={},
+                             reward_design_deferral={'status':'design_only','reason':'Live replan requires a fresh StatePacket'})
+                return state
+            validate_packet(latest)
+            from molreader.localized_report import make_localized_report
+            report=state['execution_result'].get('diagnostic_report') or make_localized_report(latest)
+            validate_report(report,latest)
+            state['packet'],state['diagnostic_report']=deepcopy(latest),deepcopy(report)
+        result=run_experts(self,state)
+        if 'deferral' in result:
+            state.update(reward_spec={},reward_design_deferral=result['deferral'],status='design_deferred',route='done')
+            return state
+        spec=result['spec']; state['reward_spec']=spec
+        state['plan']={'kind':'ControlPlan','reward_id':spec['reward_id'],
+                       'biology_plan':spec['biology_plan'],'mathematical_design':spec['mathematical_design'],
+                       'retrieval':spec['retrieval'],'checks':spec['required_validation'],
+                       'continuation':{'strength':state['strength'],'max_segments':self.config.runtime.max_segments},
+                       'summary':'Biology-ranked directions and evidence-derived executable mathematical controls'}
+        state.update(validation={},validation_key=[],route='executor')
+        return state
+
     def executor(self,state):
         # Compile/test once per plan or strength change, not on every live segment.
         key=(state['reward_spec']['reward_id'],state['strength'])
@@ -117,6 +153,10 @@ class AgentRuntime:
             state['validation']=result['validation']; state['validation_key']=list(key)
         if state['execute']:
             if not self.approve_inference or not callable(self.inference_adapter): raise RuntimeError('approved inference adapter required')
+            if state['reward_spec'].get('schema_version')=='2.0.0':
+                capabilities=getattr(self.inference_adapter,'capabilities',{})
+                if '2.0.0' not in capabilities.get('reward_versions',[]) or not capabilities.get('live_preflight'):
+                    raise RuntimeError('Expert controls require a version-2 adapter with live preflight')
             request={'segment':state['segments'],'strength':state['strength'],'run_id':state['run_id'],
                      'monitor_event':deepcopy(state.get('monitor_event',{}))}
             result=self.inference_adapter(packet=deepcopy(state['packet']),reward_spec=deepcopy(state['reward_spec']),execution_result=deepcopy(state['validation']),request=request)
@@ -176,10 +216,12 @@ class AgentRuntime:
         state.update(execute=execute,segments=0,strength=self.config.monitoring.max_strength,skill_text=skill,
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
+        state['model_dynamics']=deepcopy(self.model_dynamics)
         self.monitor=RobustMonitor(self.config.monitoring)
         try:
             if self.config.mode=='api':
-                for name in AGENT_NAMES: self._model(name)
+                for name in AGENT_NAMES:
+                    if name!='molthinker' or self.config.thinker.architecture=='single': self._model(name)
             from .workflow import build_workflow
             state=build_workflow(self).invoke(state,{'recursion_limit':4*self.config.runtime.max_segments+4*self.config.runtime.max_replans+10})
         except Exception as exc:

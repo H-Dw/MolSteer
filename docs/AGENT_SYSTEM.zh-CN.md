@@ -1,5 +1,7 @@
 # LangChain / LangGraph Agent 重构
 
+当前默认配置启用 [MolThinker 双专家](DUAL_EXPERTS.zh-CN.md)。下述四模块主流程继续保留；MolThinker 内部由生物专家、数学专家和按需调用的 Researcher 完成证据与公式交接。旧配置可显式使用 `thinker.architecture: single`。
+
 ## 架构与兼容边界
 
 新 Agent 层位于 `src/molsteer/agents`，旧版领域算法与已有实验文件保留。LangChain 负责各 Agent 的模型与工具接口，LangGraph 负责状态流转和有界反馈循环。API 是新层默认运行方式；离线模式必须显式选择，不会在 API 失败时偷偷退回规则算法。

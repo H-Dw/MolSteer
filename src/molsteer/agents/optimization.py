@@ -38,6 +38,8 @@ def conflict_weights(gradients, editable_mask, *, scales=None, max_iterations=20
         step = min(1., gap / curvature) if curvature > 0 else 1.
         w += step * direction
     combined = w @ g
+    derivative = gram @ w
+    gap = max(0., float(w @ derivative - derivative.min()))
     norm = float(np.linalg.norm(combined))
     directional = -g @ combined
     denom = np.sqrt(np.diag(gram))
@@ -45,10 +47,14 @@ def conflict_weights(gradients, editable_mask, *, scales=None, max_iterations=20
     cosine = np.divide(gram, products, out=np.zeros_like(gram), where=products > 0)
     # A zero gradient is inactive; zero cosine does not establish independence.
     cosine_values = [[float(cosine[i, j]) if products[i, j] > 0 else None for j in range(n)] for i in range(n)]
+    converged = gap <= tolerance
+    status = ('numerical_failure' if not converged else
+              'pareto_stationary_or_inactive' if norm <= np.sqrt(tolerance) else
+              'no_common_descent' if np.any(directional > tolerance) else 'candidate_descent')
     return dict(weights=w.tolist(), projected_direction=(-combined).reshape(raw.shape[1:]).tolist(),
                 cosine=cosine_values, inactive_objectives=np.flatnonzero(denom <= tolerance).tolist(),
-                status='pareto_stationary_or_inactive' if norm <= np.sqrt(tolerance) else 'candidate_descent',
-                directional_derivatives=directional.tolist(), converged=gap <= tolerance,
+                status=status,
+                directional_derivatives=directional.tolist(), converged=converged,
                 dual_gap=gap, iterations=iteration + 1,
                 constraint_scope='editable mask only; other hard constraints require proposal checks',
                 controller_strength_included=False)

@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 AGENT_NAMES = ("molreader", "molthinker", "molexecutor", "molmonitor")
+EXPERT_NAMES = ("biology", "mathematics", "researcher")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _PLACEHOLDER_MARKER = "REPLACE_WITH_"
 
@@ -104,6 +105,18 @@ class RuntimeConfig(StrictModel):
         return path
 
 
+class ThinkerConfig(StrictModel):
+    # Old configuration files retain their original single-agent behavior.
+    architecture: Literal["single", "dual_expert"] = "single"
+    experts: dict[str, str] = Field(default_factory=dict)
+    max_discussions: int = Field(default=2, ge=0, le=8)
+    max_research_requests: int = Field(default=4, ge=0, le=20)
+    research_max_steps: int = Field(default=6, ge=1, le=30)
+    research_max_searches: int = Field(default=3, ge=1, le=10)
+    research_result_limit: int = Field(default=5, ge=1, le=10)
+    external_research: bool = True
+
+
 class MonitoringConfig(StrictModel):
     window: int = Field(default=8, ge=1)
     warmup: int = Field(default=4, ge=0)
@@ -131,6 +144,7 @@ class AgentSystemConfig(StrictModel):
     agents: dict[str, AgentConfig]
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
+    thinker: ThinkerConfig = Field(default_factory=ThinkerConfig)
     mode: Literal["api", "offline"] = "api"
     repo_root: Path = Field(default=REPO_ROOT, exclude=True)
 
@@ -146,6 +160,10 @@ class AgentSystemConfig(StrictModel):
         for name, profile in self.agents.items():
             if profile.model not in self.models:
                 raise ValueError(f"agent profile {name!r} references unknown model {profile.model!r}")
+        if set(self.thinker.experts) - set(EXPERT_NAMES):
+            raise ValueError("unknown MolThinker expert role")
+        if any(model not in self.models for model in self.thinker.experts.values()):
+            raise ValueError("expert references an unknown model profile")
         return self
 
     def path(self, value: str | Path) -> Path:

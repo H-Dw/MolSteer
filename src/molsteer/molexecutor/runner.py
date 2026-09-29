@@ -57,6 +57,10 @@ def run(config):
     controls=json.loads(Path(config['control_trajectory']).read_text()) if config.get('control_trajectory') else {}
     def evaluator(program):
         return make_reward(program,baseline,receptor,vocabulary,controls.get(program.get('affinity_head')))
+    if not config.get('gradient_preflight',True):
+        for path in config['reward_programs'].values():
+            if json.loads(Path(path).read_text(encoding='utf-8')).get('evaluator')=='agent_expert':
+                raise ValueError('Expert live programs require component-gradient preflight')
     if config.get('gradient_preflight',True):
         from molsteer.molmonitor.live_gradient import check_live_gradient
         preflight={}

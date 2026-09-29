@@ -2,3 +2,5 @@
 from .store import ResearchStore,load_packet
 from .providers import EuropePMC
 from .weighting import evidence_weight
+from .retrieval import ResearchProvider, LiteratureProvider, WebProvider
+from .corpus import MarkdownCorpus

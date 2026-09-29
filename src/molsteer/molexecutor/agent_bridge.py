@@ -59,6 +59,8 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
         raise ValueError('Agent continuation strength is invalid or inconsistent')
     if not isinstance(guard_template,dict) or any(k not in guard_template for k in _GUARD_FIELDS):
         raise ValueError('A complete reviewed FLOWR guard template is required')
+    if spec.get('schema_version')=='2.0.0':
+        return _compile_expert(spec,packet,report,checkpoint,guard_template,strength)
     terms = spec.get('terms') or []
     if not terms or any(term.get('view') not in ('state','prediction') for term in terms):
         raise ValueError('Only state and prediction coordinate terms can run live')
@@ -103,3 +105,30 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
 
 
 __all__=['compile_validated_agent_checkpoint']
+
+
+def _compile_expert(spec,packet,report,checkpoint,guard_template,strength):
+    checked=validate_and_test_reward(packet,spec,report,strength=strength)
+    if not checked['passed']: raise ValueError('Expert reward failed fresh validation')
+    observables=[o for d in spec['mathematical_design']['directions'] if d['status']=='executable' for o in d['observables']]
+    for view in {o['view'] for o in observables}:
+        rep=packet['representations'][view]
+        if (rep['coordinate_frame']!='receptor_world' or rep['coordinate_unit']!='angstrom'
+                or not rep['transform'].get('verified')
+                or rep['original_atom_ids']!=list(range(len(rep['original_atom_ids'])))):
+            raise ValueError('Expert FLOWR views require verified world transforms and native slot mapping')
+    editable=sorted({a for o in observables for a in o['atom_ids']})
+    declared=spec['model_dynamics']['editable_atom_ids']
+    if declared is not None: editable=sorted(set(editable)&set(declared))
+    if not editable: raise ValueError('No editable expert coordinates')
+    program=dict(kind='RewardProgram',mode='agent_expert',evaluator='agent_expert',
+                 packet_id=packet['packet_id'],identity=deepcopy(packet['identity']),
+                 source_reward_id=spec['reward_id'],agent_run_id=checkpoint['run_id'],
+                 expert_spec=deepcopy(spec),source_packet=deepcopy(packet),source_report=deepcopy(report),
+                 region_atom_ids=editable,active_objectives=[],weights=[],lambda_graph=0.,
+                 knowledge_source={'corpus':'knowledge/','retrieval':deepcopy(spec['retrieval'])},
+                 constraints=['fresh graph binding','editable mask','live component derivative preflight','post-injection direction','explicit constraint predicates'],
+                 inactive_compatibility_fields=['tau','rho','weights','lambda_graph'])
+    program.update({k:deepcopy(guard_template[k]) for k in _GUARD_FIELDS})
+    program['program_id']='rp_'+digest(program)[:24]
+    return program,float(strength),editable,checkpoint
