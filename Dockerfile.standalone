@@ -5,6 +5,7 @@
 # readable mirror with --build-arg MOLSTEER_URL=... on legacy builders, or use
 # Dockerfile.buildkit with a short-lived secret on a BuildKit-enabled host.
 FROM nvcr.io/nvidia/cuda:12.1.1-runtime-ubuntu22.04
+USER root
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -25,7 +26,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # The CUDA runtime image and pinned PyTorch cu121 wheel supply the GPU user
 # libraries. Python dependencies come from MolSteer's environment.yml.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Some managed legacy builders unpack the image's APT keyrings so _apt
+# cannot read them. Restore readable modes, keep signature checks enabled,
+# and avoid the base image's cache-clean hook, which also fails there.
+RUN chmod 0755 /etc/apt /etc/apt/trusted.gpg.d /usr/share/keyrings \
+    && chmod 0644 /etc/apt/trusted.gpg.d/*.gpg \
+                  /usr/share/keyrings/cuda-archive-keyring.gpg \
+    && rm -f /etc/apt/apt.conf.d/docker-clean \
+    && apt-get -o APT::Sandbox::User=root update \
+    && apt-get -o APT::Sandbox::User=root install -y --no-install-recommends \
         bash ca-certificates curl git openssh-server openssh-client sudo tini \
         libgl1 libglib2.0-0 libgomp1 libsm6 libxext6 libxrender1 \
     && rm -rf /var/lib/apt/lists/* \

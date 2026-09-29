@@ -2,6 +2,8 @@
 
 [`Dockerfile.standalone`](../Dockerfile.standalone) 使用旧版 Docker 可解析的指令，不包含 `RUN --mount` 或 heredoc，也不使用 `COPY`。它从固定版本的 NVIDIA CUDA 12.1 镜像开始，安装 Miniconda、PyTorch cu121、MolSteer Agent 与 FLOWR.ROOT 所需的 Python 依赖、OpenSSH Server 和 `sudo`。源码由 Git 获取，`MOLSTEER_REF` 与 `FLOWR_REF` 默认固定到已核对的提交；可在构建时用 `--build-arg` 显式更换。
 
+若平台在 `apt-get update` 报 `NO_PUBKEY 871920D1991BC93C`、`NO_PUBKEY A4B469963BF863CC`，同时提示镜像内的密钥文件无法被 `_apt` 读取，请使用已修复的 Dockerfile 重新构建。安装步骤会修复密钥文件权限、让 APT 以 root 读取密钥，并移除在该平台报错的缓存清理钩子；仓库签名校验仍然启用。此修复已在 `ml-apus.bio.sustech.edu.cn` 上用旧版 Docker 构建器验证至系统依赖安装完成，平台构建节点仍需重新验证。
+
 截至 2026-09-29，`jule-c/flowr_root` 可匿名克隆，但 `H-Dw/MolSteer` 对匿名 Git 请求返回 401。**旧版构建器无法在 `RUN` 中安全传入 GitHub token。**因此，平台构建 `Dockerfile.standalone` 时必须将 `MOLSTEER_URL` 设为构建节点可匿名读取、且包含指定 `MOLSTEER_REF` 提交的仓库镜像；如果将原仓库公开，默认地址也可使用。不要把含 token 的 URL 放进 `--build-arg`，它会暴露在构建记录中。
 
 旧版平台在网页构建参数中设置 `MOLSTEER_URL`；命令行等价用法如下。构建上下文可以为空，无需将源码放进构建目录：
