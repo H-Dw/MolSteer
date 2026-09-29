@@ -1,0 +1,119 @@
+# Build without a local source context:
+#   docker build --secret id=github_token,env=GITHUB_TOKEN \
+#     -t molsteer:standalone-cu121 - < Dockerfile.standalone
+# The token is needed while H-Dw/MolSteer is private. It is never copied into
+# the image. FLOWR.ROOT is fetched from its public upstream repository.
+FROM nvcr.io/nvidia/cuda:12.1.1-runtime-ubuntu22.04
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG MINICONDA_INSTALLER=Miniconda3-py312_25.3.1-1-Linux-x86_64.sh
+ARG MINICONDA_SHA256=8937a2c9a86cfc5495ba2234476f89686beff5c8e0569b1ed5771a927c75107b
+ARG MOLSTEER_URL=https://github.com/H-Dw/MolSteer.git
+ARG MOLSTEER_REF=f2951d7fb35f50b3838325200b2baf5dcc9c152c
+ARG FLOWR_URL=https://github.com/jule-c/flowr_root.git
+ARG FLOWR_REF=c545b14293d978706a36ab77218cf3cb55e8b6f5
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    CONDA_DIR=/opt/conda \
+    MOLSTEER_ROOT=/opt/MolSteer \
+    FLOWR_ROOT=/opt/MolSteer/flowr_root \
+    PYTHONPATH=/opt/MolSteer/flowr_root \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# The CUDA runtime image and pinned PyTorch cu121 wheel supply the GPU user
+# libraries. Python dependencies come from MolSteer's environment.yml.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bash ca-certificates curl git openssh-server openssh-client sudo tini \
+        libgl1 libglib2.0-0 libgomp1 libsm6 libxext6 libxrender1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -f /etc/ssh/ssh_host_* \
+    && useradd --create-home --shell /bin/bash --uid 1000 molsteer \
+    && usermod -aG sudo molsteer \
+    && printf '%s\n' 'molsteer ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/molsteer \
+    && chmod 0440 /etc/sudoers.d/molsteer \
+    && printf '%s\n' \
+        'PermitRootLogin no' \
+        'PasswordAuthentication no' \
+        'KbdInteractiveAuthentication no' \
+        'PubkeyAuthentication yes' \
+        'AllowUsers molsteer' > /etc/ssh/sshd_config.d/90-molsteer.conf \
+    && install -d -m 0700 -o molsteer -g molsteer /home/molsteer/.ssh
+
+RUN curl -fsSL "https://repo.anaconda.com/miniconda/${MINICONDA_INSTALLER}" \
+        -o /tmp/miniconda.sh \
+    && echo "${MINICONDA_SHA256}  /tmp/miniconda.sh" | sha256sum -c - \
+    && bash /tmp/miniconda.sh -b -p /opt/conda \
+    && rm /tmp/miniconda.sh \
+    && /opt/conda/bin/conda clean -afy
+
+ENV PATH=/opt/conda/bin:${PATH}
+
+# Source checkout is pinned so upstream changes cannot silently alter the
+# generator or MolSteer. BuildKit exposes the optional GitHub token only to
+# this RUN step. Git's askpass script is removed before the layer is committed.
+RUN --mount=type=secret,id=github_token,required=false <<'BASH'
+set -euo pipefail
+if [[ -s /run/secrets/github_token ]]; then
+    cat > /tmp/molsteer-git-askpass <<'ASKPASS'
+#!/bin/sh
+case "$1" in
+    *Username*) printf '%s\n' 'x-access-token' ;;
+    *Password*) tr -d '\r\n' < /run/secrets/github_token ;;
+esac
+ASKPASS
+    chmod 0700 /tmp/molsteer-git-askpass
+    export GIT_ASKPASS=/tmp/molsteer-git-askpass
+fi
+export GIT_TERMINAL_PROMPT=0
+git clone --quiet "${MOLSTEER_URL}" "${MOLSTEER_ROOT}"
+git -C "${MOLSTEER_ROOT}" checkout --quiet --detach "${MOLSTEER_REF}"
+test "$(git -C "${MOLSTEER_ROOT}" rev-parse HEAD)" = "${MOLSTEER_REF}"
+rm -f /tmp/molsteer-git-askpass
+git clone --quiet "${FLOWR_URL}" "${FLOWR_ROOT}"
+git -C "${FLOWR_ROOT}" checkout --quiet --detach "${FLOWR_REF}"
+test "$(git -C "${FLOWR_ROOT}" rev-parse HEAD)" = "${FLOWR_REF}"
+test -f "${FLOWR_ROOT}/flowr/__init__.py"
+BASH
+
+# FLOWR's upstream pyproject/uv.lock targets PyTorch 2.11 and CUDA 13.
+# Install the previously validated CUDA 12.1 dependency set instead, and
+# expose the pinned FLOWR source through PYTHONPATH without installing its
+# incompatible package metadata.
+RUN /opt/conda/bin/conda env create -f "${MOLSTEER_ROOT}/environment.yml" \
+    && /opt/conda/bin/conda clean -afy
+
+ENV PATH=/opt/conda/envs/molsteer-flowr/bin:/opt/conda/bin:${PATH}
+WORKDIR /opt/MolSteer
+
+RUN python -m pip install --no-deps -e /opt/MolSteer \
+    && python -m pip check \
+    && python -c 'import flowr.gen.generate_from_pdb; import molsteer, langchain_core, torch; assert torch.__version__.startswith("2.5.1"); assert torch.version.cuda == "12.1"' \
+    && chown -R molsteer:molsteer /opt/MolSteer
+
+# The container generates its own SSH host keys on each start. Supply user
+# public keys at /run/secrets/ssh_authorized_keys, or mount authorized_keys
+# at /home/molsteer/.ssh/authorized_keys. No password login is enabled.
+RUN <<'BASH'
+printf '%s\n' \
+    'SetEnv PATH=/opt/conda/envs/molsteer-flowr/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin MOLSTEER_ROOT=/opt/MolSteer FLOWR_ROOT=/opt/MolSteer/flowr_root PYTHONPATH=/opt/MolSteer/flowr_root' \
+    >> /etc/ssh/sshd_config.d/90-molsteer.conf
+cat > /usr/local/bin/molsteer-entrypoint <<'ENTRYPOINT'
+#!/usr/bin/env bash
+set -euo pipefail
+install -d -m 0755 /run/sshd
+ssh-keygen -A >/dev/null
+if [[ -f /run/secrets/ssh_authorized_keys ]]; then
+    install -d -m 0700 -o molsteer -g molsteer /home/molsteer/.ssh
+    install -m 0600 -o molsteer -g molsteer \
+        /run/secrets/ssh_authorized_keys /home/molsteer/.ssh/authorized_keys
+fi
+exec "$@"
+ENTRYPOINT
+chmod 0755 /usr/local/bin/molsteer-entrypoint
+BASH
+
+EXPOSE 22
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/molsteer-entrypoint"]
+CMD ["/usr/sbin/sshd", "-D", "-e"]

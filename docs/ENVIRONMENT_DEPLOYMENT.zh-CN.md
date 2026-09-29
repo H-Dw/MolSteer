@@ -40,6 +40,8 @@ python -m pytest tests -q
 
 ## Docker 镜像
 
+如果构建机器没有现成的 MolSteer/FLOWR 源码目录，可使用[独立构建 Dockerfile](STANDALONE_DOCKER.zh-CN.md)。它在构建阶段从固定的 Git 提交拉取两套源码，不使用本地 `COPY`；私有 MolSteer 仓库通过一次性 BuildKit secret 提供 GitHub 读取凭据，并预装 Miniconda、CUDA、SSH 服务和 `sudo`。
+
 [`Dockerfile`](../Dockerfile) 提供 `agent` 与 `flowr` 两个构建目标。它以固定版本的 Conda Forge Miniforge 镜像为基础，PyTorch cu121 wheel 安装用户态 CUDA 库，并分别创建上述 Conda 环境。`flowr` 目标要求构建目录内有 `flowr_root/flowr/`；该目录由用户单独管理，不进入 MolSteer Git 仓库。`.dockerignore` 只发送必要的生成器源码与 vendored PoseBusters，跳过虚拟环境、输出、数据和模型权重。
 
 ```bash
