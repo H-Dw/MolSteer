@@ -19,24 +19,23 @@ generator 的上游 `flowr_root/pyproject.toml` 与 `uv.lock` 针对 CUDA 13 / G
 | [`environment.agent.yml`](../environment.agent.yml) | MolSteer Agent、奖励验证与独立评估；无需生成器源码即可创建 |
 | [`environment.yml`](../environment.yml) | MolSteer + FLOWR 生成与续推；包含 generator 的直接运行依赖 |
 
-两个文件固定主依赖版本，由 pip 安装其传递依赖；它们是可重建的环境规格，不是逐个 wheel 哈希锁。依赖建好后，从仓库根目录以 editable 方式安装当前 MolSteer 源码。Docker 构建也按这个顺序分层，使源码更新不会重装整套 CUDA 依赖。如已在其他环境中运行作业，请勿原地替换；新建环境后分别验证。
+两个文件固定主依赖版本，由 pip 安装其传递依赖；它们是可重建的环境规格，不是逐个 wheel 哈希锁。`environment.yml` 不会安装操作系统动态库。Ubuntu/Debian 的精简容器需先安装下面的系统包；其中 `libxrender1` 提供 `libXrender.so.1`，`libxext6` 提供 `libXext.so.6`。Dockerfile 已包含同一组包。依赖建好后，从仓库根目录以 editable 方式安装当前 MolSteer 源码。Docker 构建也按这个顺序分层，使源码更新不会重装整套 CUDA 依赖。如已在其他环境中运行作业，请勿原地替换；新建环境后分别验证。
 
 ```bash
-cd /data1/dhuang/MolSteer
-/data1/dhuang/miniconda3/bin/conda env create -f environment.agent.yml
-/data1/dhuang/miniconda3/bin/conda env create -f environment.yml
+# 以下命令在 MolSteer 仓库根目录运行；root 用户可直接执行 apt-get
+apt-get update
+apt-get install -y libgl1 libglib2.0-0 libgomp1 libsm6 libxext6 libxrender1
 
-# 在 Bash 中启用 Conda 后选择一个环境
-eval "$(/data1/dhuang/miniconda3/bin/conda shell.bash hook)"
+conda env create -f environment.yml
 conda activate molsteer-flowr
 python -m pip install --no-deps -e .
-export FLOWR_ROOT="$PWD/flowr_root"
-export PYTHONPATH="$FLOWR_ROOT${PYTHONPATH:+:$PYTHONPATH}"
-python -c 'import molsteer, flowr, langchain_core, torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())'
+export FLOWR_ROOT=flowr_root
+export PYTHONPATH="./flowr_root${PYTHONPATH:+:$PYTHONPATH}"
+python -c 'import flowr.gen.generate_from_pdb; import molsteer, langchain_core, torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())'
 python -m pytest tests -q
 ```
 
-若只运行 Agent，请激活 `molsteer-agent`，并同样执行 `python -m pip install --no-deps -e .`。如需从纯 Agent 环境执行 FLOWR 续推，应改用 `molsteer-flowr`；两种环境都从宿主进程读取 `OPENROUTER_API_KEY`，不从仓库文件读取。
+非 root 用户在上述 `apt-get` 命令前加 `sudo`。若只运行 Agent，则使用 `conda env create -f environment.agent.yml`、`conda activate molsteer-agent`，并同样执行 `python -m pip install --no-deps -e .`。如需从纯 Agent 环境执行 FLOWR 续推，应改用 `molsteer-flowr`；两种环境都从宿主进程读取 `OPENROUTER_API_KEY`，不从仓库文件读取。
 
 ## Docker 镜像
 
