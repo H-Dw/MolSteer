@@ -39,7 +39,7 @@ python -m pytest tests -q
 
 ## Docker 镜像
 
-[`Dockerfile`](../Dockerfile) 提供 `agent` 与 `flowr` 两个构建目标。它以 CUDA 12.1 运行时镜像和固定版本 Miniforge 为基础，分别创建上述 Conda 环境。`flowr` 目标要求构建目录内有 `flowr_root/flowr/`；该目录由用户单独管理，不进入 MolSteer Git 仓库。`.dockerignore` 只发送必要的生成器源码与 vendored PoseBusters，跳过虚拟环境、输出、数据和模型权重。
+[`Dockerfile`](../Dockerfile) 提供 `agent` 与 `flowr` 两个构建目标。它以 CUDA 12.1 base 镜像和固定版本 Miniforge 为基础，PyTorch cu121 wheel 安装用户态 CUDA 库，并分别创建上述 Conda 环境。`flowr` 目标要求构建目录内有 `flowr_root/flowr/`；该目录由用户单独管理，不进入 MolSteer Git 仓库。`.dockerignore` 只发送必要的生成器源码与 vendored PoseBusters，跳过虚拟环境、输出、数据和模型权重。
 
 ```bash
 cd /data1/dhuang/MolSteer
