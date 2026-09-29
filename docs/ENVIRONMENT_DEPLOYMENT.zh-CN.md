@@ -65,3 +65,5 @@ docker run --rm --gpus all \
 容器中的新阶段可继续使用 `integrations/flowr_root/agent_continuation.py` 续推。旧的精确检查点包含原宿主机的绝对路径、模型哈希、stage runner 哈希和 GPU 信息；迁移到容器后须按[精确恢复说明](FLOWR_ROOT_LINUX.zh-CN.md)重建或核验这些来源，不能仅因路径已挂载就假定可直接恢复。
 
 当前服务器尚未注册 NVIDIA 容器运行时；`docker run --gpus all` 当前报 `could not select device driver`。GPU 容器运行前需由服务器管理员按 [NVIDIA Container Toolkit 官方安装说明](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)配置 Docker 运行时。在此之前可直接使用上述 Conda 环境运行 GPU 生成，镜像可用于 CPU 导入和流程检查。
+
+2026-09-29 已在远端用 `--network=host` 构建两个镜像；容器内 `pip check` 均通过，FLOWR 镜像可导入生成器与 Agent、加载两个运行入口，且 `tests/test_agent_flowr_bridge.py` 与 `tests/test_agent_runtime.py` 共 11 项测试通过。容器 GPU 生成未验证，因为宿主 Docker 缺少上述 NVIDIA 运行时。
