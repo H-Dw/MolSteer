@@ -39,12 +39,12 @@ python -m pytest tests -q
 
 ## Docker 镜像
 
-[`Dockerfile`](../Dockerfile) 提供 `agent` 与 `flowr` 两个构建目标。它以 CUDA 12.1 base 镜像和固定版本 Miniforge 为基础，PyTorch cu121 wheel 安装用户态 CUDA 库，并分别创建上述 Conda 环境。`flowr` 目标要求构建目录内有 `flowr_root/flowr/`；该目录由用户单独管理，不进入 MolSteer Git 仓库。`.dockerignore` 只发送必要的生成器源码与 vendored PoseBusters，跳过虚拟环境、输出、数据和模型权重。
+[`Dockerfile`](../Dockerfile) 提供 `agent` 与 `flowr` 两个构建目标。它以固定版本的 Conda Forge Miniforge 镜像为基础，PyTorch cu121 wheel 安装用户态 CUDA 库，并分别创建上述 Conda 环境。`flowr` 目标要求构建目录内有 `flowr_root/flowr/`；该目录由用户单独管理，不进入 MolSteer Git 仓库。`.dockerignore` 只发送必要的生成器源码与 vendored PoseBusters，跳过虚拟环境、输出、数据和模型权重。
 
 ```bash
 cd /data1/dhuang/MolSteer
-docker build --target agent -t molsteer:agent-cu121 .
-docker build --target flowr -t molsteer:flowr-cu121 .
+docker build --network=host --target agent -t molsteer:agent-cu121 .
+docker build --network=host --target flowr -t molsteer:flowr-cu121 .
 
 # 离线检查；不会调用 OpenRouter
 docker run --rm molsteer:agent-cu121 python -c 'import langchain_core, molsteer; print(langchain_core.__version__)'
@@ -63,3 +63,5 @@ docker run --rm --gpus all \
 ```
 
 容器中的新阶段可继续使用 `integrations/flowr_root/agent_continuation.py` 续推。旧的精确检查点包含原宿主机的绝对路径、模型哈希、stage runner 哈希和 GPU 信息；迁移到容器后须按[精确恢复说明](FLOWR_ROOT_LINUX.zh-CN.md)重建或核验这些来源，不能仅因路径已挂载就假定可直接恢复。
+
+当前服务器尚未注册 NVIDIA 容器运行时；`docker run --gpus all` 当前报 `could not select device driver`。GPU 容器运行前需由服务器管理员按 [NVIDIA Container Toolkit 官方安装说明](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)配置 Docker 运行时。在此之前可直接使用上述 Conda 环境运行 GPU 生成，镜像可用于 CPU 导入和流程检查。

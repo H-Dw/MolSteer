@@ -1,20 +1,15 @@
-# PyTorch cu121 wheels supply their CUDA user-space libraries.
-FROM nvidia/cuda:12.1.1-base-ubuntu22.04 AS base
+# PyTorch cu121 wheels supply CUDA user-space libraries; Miniforge supplies Conda.
+FROM condaforge/miniforge3:25.3.0-3 AS base
 
-ARG MINIFORGE_VERSION=25.3.0-3
 ENV DEBIAN_FRONTEND=noninteractive \
     CONDA_DIR=/opt/conda \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        bash ca-certificates curl bzip2 libgl1 libglib2.0-0 libgomp1 \
+        bash ca-certificates libgl1 libglib2.0-0 libgomp1 \
         libsm6 libxext6 libxrender1 && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL "https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh" \
-        -o /tmp/miniforge.sh && \
-    bash /tmp/miniforge.sh -b -p "$CONDA_DIR" && \
-    rm /tmp/miniforge.sh
+    rm -rf /var/lib/apt/lists/*
 
 ENV PATH=/opt/conda/bin:$PATH
 WORKDIR /opt/MolSteer
