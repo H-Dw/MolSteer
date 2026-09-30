@@ -8,6 +8,8 @@ MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 
 
 Linux 服务器的 [Conda 环境与 Docker 镜像配置](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md)包含 MolSteer Agent、FLOWR 生成器和 CUDA 12.1 的当前验证版本。
 
+SCNet 的 DTK 26.04 异构加速卡 Notebook 使用单独的 [推理 Conda 环境配置记录](docs/SCNET_DTK_CONDA_INFERENCE.zh-CN.md)。
+
 - MolReader：43 个独立指标、多视图 StatePacket、只报告风险的中英文 DiagnosticReport。
 - MolThinker：知识检索、适用性检查、奖励选择或组合，以及可执行 RewardProgram。
 - MolExecutor：可微奖励、明确的梯度注入、模型适配、自动启动脚本和完整运行检查点。
@@ -18,6 +20,8 @@ Linux 服务器的 [Conda 环境与 Docker 镜像配置](docs/ENVIRONMENT_DEPLOY
 新增[完整阶段检查点与相同奖励的起始时间对照](docs/EXACT_RESTART.zh-CN.md)，直接保存原生轨迹的自条件缓存和 RNG，并验证精确续跑。
 
 [MolMonitor 架构与文献依据](docs/MOLMONITOR.zh-CN.md)说明动态控制、异常定位、反馈摘要及函数修订后的恢复约定。
+
+[MolMonitor 与可选图复核](docs/MOLMONITOR_GRAPH_REVIEW.zh-CN.md)说明父子开关、默认关闭的图复核流程，以及 t=0.50 单分子五档奖励权重测试约定。
 
 [基于无引导对照的奖励与主动图搜索](docs/OUTCOME_GUIDANCE.zh-CN.md)说明自然修复归因、连续 MMFF 梯度、方向相互作用、埋藏极性代价、实际分类张量试探，以及根据独立评分和梯度冲突修订目标。文档保留了动态修订未改善终态的测试反例。
 

@@ -1,0 +1,14 @@
+{
+  "split": "data/split_by_name.pt",
+  "data_root": "data/crossdocked_pocket10",
+  "model_root": "flowr_root",
+  "stage_runner": "integrations/flowr_root/stage_runner.py",
+  "checkpoint": "flowr_root/checkpoints/flowr_root_v2.2.ckpt",
+  "output": "outputs/flowr_100target_checkpoints",
+  "expected_targets": 100,
+  "integration_steps": 100,
+  "seed": 20260930,
+  "device": "cuda",
+  "gpu": 0,
+  "chain_id": null
+}

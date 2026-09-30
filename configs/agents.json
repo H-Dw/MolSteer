@@ -57,6 +57,7 @@
     "langsmith_tracing": false
   },
   "monitoring": {
+    "graph_review_enabled": false,
     "window": 8,
     "warmup": 4,
     "threshold": 4.5,

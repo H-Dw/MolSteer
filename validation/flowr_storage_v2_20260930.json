@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-30",
+  "format": "molsteer.flowr.batch_trajectory.v2",
+  "remote_run": "/root/private_data/MolSteer/outputs/flowr_100target_checkpoints",
+  "migration_report": "/root/private_data/MolSteer/validation/flowr_storage_migration_20260930.json",
+  "original_source_backup": "/root/private_data/MolSteer/validation/flowr_checkpoint_v1_sources_20260930.zip",
+  "completed_targets_migrated": 68,
+  "molecule_references": 204,
+  "batch_files": 68,
+  "incomplete_target_directories_unchanged": [
+    "068_5d7n_D_rec_4jt9_1ns_lig_tt_min_0",
+    "071_4gvd_A_rec_4nxr_ans_lig_tt_min_0"
+  ],
+  "audit": {
+    "original_tensor_bytes": 1421602464,
+    "shared_tensor_bytes_before_pooling": 473867488,
+    "duplicate_batch_tensor_bytes": 947734976,
+    "pooled_tensor_bytes": 467788288
+  },
+  "checkpoint_file_sizes": {
+    "before_bytes": 1457811936,
+    "after_bytes": 489822208,
+    "saved_bytes": 967989728,
+    "saved_percent": 66.40017852069501,
+    "scope": "Completed targets' molecule and batch .pt files; excludes audit journals and source backups."
+  },
+  "verification": {
+    "real_data_roundtrip": "All common fields, all tensor bits/dtypes/shapes/strides, per-member SDF/status/index metadata and RNG preserved; each of 204 public molecule entry points reloaded after migration.",
+    "local_tests_passed": 44,
+    "remote_stochastic_model_suffixes_passed": 24,
+    "remote_suffix_test_scope": "3 members x 8 starting times, comparing remaining state, self-conditioning, final predictions and RNG.",
+    "fresh_real_model_gpu_replay": "not_run",
+    "reason": "Current remote instance reports no available CUDA/DTK device. Existing historical inference verification is preserved without being relabeled as a new GPU replay."
+  }
+}

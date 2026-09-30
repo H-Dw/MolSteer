@@ -100,9 +100,10 @@ H_t 包含上一次力度附近的扩张/收缩候选、下限及预算饱和上
 - `controller.py`：力度候选、选择、持续性、冷却和路由状态。
 - `runtime.py`：接入适配器，执行候选检查、提交及完整状态保存。
 - `feedback.py`：生成紧凑 RewardRevisionRequest。
+- `graph_review/changes.py`、`graph_review/session.py`：默认关闭的图变化识别与 Reader → Thinker → Executor 复核。
 - `molthinker/feedback.py`：接收/检索上下文，校验修订响应。
 
-通用 Executor 在配置存在 `monitor` 时启用该循环；原路径保持可用。该循环需要适配器实现 live prediction、endpoint、native step、注入尺度、序列化/恢复接口。控制器本身不依赖 FLOWR 的网络结构，但当前集成验证只覆盖 FLOWR.ROOT。
+通用 Executor 在配置包含启用的 `monitor` 时进入该循环；`monitor.enabled=false` 明确关闭。图复核是其子模块，须另行显式设置 `monitor.graph_review.enabled=true`，默认关闭，并服从父开关。Agent 分段监控通过 `agents.molmonitor.enabled` 控制，其图复核开关 `monitoring.graph_review_enabled` 也默认关闭；详见[父子开关与图复核流程](MOLMONITOR_GRAPH_REVIEW.zh-CN.md)。该循环需要适配器实现 live prediction、endpoint、native step、注入尺度、序列化/恢复接口。控制器本身不依赖 FLOWR 的网络结构，但当前集成验证只覆盖 FLOWR.ROOT。
 
 修订响应包含 request_id、parent_program_id、新 program、理由与验证计划。用 Executor 的 `--revision-response` 和 `--resume` 加载挂起状态。身份、引用、硬阈值、监控策略及预算不允许静默变化；累计路径、自条件及 RNG 保留。新奖励须通过当前状态的 live gradient preflight 后续推理。
 
@@ -115,6 +116,8 @@ H_t 包含上一次力度附近的扩张/收缩候选、下限及预算饱和上
 ```json
 {
   "monitor": {
+    "enabled": true,
+    "graph_review": {"enabled": false},
     "reference": "/data1/dhuang/flowr_root/output/molsteer_monitor_20260923/reference.json",
     "knowledge_path": "/data1/dhuang/flowr_root/MolSteer/knowledge/Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md",
     "policy": {"initial_eta": 30.0, "max_eta": 10000.0}

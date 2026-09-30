@@ -9,7 +9,8 @@ from pathlib import Path
 import torch
 from molsteer.common import write_json,digest
 from molsteer.molexecutor.expert_control import probe_predict
-from .graph_change import tensor_graph,graph_changes,review_event
+from .changes import tensor_graph,graph_changes,review_event
+from ..settings import graph_review_settings
 
 
 def graph_dependent_views(reward):
@@ -43,7 +44,7 @@ def refresh_reward(adapter,reward,directory,event,endpoint,settings,budget):
     from molsteer.agents.runtime import AgentRuntime
     from molsteer.molexecutor.agent_bridge import compile_validated_agent_checkpoint
     from molsteer.molexecutor.program import make_reward
-    from .live_gradient import check_live_gradient
+    from ..live_gradient import check_live_gradient
     directory=Path(directory);directory.mkdir(parents=True,exist_ok=False)
     time=float(adapter.grid[adapter.step_index])
     name=f't_{time:.8f}'
@@ -100,9 +101,9 @@ def refresh_reward(adapter,reward,directory,event,endpoint,settings,budget):
 
 
 class GraphReviewSession:
-    """Detect each newly observed graph once; review is opt-in via agent_config."""
+    """Opt-in MolMonitor child; detect each newly observed graph once."""
     def __init__(self,adapter,reward,output,budget,arm,reviewer=None):
-        settings=adapter.config.get('graph_review')
+        settings=graph_review_settings(adapter.config)
         self.enabled=arm!='unguided' and bool(settings)
         self.adapter=adapter;self.output=Path(output);self.budget=budget
         self.settings=settings or {};self.reviewer=reviewer or refresh_reward

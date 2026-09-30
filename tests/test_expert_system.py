@@ -110,6 +110,32 @@ def test_complete_biology_and_retrieval_coverage(case):
     with pytest.raises(ValueError,match='weighted sums'):validate_math(bad,b,p,[ret],{})
 
 
+def test_rejected_lineage_feedback_identifies_field_without_echoing_formula(case):
+    from molsteer.agents.loop import _validation_feedback
+    p,r,b,d,ret=case
+    bad=copy.deepcopy(d)
+    bad['directions'][0]['function_lineage'][0]['original_formula']='rejected-private-input'
+    with pytest.raises(ValueError) as error:validate_math(bad,b,p,[ret],{})
+    feedback=_validation_feedback(error.value)
+    assert feedback['validation_path']==['directions',0,'function_lineage',0,'original_formula']
+    assert 'exact substring' in feedback['validation_hint']
+    assert 'rejected-private-input' not in json.dumps(feedback)
+
+
+def test_rejected_evidence_feedback_identifies_direction_without_echoing_ids(case):
+    from molsteer.agents.loop import _validation_feedback
+    p,r,b,d,ret=case
+    bad=copy.deepcopy(b)
+    index=next(i for i,direction in enumerate(bad['directions'])
+               if set(r['evidence_index'])-set(direction['evidence_ids']))
+    bad['directions'][index]['evidence_ids']=[next(iter(set(r['evidence_index'])-set(bad['directions'][index]['evidence_ids'])))]
+    with pytest.raises(ValueError) as error:validate_biology(bad,r)
+    feedback=_validation_feedback(error.value)
+    assert feedback['validation_path']==['directions',index,'evidence_ids']
+    assert all(evidence_id not in json.dumps(feedback)
+               for evidence_id in bad['directions'][index]['evidence_ids'])
+
+
 def test_required_deferred_direction_is_not_executable(case):
     p,r,b,d,ret=case;d=copy.deepcopy(d)
     d['directions'][0].update(status='design_only',expression=None,missing_requirements=['Live physical applicability is unknown.'])

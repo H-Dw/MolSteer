@@ -12,6 +12,7 @@ from .features import snapshot
 from .reference import ReferenceTrajectory
 from .controller import MonitorPolicy,AdaptiveController
 from .feedback import revision_request,compact
+from .settings import graph_review_settings
 
 
 def guidance_capacity(norms,available,mask):
@@ -58,7 +59,7 @@ def candidate_failures(frame,base,before,temporal,policy):
 def run_monitored_suffix(adapter,reward,output,budget,arm):
     from functools import partial
     from molsteer.molexecutor.expert_control import probe_predict
-    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') or adapter.config.get('graph_review') else adapter.predict
+    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') or graph_review_settings(adapter.config) else adapter.predict
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     interval=adapter.config.get('guidance_interval',[0.,1.])
     if len(interval)!=2 or not 0<=interval[0]<interval[1]<=1:
@@ -243,6 +244,7 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
         adapter.save_stage(output,'final',1.);torch.save(adapter.checkpoint(),output/'resume_final.pt')
     torch.save(tensor_trace,output/'tensor_trace.pt')
     result=dict(arm=arm,status='complete' if completed else 'revision_requested',steps=len(rows),
+        monitor_enabled=True,graph_reviews=graph_review.state.get('reviews',0),
         accepted_steps=sum(r['accepted'] for r in rows),gradient_steps=sum(r['gradient_norm'] is not None for r in rows),
         max_injected_path_angstrom=float(path_used.max()),wall_seconds=time.perf_counter()-started,
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(adapter.device),

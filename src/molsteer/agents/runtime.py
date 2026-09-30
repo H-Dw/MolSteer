@@ -173,15 +173,23 @@ class AgentRuntime:
             trials=state['validation']['trials']
             state['execution_result']={'done':True,'mode':'validation_only','metrics':{'penalty_after':sum(t['penalty_after'] for t in trials)},'validation':state['validation']}
         state['segments']+=1; state['route']='monitor'
+        if not self.config.agents['molmonitor'].enabled:
+            if state['execution_result']['done']:
+                state['status']='completed' if state['execute'] else 'validated'
+                state['route']='done'
+            elif state['segments']>=self.config.runtime.max_segments:
+                state['status']='segment_limit';state['route']='done'
+            else:
+                state['route']='executor'
         append_trace(state,node='executor',kind='observation',summary='Live adapter segment' if state['execute'] else 'Numerical tests only; inference not run',output=state['execution_result'])
         return state
 
     def monitoring(self,state):
         event=self.monitor.observe(monitor_metrics(state['execution_result']),step=state['segments'])
         latest=state['execution_result'].get('packet')
-        if latest is not None and event['route']!='stop':
+        if self.config.monitoring.graph_review_enabled and latest is not None and event['route']!='stop':
             validate_packet(latest)
-            from molsteer.molmonitor.graph_change import packet_change_event
+            from molsteer.molmonitor.graph_review.changes import packet_change_event
             changed=packet_change_event(state['packet'],latest,step=state['segments'],
                                        parent_program_id=state['reward_spec'].get('reward_id'))
             if changed:
@@ -248,10 +256,11 @@ class AgentRuntime:
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
         state['model_dynamics']=deepcopy(self.model_dynamics)
         if feedback is not None:state['monitor_event']=deepcopy(feedback)
-        self.monitor=RobustMonitor(self.config.monitoring)
+        self.monitor=RobustMonitor(self.config.monitoring) if self.config.agents['molmonitor'].enabled else None
         try:
             if self.config.mode=='api':
                 for name in AGENT_NAMES:
+                    if not self.config.agents[name].enabled:continue
                     if name!='molthinker' or self.config.thinker.architecture=='single': self._model(name)
             from .workflow import build_workflow
             state=build_workflow(self).invoke(state,{'recursion_limit':4*self.config.runtime.max_segments+4*self.config.runtime.max_replans+10})

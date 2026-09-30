@@ -63,7 +63,7 @@ def test_packet_changes_ignore_coordinates_and_keep_slot_roles(tmp_path):
 class Adapter:
     index=0;step_index=50;grid=torch.linspace(0,1,101)
     def __init__(self,pred):
-        self.config={'graph_review':{'agent_config':'fixture.json','max_reviews':2},'target_id':'target'}
+        self.config={'monitor':{'enabled':True,'graph_review':{'enabled':True,'agent_config':'fixture.json','max_reviews':2}},'target_id':'target'}
         self.curr={k:v.unsqueeze(0).clone() for k,v in pred.items()};self.curr['mask']=torch.ones(1,3,dtype=torch.bool)
         self.cond={'cache':torch.ones(1)}
         self.guidance_state={'arm':'agent','program_id':'old','path_used':torch.tensor([[.1,.2,.3]])}
@@ -169,7 +169,7 @@ def test_agent_workflow_routes_fresh_graph_through_reader_before_thinker(tmp_pat
     from molsteer.agents.state import initial_state
     old=packet_at(tmp_path/'old',molecule('CCC'))
     new=packet_at(tmp_path/'new',molecule('COC'),.51)
-    cfg=agent_config();cfg.mode='offline'
+    cfg=agent_config();cfg.mode='offline';cfg.monitoring.graph_review_enabled=True
     runtime=AgentRuntime(cfg);runtime.monitor=RobustMonitor()
     order=[]
     # Real Reader, Monitor and LangGraph routing. Lightweight Thinker/Executor
@@ -231,19 +231,20 @@ def test_real_reader_offline_thinker_compiler_and_live_preflight(tmp_path):
     assert (tmp_path/'review'/'gradient_preflight.json').is_file()
 
 
-def test_failed_review_full_suffix_matches_native_state_and_rng(tmp_path,monkeypatch):
+def test_disabled_monitor_full_suffix_matches_native_state_and_rng(tmp_path,monkeypatch):
     from molsteer.molexecutor.engine import run_suffix
     for name in ('reset_peak_memory_stats','max_memory_allocated'):
         monkeypatch.setattr(torch.cuda,name,lambda *a,**k:0)
-    import molsteer.molmonitor.graph_review as module
-    def fail(*args):torch.rand(30);raise RuntimeError('Unavailable Agent')
-    monkeypatch.setattr(module,'refresh_reward',fail)
+    import molsteer.molmonitor.graph_review.session as module
+    monkeypatch.setattr(module.GraphReviewSession,'__init__',
+        lambda *args,**kwargs:pytest.fail('Disabled monitor must not construct a graph review'))
     class Sampler(Adapter):
         step_index=0;device='cpu';args=SimpleNamespace(integration_steps=2)
         grid=torch.tensor([0.,.5,1.]);times=[torch.zeros(1)]
         model=SimpleNamespace(coord_scale=1.,parameters=lambda:[])
         def __init__(self):
             super().__init__(molecule('COC'));self.guidance_state={}
+            self.config['monitor']['enabled']=False
             self.times=[torch.zeros(1)];self.step_index=0
         def native_step(self,pred,cond,dt):
             self.curr['coords']=self.curr['coords']+.01*torch.rand_like(self.curr['coords'])
@@ -255,8 +256,30 @@ def test_failed_review_full_suffix_matches_native_state_and_rng(tmp_path,monkeyp
     run_suffix(native,reward,tmp_path/'native',GuidanceBudget(),'unguided')
     final_rng=torch.get_rng_state()
     torch.set_rng_state(rng);guided=Sampler()
-    result=run_suffix(guided,reward,tmp_path/'guided',GuidanceBudget(),'agent')
-    assert result['accepted_steps']==0 and result['steps']==2 and result['graph_reviews']==2
+    result=run_suffix(guided,reward,tmp_path/'guided',GuidanceBudget(),'unguided')
+    assert result['accepted_steps']==0 and result['steps']==2 and result['graph_reviews']==0
+    assert result['monitor_enabled'] is False
     for key in native.curr:torch.testing.assert_close(native.curr[key],guided.curr[key],atol=0,rtol=0)
     torch.testing.assert_close(native.cond['cache'],guided.cond['cache'],atol=0,rtol=0)
     assert torch.equal(final_rng,torch.get_rng_state())
+
+
+@pytest.mark.parametrize('settings',[
+    {}, {'monitor':False}, {'monitor':{'enabled':False,'graph_review':{'enabled':True}}},
+    {'monitor':{'enabled':True}},
+    {'monitor':{'enabled':True,'graph_review':{'agent_config':'fixture.json'}}},
+    {'monitor':{'enabled':True,'graph_review':{'enabled':False,'agent_config':'fixture.json'}}},
+])
+def test_graph_review_is_off_by_default_and_obeys_parent_switch(tmp_path,settings):
+    adapter=Adapter(molecule('COC'));adapter.config=settings
+    session=GraphReviewSession(adapter,reward_for(molecule('CCC')),tmp_path,GuidanceBudget(),'agent',
+        reviewer=lambda *a:pytest.fail('Disabled review must not call an Agent'))
+    assert session.enabled is False
+    assert session.before_step(reward_for(molecule('CCC')))[1:]==(None,True)
+    assert not tmp_path.joinpath('graph_reviews').exists()
+
+
+def test_legacy_independent_graph_review_requires_explicit_migration():
+    from molsteer.molmonitor.settings import graph_review_settings
+    with pytest.raises(ValueError,match='monitor.graph_review'):
+        graph_review_settings({'graph_review':{'agent_config':'fixture.json'}})

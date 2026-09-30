@@ -251,7 +251,7 @@ def evaluate_with_state(reward, adapter, endpoint, state_coordinates):
     return reward.evaluate(endpoint)
 
 
-def make_reward(program,baseline,receptor,vocabulary,control=None):
+def _make_reward(program,baseline,receptor,vocabulary,control=None):
     if program.get('evaluator')=='agent_expert':
         from .expert_reward import ExpertReward
         return ExpertReward(program,baseline,receptor,vocabulary)
@@ -274,3 +274,9 @@ def make_reward(program,baseline,receptor,vocabulary,control=None):
         if control is None:raise ValueError('Affinity guidance requires a matched control trajectory')
         return AffinityStructureReward(program,baseline,receptor,vocabulary,control)
     return MolecularReward(program,baseline,receptor,vocabulary)
+
+
+def make_reward(program,baseline,receptor,vocabulary,control=None):
+    from .weighted_reward import WeightedReward
+    reward=_make_reward(program,baseline,receptor,vocabulary,control)
+    return WeightedReward(reward,program['reward_weight']) if 'reward_weight' in program else reward

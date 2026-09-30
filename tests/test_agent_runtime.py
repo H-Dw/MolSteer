@@ -38,6 +38,28 @@ def test_offline_graph_and_input_immutability(config, inputs):
     assert {e['node'] for e in state['trace']} == {'reader','thinker','executor','monitor'}
 
 
+def test_disabled_monitor_is_skipped_and_validation_finishes(config,inputs,monkeypatch):
+    config.agents['molmonitor'].enabled=False
+    runtime=AgentRuntime(config)
+    monkeypatch.setattr(runtime,'monitoring',lambda *a:pytest.fail('Disabled monitor was invoked'))
+    state=runtime.run(*inputs)
+    assert state['status']=='validated' and state['validation']['passed']
+    assert runtime.monitor is None
+    assert {e['node'] for e in state['trace']}=={'reader','thinker','executor'}
+
+
+def test_disabled_monitor_continues_segments_without_retuning(config,inputs):
+    config.agents['molmonitor'].enabled=False
+    requests=[]
+    def adapter(**kwargs):
+        requests.append(kwargs['request'])
+        return {'done':len(requests)==3,'metrics':{'movement':float('nan')}}
+    state=AgentRuntime(config,inference_adapter=adapter,approve_inference=True).run(*inputs,execute=True)
+    assert state['status']=='completed' and len(requests)==3
+    assert all(r['strength']==1. for r in requests)
+    assert not any(e['node']=='monitor' for e in state['trace'])
+
+
 def test_monitor_persistence_and_escalation():
     monitor = RobustMonitor(warmup=2, window=4, persistence=2, cooldown=0, max_retunes=2)
     for _ in range(2): monitor.observe({'energy':1000., 'displacement':.1})

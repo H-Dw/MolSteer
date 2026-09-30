@@ -118,6 +118,7 @@ class ThinkerConfig(StrictModel):
 
 
 class MonitoringConfig(StrictModel):
+    graph_review_enabled: bool = False
     window: int = Field(default=8, ge=1)
     warmup: int = Field(default=4, ge=0)
     threshold: float = Field(default=4.5, ge=0)

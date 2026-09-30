@@ -2,6 +2,7 @@
 from typing import Literal
 from pydantic import Field, field_validator
 from .config import StrictModel
+from .contract_errors import ContractValidationError
 from molsteer.common import digest
 from molsteer.molthinker.expressions import validate_expression, validate_observables
 
@@ -90,13 +91,14 @@ def validate_biology(plan, report):
         raise ValueError('Direction identities and ranks must be unique and contiguous')
     covered = set()
     constraints = {d['direction_id'] for d in directions if d['disposition'] == 'constraint'}
-    for direction in directions:
+    for direction_index, direction in enumerate(directions):
         fs, evidence = set(direction['finding_ids']), set(direction['evidence_ids'])
         if not fs <= set(findings) or not evidence <= set(report['evidence_index']):
             raise ValueError('Biological direction cites unknown diagnostic evidence')
         related = {e for f in fs for e in findings[f]['evidence_ids']}
         if not evidence <= related:
-            raise ValueError('Evidence does not belong to the direction findings')
+            raise ContractValidationError('Evidence does not belong to the direction findings',
+                                          ['directions', direction_index, 'evidence_ids'])
         if not set(direction['preservation_conditions']) <= constraints:
             raise ValueError('Preservation conditions must reference explicit constraint directions')
         if direction['required'] and direction['disposition']=='monitor':
@@ -114,7 +116,7 @@ def validate_math(design, biology, packet, retrievals, sources):
     if len(ids) != len(set(ids)) or set(ids) != set(targets):
         raise ValueError('Math must account for each selected direction without changing biological priorities')
     retrieved = {r['retrieval_id']: r for r in retrievals}
-    for direction in value['directions']:
+    for direction_index, direction in enumerate(value['directions']):
         referenced = []
         passages = {}
         for rid in direction['retrieval_ids']:
@@ -131,15 +133,18 @@ def validate_math(design, biology, packet, retrievals, sources):
             if not direction['function_lineage']:
                 raise ValueError('Executable formulas require function-level lineage')
             lineage_sources=set()
-            for lineage in direction['function_lineage']:
+            for lineage_index, lineage in enumerate(direction['function_lineage']):
                 if set(lineage)!={'source_id','locator','original_formula','adaptation'} or lineage['locator'] not in passages:
                     raise ValueError('Function lineage must identify an inspected source location')
                 source=passages[lineage['locator']]
                 formula=lineage['original_formula']
-                if (lineage['source_id']!=source['source_id'] or not isinstance(formula,str) or not formula.strip()
-                        or formula not in (source.get('formula') or source.get('excerpt',''))
-                        or not isinstance(lineage['adaptation'],str) or len(lineage['adaptation'].strip())<12):
-                    raise ValueError('Lineage formula/source must match the inspected passage and explain specialization')
+                field = ('source_id' if lineage['source_id']!=source['source_id'] else
+                         'original_formula' if not isinstance(formula,str) or not formula.strip()
+                         or formula not in (source.get('formula') or source.get('excerpt','')) else
+                         'adaptation' if not isinstance(lineage['adaptation'],str) or len(lineage['adaptation'].strip())<12 else None)
+                if field:
+                    raise ContractValidationError('Lineage formula/source must match the inspected passage and explain specialization',
+                        ['directions', direction_index, 'function_lineage', lineage_index, field])
                 lineage_sources.add(lineage['source_id'])
             if not lineage_sources <= set(direction['source_ids']):
                 raise ValueError('Lineage sources must be included in direction citations')

@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-30",
+  "entry_point": "scripts/preprocess_flowr_100targets.py",
+  "local_tests": {
+    "files": ["tests/test_flowr_preprocessing.py", "tests/test_executor.py", "tests/test_agent_flowr_bridge.py"],
+    "passed": 31,
+    "failed": 0,
+    "torch": "2.14.0+cpu"
+  },
+  "remote_tests": {
+    "host": "ksai.scnet.cn",
+    "workspace": "/root/private_data/MolSteer",
+    "file": "tests/test_flowr_preprocessing.py",
+    "passed": 16,
+    "failed": 0
+  },
+  "test_scope": "Stochastic test model exercising disk serialization, self-conditioning, all RNG families, all eight resume times, and the actual upstream _generate function with test model weights. Not a real FLOWR checkpoint inference test.",
+  "remote_dataset": {
+    "split": "/root/private_data/MolSteer/data/split_by_name.pt",
+    "split_sha256": "7ba210bc9b8a89034b8e189f26dd055141b0cbcc7aab66898d68e84140ad6e3b",
+    "test_pairs": 100,
+    "validated_input_files": 200,
+    "planned_molecules": 300,
+    "planned_checkpoints": 2400,
+    "report": "/root/private_data/MolSteer/outputs/flowr_100target_preflight.json"
+  },
+  "real_model_generation": {
+    "status": "not_run",
+    "cuda_available": false,
+    "visible_gpu_count": 0,
+    "reason": "The connected SCNet instance currently has no available GPU. Real-model exact continuation remains unverified."
+  }
+}

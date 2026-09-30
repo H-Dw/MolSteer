@@ -121,19 +121,27 @@ def main():
     parser.add_argument('--flowr-root',type=Path,required=True)
     parser.add_argument('--output-root',type=Path,required=True)
     parser.add_argument('--prepare-only',action='store_true')
+    parser.add_argument('--monitor-reference',type=Path,
+                        help='Enable MolMonitor using a matched unguided reference trajectory')
     parser.add_argument('--graph-review-agent-config',type=Path,
-                        help='Enable live graph-change Reader/Thinker/Executor review using this Agent configuration')
+                        help='Enable MolMonitor graph review (requires --monitor-reference); default off')
     parser.add_argument('--max-graph-reviews',type=int,default=4)
     args=parser.parse_args()
+    if args.graph_review_agent_config and not args.monitor_reference:
+        parser.error('--graph-review-agent-config requires --monitor-reference')
     _load_generator_first(args.flowr_root)
     from molsteer.molexecutor.runner import run
     output_root=args.output_root.resolve()
     config=prepare(args.agent_checkpoint.resolve(strict=True),args.flowr_config.resolve(strict=True),
                    args.flowr_root,output_root)
+    if args.monitor_reference:
+        config['monitor']=dict(enabled=True,reference=str(args.monitor_reference.resolve(strict=True)),
+                               graph_review=dict(enabled=False))
     if args.graph_review_agent_config:
         if args.max_graph_reviews<1:raise ValueError('max-graph-reviews must be positive')
-        config['graph_review']=dict(agent_config=str(args.graph_review_agent_config.resolve(strict=True)),
-                                    max_reviews=args.max_graph_reviews)
+        config['monitor']['graph_review']=dict(enabled=True,
+            agent_config=str(args.graph_review_agent_config.resolve(strict=True)),max_reviews=args.max_graph_reviews)
+    if args.monitor_reference:
         (output_root/'execution.agent.json').write_text(json.dumps(config,ensure_ascii=False,indent=2),encoding='utf-8')
     print('AGENT_FLOWR_PREPARED '+str(output_root),flush=True)
     if args.prepare_only:return
