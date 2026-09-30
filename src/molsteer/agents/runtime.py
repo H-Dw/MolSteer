@@ -65,6 +65,8 @@ class AgentRuntime:
             self._loop(state,'reader',tools,{'packet_id':state['packet']['packet_id']},
                        'Inspect geometry, chemistry and uncertainty via their separate tools, then submit_diagnosis.',lambda:'report' in result)
         state['diagnostic_report']=result['report']; state['route']='thinker'
+        if state.get('terminal_graph_review'):
+            state['status']='completed';state['route']='done'
         return state
 
     def thinker(self,state):
@@ -89,6 +91,10 @@ class AgentRuntime:
                 if creative else
                 'First record_task_plan with concise steps and evidence IDs. Use derive_reward_candidates and reviewed '
                 'retrieval, then submit_reward_plan with candidate term IDs, weights and scales. No raw chain of thought.')
+            if state.get('monitor_event',{}).get('kind')=='ChemicalGraphChange':
+                instructions += (' Review the previous reward against the fresh graph. Keep native slot IDs; reassign '
+                    'chemical roles and support. Retain valid function forms, rederive obsolete bounds, and explain '
+                    'changes. A disappeared target is not proof of repair. Do not require the initial graph identity.')
             self._loop(state,'thinker',tools,{'report':state['diagnostic_report'],'feedback':state.get('monitor_event',{})},
                        state['skill_text']+'\n'+instructions,lambda:'spec' in result or 'deferral' in result)
         if 'deferral' in result:
@@ -123,7 +129,8 @@ class AgentRuntime:
                 return state
             validate_packet(latest)
             from molreader.localized_report import make_localized_report
-            report=state['execution_result'].get('diagnostic_report') or make_localized_report(latest)
+            report=(state.get('diagnostic_report') if state.get('diagnostic_report',{}).get('packet_id')==latest['packet_id']
+                    else state['execution_result'].get('diagnostic_report') or make_localized_report(latest))
             validate_report(report,latest)
             state['packet'],state['diagnostic_report']=deepcopy(latest),deepcopy(report)
         result=run_experts(self,state)
@@ -171,6 +178,14 @@ class AgentRuntime:
 
     def monitoring(self,state):
         event=self.monitor.observe(monitor_metrics(state['execution_result']),step=state['segments'])
+        latest=state['execution_result'].get('packet')
+        if latest is not None and event['route']!='stop':
+            validate_packet(latest)
+            from molsteer.molmonitor.graph_change import packet_change_event
+            changed=packet_change_event(state['packet'],latest,step=state['segments'],
+                                       parent_program_id=state['reward_spec'].get('reward_id'))
+            if changed:
+                event={**changed,'strength':state['strength'],'numerical_monitor':event}
         if self.config.mode=='api':
             reviewed={}
             @tool
@@ -185,10 +200,25 @@ class AgentRuntime:
                 reviewed['done']=True
                 return {'status':'accepted','route':event['route'],'action':event['action']}
             self._loop(state,'monitor',[inspect_monitor_event,acknowledge_monitor_route],{'segment':state['segments']},
-                       'Inspect monitor event then acknowledge the host route. Single fluctuations are held; sustained shifts retune Executor before Thinker revision; never bypass hard safety stops.',lambda:reviewed.get('done',False))
+                       'Inspect monitor event then acknowledge the host route. Chemical graph changes activate MolReader before MolThinker; numerical fluctuations use retuning. Never bypass hard safety stops.',lambda:reviewed.get('done',False))
         state['monitor_event']=event
         state['strength']=event.get('strength',state['strength'])
         if event['route']=='stop': state['status']='safety_stopped'; state['route']='done'
+        elif event['route']=='reader':
+            if state['execution_result']['done']:
+                state['terminal_graph_review']=deepcopy(event)
+                state['packet']=deepcopy(latest);state['diagnostic_report']={}
+                state['route']='reader'
+            elif state['replans']>=self.config.runtime.max_replans:
+                state['status']='replan_limit';state['route']='done'
+            else:
+                state['replans']+=1
+                state['packet']=deepcopy(latest)
+                # Force a fresh reading; an adapter's previous diagnosis must not
+                # bypass the Reader when chemical roles have changed.
+                state['diagnostic_report']={}
+                state['validation']={};state['validation_key']=[]
+                state['route']='reader'
         elif event['route']=='thinker':
             if state['replans']>=self.config.runtime.max_replans: state['status']='replan_limit'; state['route']='done'
             else: state['replans']+=1; state['route']='thinker'
@@ -201,7 +231,7 @@ class AgentRuntime:
         append_trace(state,node='monitor',kind='decision',summary='Monitor '+event['action'],output=event)
         return state
 
-    def run(self,packet,diagnostic_report=None,run_id=None,execute=False):
+    def run(self,packet,diagnostic_report=None,run_id=None,execute=False,feedback=None):
         validate_packet(packet)
         if diagnostic_report is not None: validate_report(diagnostic_report,packet)
         run_id=run_id or 'run_'+uuid.uuid4().hex[:24]
@@ -217,6 +247,7 @@ class AgentRuntime:
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
         state['model_dynamics']=deepcopy(self.model_dynamics)
+        if feedback is not None:state['monitor_event']=deepcopy(feedback)
         self.monitor=RobustMonitor(self.config.monitoring)
         try:
             if self.config.mode=='api':

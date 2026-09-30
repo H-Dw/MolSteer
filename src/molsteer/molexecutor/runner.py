@@ -1,5 +1,6 @@
 """Agent entry point: a declared adapter and JSON configuration produce a run."""
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
@@ -55,17 +56,30 @@ def run(config):
     saved_baseline=torch.load(Path(config.get('reward_reference_stage',config['saved_stage']))/'world_prediction.pt',weights_only=True,map_location=adapter.device)
     baseline={k:v[0] for k,v in saved_baseline.items() if torch.is_tensor(v)}
     controls=json.loads(Path(config['control_trajectory']).read_text()) if config.get('control_trajectory') else {}
+    review_state=checkpoint.get('guidance_state',{}).get('graph_review',{})
+    resumed_program=review_state.get('program')
+    initial_editable=deepcopy(review_state.get('editable_atom_ids',config.get('editable_atom_ids')))
+    if initial_editable is not None:adapter.config['editable_atom_ids']=initial_editable
+    def load_program(path):
+        program=json.loads(Path(path).read_text(encoding='utf-8'))
+        if resumed_program is not None:
+            from molsteer.common import digest
+            if (resumed_program['program_id']!=checkpoint['guidance_state']['program_id'] or
+                    resumed_program['program_id']!='rp_'+digest({k:v for k,v in resumed_program.items() if k!='program_id'})[:24]):
+                raise ValueError('Resumed graph review program provenance mismatch')
+            program=deepcopy(resumed_program)
+        return program
     def evaluator(program):
         return make_reward(program,baseline,receptor,vocabulary,controls.get(program.get('affinity_head')))
     if not config.get('gradient_preflight',True):
         for path in config['reward_programs'].values():
-            if json.loads(Path(path).read_text(encoding='utf-8')).get('evaluator')=='agent_expert':
+            if load_program(path).get('evaluator')=='agent_expert':
                 raise ValueError('Expert live programs require component-gradient preflight')
     if config.get('gradient_preflight',True):
         from molsteer.molmonitor.live_gradient import check_live_gradient
         preflight={}
         for mode in config['reward_programs']:
-            program=json.loads(Path(config['reward_programs'][mode]).read_text(encoding='utf-8'))
+            program=load_program(config['reward_programs'][mode])
             reward=evaluator(program)
             if (program.get('evaluator')=='augmented_lagrangian' and adapter.guidance_state
                     and adapter.guidance_state.get('augmented_lagrangian')):
@@ -79,8 +93,10 @@ def run(config):
     RDLogger.DisableLog('rdApp.warning')
     for arm in config.get('arms',['unguided','selection','creativity']):
         adapter.restore(checkpoint)
+        if initial_editable is None:adapter.config.pop('editable_atom_ids',None)
+        else:adapter.config['editable_atom_ids']=deepcopy(initial_editable)
         program_key=arm if arm!='unguided' else next(iter(config['reward_programs']))
-        program=json.loads(Path(config['reward_programs'][program_key]).read_text(encoding='utf-8'))
+        program=load_program(config['reward_programs'][program_key])
         reward=evaluator(program)
         armout=output/arm
         armout.mkdir(parents=True,exist_ok=True)

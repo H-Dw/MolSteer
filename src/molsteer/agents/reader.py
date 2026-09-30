@@ -36,7 +36,7 @@ def reader_tools(packet: dict, supplied_report: dict | None = None):
     validate_packet(packet); frozen = deepcopy(packet); result = {}; observed_paths = set()
     def metrics(path):
         observed_paths.add(path)
-        groups = {"geometry": {"bond_lengths", "bond_angles", "mmff_local_geometry", "protein_clashes", "intramolecular_clashes"}, "chemistry": {"chemical_validity", "structural_alerts", "mmff_strain", "posebusters"}}
+        groups = {"geometry": {"bond_lengths", "bond_angles", "mmff_local_geometry", "protein_clashes", "intramolecular_clashes"}, "chemistry": {"chemical_validity", "valence", "atom_inventory", "formal_charge", "connectivity", "chemistry_context", "structural_alerts", "mmff_strain", "posebusters"}}
         observations = frozen.get("observations", [])
         if path in groups: observations = [x for x in observations if x.get("metric_id") in groups[path]]
         else: observations = [x for x in observations if "confidence" in x.get("metric_id", "") or "entropy" in x.get("metric_id", "")]

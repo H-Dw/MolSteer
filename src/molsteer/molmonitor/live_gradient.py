@@ -33,8 +33,10 @@ def check_live_gradient(adapter, reward, epsilons=(.002,.005,.01), sample_count=
     # Coarser perturbations reduce float32 subtractive cancellation. Preserve all
     # scales in the record; graph crossings cannot qualify as a derivative check.
     stable=[s for s in samples if s['epsilon']==max(epsilons)]
-    passed=all(s['same_discrete_graph'] and s['autograd']*s['finite_difference']>0 and s['relative_error']<.15 for s in stable)
-    return dict(passed=passed,criterion='At largest declared epsilon: same graph, matching sign, relative error < 0.15; float32 screen, not an analytic guarantee',
+    passed=all(s['same_discrete_graph'] and (
+        max(abs(s['autograd']),abs(s['finite_difference']))<=1e-8 or
+        s['autograd']*s['finite_difference']>0 and s['relative_error']<.15) for s in stable)
+    return dict(passed=passed,criterion='At largest declared epsilon: same graph and either both derivatives <= 1e-8 in magnitude or matching sign and relative error < 0.15; numerical screen, not an analytic guarantee',
                 precision=adapter.precision,samples=samples)
 
 
@@ -44,8 +46,9 @@ def check_expert_live_gradient(adapter,reward,epsilons,sample_count):
     from molsteer.molexecutor.expert_control import probe_predict
     pred,_=probe_predict(adapter,coordinates=x)
     def parts(prediction,coordinates):
+        kwargs={'state_graph':reward.state_graph(adapter)} if getattr(reward,'uses_state_graph',False) else {}
         return reward.components(adapter.endpoint(prediction),
-            adapter.world_state_coordinates(coordinates) if reward.uses_state_view else None)
+            adapter.world_state_coordinates(coordinates) if reward.uses_state_view else None,**kwargs)
     values=parts(pred,x);checks={}
     editable=adapter.config.get('editable_atom_ids')
     if not editable: raise ValueError('Expert preflight requires editable atom IDs')

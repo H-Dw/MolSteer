@@ -245,8 +245,9 @@ class AgentMixedReward(MolecularReward):
 
 def evaluate_with_state(reward, adapter, endpoint, state_coordinates):
     if getattr(reward,'uses_state_view',False):
+        kwargs={'state_graph':reward.state_graph(adapter)} if getattr(reward,'uses_state_graph',False) else {}
         return reward.evaluate(endpoint,
-            state_coords=adapter.world_state_coordinates(state_coordinates))
+            state_coords=adapter.world_state_coordinates(state_coordinates),**kwargs)
     return reward.evaluate(endpoint)
 
 

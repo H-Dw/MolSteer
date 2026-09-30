@@ -4,6 +4,7 @@ from molsteer.common import digest
 from molsteer.agents.expert_contracts import validate_expert_spec
 from .program import MolecularReward
 from .expert_control import ExpertEvaluator, control_direction, check_displacement
+from .chemistry import decode_endpoint
 from molsteer.molthinker.expressions import aggregate_objectives
 
 
@@ -16,39 +17,36 @@ class ExpertReward(MolecularReward):
         self.spec=program
         self.evaluator=ExpertEvaluator(program['expert_spec'],program['source_packet'])
         self.uses_state_view=any(o['view']=='state' for d in self.evaluator.directions for o in d['observables'])
+        self.uses_state_graph='state' in self.evaluator.mmff
         self.control_diagnostics={};self.component_gradients=None
-        self.check_graph(baseline,'prediction')
 
-    def check_graph(self,pred,view):
-        packet=self.evaluator.packet
-        atomic=pred['atomics'].detach().argmax(-1).cpu().tolist()
-        charges=pred['charges'].detach().argmax(-1).cpu().tolist()
-        bond=pred['bonds'].detach().argmax(-1).cpu().tolist()
-        signature=digest(dict(atom_ids=packet['representations'][view]['original_atom_ids'],
-                              atoms=[self.vocab['atomic_tokens'][i] for i in atomic],
-                              formal_charges=[self.vocab['charge_tokens'][i] for i in charges],
-                              orders=[[float(self.vocab['bond_orders'][i]) for i in row] for row in bond]))
-        if signature!=packet['steering']['graph_signatures'][view]:
-            raise ValueError('Chemical graph changed; fresh expert state binding is required')
-
-    def components(self,pred,state_coords=None):
-        self.check_graph(pred,'prediction')
+    def components(self,pred,state_coords=None,state_graph=None):
         if self.uses_state_view and state_coords is None:
             raise ValueError('Expert expressions require live state-world coordinates')
-        return self.evaluator.components({'prediction':pred['coords'],'state':state_coords})
+        coordinates={'prediction':pred['coords'],'state':state_coords}
+        for view in {o['view'] for d in self.evaluator.directions for o in d['observables']}:
+            ids=self.evaluator.packet['steering']['coordinate_snapshots'][view]['atom_ids']
+            if coordinates[view].shape!=(len(ids),3):
+                raise ValueError('Expert coordinate slot count changed; explicit mapping required')
+        molecules={}
+        for view in self.evaluator.mmff:
+            if view=='state' and state_graph is None:
+                raise ValueError('Live state categories are required for MMFF')
+            current=pred if view=='prediction' else dict(state_graph,coords=state_coords)
+            molecules[view]=decode_endpoint(current,self.vocab)
+        return self.evaluator.components(coordinates,molecules=molecules)
 
-    def evaluate(self,pred,state_coords=None):
-        values=self.components(pred,state_coords)
+    def evaluate(self,pred,state_coords=None,state_graph=None):
+        values=self.components(pred,state_coords,state_graph)
         reward=-aggregate_objectives(self.evaluator.objectives(values),self.evaluator.strategy)
         return reward,{'components':{k:float(v.detach()) for k,v in values.items()},
                        'control_mode':self.evaluator.strategy['mode'],
-                       'scalar_is_reporting_only':self.evaluator.strategy['mode']=='common_descent'}
+                       'scalar_is_reporting_only':self.evaluator.strategy['mode']=='common_descent',
+                       'chemical_applicability':'Coordinate expressions evaluated; semantic review belongs to MolMonitor'}
 
     def control_gradient(self,adapter,endpoint,x,mask):
-        if self.uses_state_view:
-            current={k:v[adapter.index] for k,v in adapter.curr.items() if k in ('atomics','charges','bonds')}
-            self.check_graph(current,'state')
-        values=self.components(endpoint,adapter.world_state_coordinates(x) if self.uses_state_view else None)
+        current=self.state_graph(adapter)
+        values=self.components(endpoint,adapter.world_state_coordinates(x) if self.uses_state_view else None,current)
         direction,self.component_gradients,self.control_diagnostics=control_direction(
             self.evaluator.objectives(values),x,mask,self.evaluator.strategy)
         self.potential_gradient=-direction
@@ -60,17 +58,19 @@ class ExpertReward(MolecularReward):
 
     def proposal_failures(self,adapter,candidate,base,state_coords,base_state,delta):
         failures=[]
-        if self.uses_state_view:
-            current={k:v[adapter.index] for k,v in adapter.curr.items() if k in ('atomics','charges','bonds')}
-            self.check_graph(current,'state')
+        current=self.state_graph(adapter)
         ok,derivatives=check_displacement(delta,self.component_gradients,self.evaluator.strategy,scalar_gradient=self.potential_gradient)
         self.control_diagnostics['post_injection_directional_derivatives']=derivatives
         if not ok: failures.append('post_injection_direction_not_feasible')
         coords=adapter.world_state_coordinates(state_coords) if self.uses_state_view else None
         basecoords=adapter.world_state_coordinates(base_state) if self.uses_state_view else None
-        values=self.components(candidate,coords);baseline=self.components(base,basecoords)
+        values=self.components(candidate,coords,current);baseline=self.components(base,basecoords,current)
         failures.extend('constraint:'+k for k in self.evaluator.constraints(values))
         if self.evaluator.strategy['mode']=='common_descent':
             failures.extend('objective_regression:'+k for k in self.evaluator.objectives(values)
                             if float(values[k])>float(baseline[k])+1e-7)
         return failures
+
+    def state_graph(self,adapter):
+        if not self.uses_state_graph:return None
+        return {k:adapter.curr[k][adapter.index] for k in ('atomics','charges','bonds')}

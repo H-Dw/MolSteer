@@ -61,7 +61,10 @@ class ExpertEvaluator:
                         raise ValueError('MMFF chemical applicability and protonation must be validated')
                     self.mmff[view], self.molecules[view] = MMFFStrain(), packet_molecule(packet,view)
 
-    def components(self, coordinates):
+    def components(self, coordinates, molecules=None):
+        # Offline trials use their bound snapshot. Live callers supply freshly
+        # decoded molecules so force-field typing follows the current categories.
+        molecules = self.molecules if molecules is None else molecules
         values = {}
         for direction in self.directions:
             local = {}
@@ -69,7 +72,7 @@ class ExpertEvaluator:
                 view = obs['view']
                 local[obs['observable_id']] = observable_value(obs, coordinates[view],
                     self.packet['steering']['coordinate_snapshots'][view]['atom_ids'], self.packet,
-                    self.mmff.get(view), self.molecules.get(view))
+                    self.mmff.get(view), molecules.get(view))
             values[direction['direction_id']] = evaluate_expression(direction['expression'], local)
         return values
 

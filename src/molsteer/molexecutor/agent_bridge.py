@@ -22,6 +22,7 @@ _TERM_FIELDS = (
     'term_id', 'view', 'family', 'atom_ids', 'lower', 'upper', 'scale',
     'weight', 'reference_coords', 'reference_evidence_id', 'evidence_ids',
     'unit', 'receptor_identity',
+    'graph_dependent', 'hypothesis_atom_ids', 'conditions', 'observable',
 )
 
 
@@ -85,6 +86,7 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
         'packet_id':packet['packet_id'], 'identity':deepcopy(packet['identity']),
         'source_reward_id':spec['reward_id'], 'agent_run_id':checkpoint['run_id'],
         'source_packet_digest':digest(packet), 'source_report_digest':digest(report),
+        'source_packet':deepcopy(packet),
         'terms':compiled_terms, 'region_atom_ids':editable,
         'active_objectives':[], 'weights':[], 'lambda_graph':0.,
         'reward':('negative validated declarative objective tree' if designed else
@@ -127,7 +129,8 @@ def _compile_expert(spec,packet,report,checkpoint,guard_template,strength):
                  expert_spec=deepcopy(spec),source_packet=deepcopy(packet),source_report=deepcopy(report),
                  region_atom_ids=editable,active_objectives=[],weights=[],lambda_graph=0.,
                  knowledge_source={'corpus':'knowledge/','retrieval':deepcopy(spec['retrieval'])},
-                 constraints=['fresh graph binding','editable mask','live component derivative preflight','post-injection direction','explicit constraint predicates'],
+                 graph_policy='allow_changes; MolMonitor reviews current chemical roles',
+                 constraints=['current slot mapping','editable mask','live component derivative preflight','post-injection direction','explicit constraint predicates'],
                  inactive_compatibility_fields=['tau','rho','weights','lambda_graph'])
     program.update({k:deepcopy(guard_template[k]) for k in _GUARD_FIELDS})
     program['program_id']='rp_'+digest(program)[:24]

@@ -395,8 +395,14 @@ def test_compiled_expert_reward_binds_live_graph_and_formula(case):
     direction,_,_=reward.control_gradient(SimpleNamespace(),live,x,torch.ones_like(x))
     direct=torch.autograd.grad(reward.evaluate(live)[0],x)[0]
     assert torch.allclose(direction,direct)
-    changed=dict(pred,atomics=pred['atomics'].roll(1,-1))
-    with pytest.raises(ValueError,match='graph changed'):reward.evaluate(changed)
+    # Pure coordinate expressions remain mathematically evaluable after any
+    # categorical change; semantic review is routed through MolMonitor.
+    for key in ('atomics','charges','bonds'):
+        changed=dict(pred,**{key:pred[key].roll(1,-1)})
+        changed_value,_=reward.evaluate(changed)
+        assert float(changed_value)==pytest.approx(float(value))
+    with pytest.raises(ValueError,match='slot count'):
+        reward.evaluate(dict(pred,coords=pred['coords'][:-1]))
 
 
 def test_engine_rejected_expert_probes_preserve_native_path_and_rng(tmp_path,monkeypatch):

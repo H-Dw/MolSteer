@@ -58,7 +58,7 @@ def candidate_failures(frame,base,before,temporal,policy):
 def run_monitored_suffix(adapter,reward,output,budget,arm):
     from functools import partial
     from molsteer.molexecutor.expert_control import probe_predict
-    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') else adapter.predict
+    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') or adapter.config.get('graph_review') else adapter.predict
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     interval=adapter.config.get('guidance_interval',[0.,1.])
     if len(interval)!=2 or not 0<=interval[0]<interval[1]<=1:
@@ -90,15 +90,22 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
         if not editable: raise ValueError('Expert monitored controls require an explicit editable mask')
         mask[adapter.index]=False;mask[adapter.index,editable]=True
     path_used=saved.get('path_used',torch.zeros_like(mask,dtype=adapter.curr['coords'].dtype)).clone()
+    adapter.guidance_state.update(arm=arm,program_id=reward.spec['program_id'],path_used=path_used)
+    from .graph_review import GraphReviewSession
+    graph_review=GraphReviewSession(adapter,reward,output,budget,arm)
     adapter.execution_arm=arm;rows=[];tensor_trace=[];started=time.perf_counter();pending=None
     start_t=float(adapter.grid[adapter.step_index]);adapter.save_stage(output,f't_{start_t:.2f}',start_t)
     torch.cuda.reset_peak_memory_stats(adapter.device)
     for step in range(adapter.step_index,adapter.args.integration_steps):
         t=step/adapter.args.integration_steps;next_t=(step+1)/adapter.args.integration_steps
         dt=adapter.grid[step+1]-adapter.grid[step]
+        reward,graph_event,review_ready=graph_review.before_step(reward)
+        if graph_event and adapter.config.get('editable_atom_ids') is not None:
+            mask[adapter.index]=False;mask[adapter.index,adapter.config['editable_atom_ids']]=True
         if hasattr(reward,'set_time'):reward.set_time(float(adapter.times[0][0]))
         gradient=None;unavailable=None;native_before=adapter.curr['coords'].detach().clone()
-        guidance_active=not stopped and arm!='unguided' and interval[0]<=t<interval[1]
+        guidance_active=review_ready and not stopped and arm!='unguided' and interval[0]<=t<interval[1]
+        if not review_ready:unavailable='chemical_role_review_not_validated; native sampling continues'
         if guidance_active:
             x=adapter.curr['coords'].detach().requires_grad_(True)
             pred,cond=adapter.predict(coordinates=x);endpoint=adapter.endpoint(pred)
@@ -126,6 +133,8 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
         with torch.no_grad():
             base_pred,_=probe(times=comparison_times);base_endpoint=adapter.endpoint(base_pred)
             base=snapshot(base_endpoint,reward,next_t,strain=review)
+            if graph_review.needs_review(reward,base_endpoint):
+                gradient=None;unavailable='native_graph_changed; review before further guidance'
             try:
                 control=reference.frame(next_t)
             except ValueError:
@@ -144,6 +153,7 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
                 saturation=float((available[movable]/norms[movable]).max()) if movable.any() else policy.min_eta
                 previous_deltas=[]
                 for eta in (controller.strengths(saturation) if movable.any() else []):
+                    eta=min(eta,graph_review.strength_cap) if graph_review.enabled else eta
                     delta=bounded_displacement(eta*unit,mask,path_used,budget,adapter.model.coord_scale)
                     if any(torch.allclose(delta,old,atol=1e-9,rtol=1e-6) for old in previous_deltas):continue
                     previous_deltas.append(delta)
@@ -181,7 +191,10 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
             current=candidate_frames[selected['eta']] if selected else base
             if review:
                 sentinel=quality_sentinel(current,control,policy,reward.spec.get('affinity_head','pkd'))
-        if stopped:
+        if not review_ready:
+            decision=dict(step=step,time=next_t,destination='MolReader',action='native_only',
+                reasons=['chemical_role_review_not_validated'],failures=[],selected_eta=0.,selected_effective_l2=0.)
+        elif stopped:
             decision=dict(step=step,time=next_t,destination='MolExecutor',action='stop_guidance',
                 reasons=['guidance_previously_stopped'],failures=[],selected_eta=0.,selected_effective_l2=0.)
             controller.state['history']=(controller.state['history']+[decision])[-8:]
@@ -197,6 +210,7 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
             before=compact(before),native_next=compact(base),committed=compact(current),sentinel=sentinel,
             injected_path_max_angstrom=float(path_used.max()))
         rows.append(row)
+        if graph_event:row['graph_review']=graph_event
         if hasattr(reward,'control_diagnostics'):
             row['expert_control']=reward.control_diagnostics
         if decision['action']=='request_reward_revision':
@@ -209,9 +223,10 @@ def run_monitored_suffix(adapter,reward,output,budget,arm):
             context=prepare_revision_context(pending,reward.spec,settings['knowledge_path'])
             write_json(output/'feedback'/f"{pending['request_id']}.json",pending)
             write_json(output/'feedback'/f"{pending['request_id']}.context.json",context)
-        adapter.guidance_state=dict(arm=arm,program_id=reward.spec['program_id'],path_used=path_used,
-            program_lineage=saved.get('program_lineage',[]),pending_request=pending,
+        adapter.guidance_state.update(arm=arm,program_id=reward.spec['program_id'],path_used=path_used,
+            pending_request=pending,
             monitor=dict(controller=controller.state,sentinel=sentinel,stopped=stopped,reference_sha256=ref_hash,policy=asdict(policy),budget=asdict(budget)))
+        graph_review.save_state()
         with (output/'monitor_trace.jsonl').open('a',encoding='utf-8') as stream:stream.write(json.dumps(row,allow_nan=False)+'\n')
         tensor_trace.append(dict(step=step,t=t,state_after=adapter.curr['coords'][adapter.index].detach().cpu().clone(),endpoint_before=endpoint_coords,
             atom_classes=adapter.curr['atomics'][adapter.index].argmax(-1).cpu(),charge_classes=adapter.curr['charges'][adapter.index].argmax(-1).cpu(),

@@ -11,7 +11,9 @@ from molsteer.molmonitor.guidance_dynamics import step_comparison, vector_cosine
 def run_suffix(adapter, reward, output, budget, arm):
     from functools import partial
     from .expert_control import probe_predict
-    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') else adapter.predict
+    probe=partial(probe_predict,adapter) if hasattr(reward,'control_gradient') or adapter.config.get('graph_review') else adapter.predict
+    if adapter.config.get('graph_review') and reward.spec.get('evaluator') not in ('agent_expert','agent_mixed'):
+        raise ValueError('Live Agent graph review requires an Agent coordinate program; other controllers need a matching revision compiler')
     if reward.spec.get('evaluator')=='augmented_lagrangian':
         from .augmented_lagrangian_engine import run_augmented_lagrangian_suffix
         return run_augmented_lagrangian_suffix(adapter,reward,output,budget,arm)
@@ -42,6 +44,9 @@ def run_suffix(adapter, reward, output, budget, arm):
         if adapter.guidance_state['arm']!=arm or adapter.guidance_state['program_id']!=reward.spec['program_id']:
             raise ValueError('Cannot change the reward or arm silently within a guided continuation')
         path_used=adapter.guidance_state['path_used'].clone()
+    adapter.guidance_state.update(arm=arm,program_id=reward.spec['program_id'],path_used=path_used)
+    from molsteer.molmonitor.graph_review import GraphReviewSession
+    graph_review=GraphReviewSession(adapter,reward,output,budget,arm)
     rows=[];tensor_trace=[]
     start=time.perf_counter()
     torch.cuda.reset_peak_memory_stats(adapter.device)
@@ -50,8 +55,15 @@ def run_suffix(adapter, reward, output, budget, arm):
     for step in range(adapter.step_index,adapter.args.integration_steps):
         dt=adapter.grid[step+1]-adapter.grid[step]
         row=dict(step=step,t=float(adapter.times[0][0]),arm=arm,accepted=False)
+        reward,graph_event,review_ready=graph_review.before_step(reward)
+        if graph_event:
+            row['graph_review']=graph_event
+            editable=adapter.config.get('editable_atom_ids')
+            if editable is not None:
+                mask[adapter.index]=False;mask[adapter.index,editable]=True
         if hasattr(reward,'set_time'):reward.set_time(row['t'])
-        guidance_active=arm!='unguided' and interval[0]<=step/adapter.args.integration_steps<interval[1]
+        guidance_active=review_ready and arm!='unguided' and interval[0]<=step/adapter.args.integration_steps<interval[1]
+        if not review_ready:row['guidance_unavailable']='chemical_role_review_not_validated; native sampling continues'
         row['guidance_active']=guidance_active
         before_coordinates=adapter.curr['coords'].detach().clone()
         gradient=None
@@ -93,7 +105,7 @@ def run_suffix(adapter, reward, output, budget, arm):
         row['native_step_l2_angstrom']=float(native_delta[adapter.index].norm())*adapter.model.coord_scale
         del pred,cond
         if gradient is not None:
-            raw_delta=budget.strength*adapter.inject(gradient,float(dt))*mask.unsqueeze(-1)
+            raw_delta=min(budget.strength,graph_review.strength_cap)*adapter.inject(gradient,float(dt))*mask.unsqueeze(-1)
             delta=bounded_displacement(raw_delta,mask,path_used,budget,adapter.model.coord_scale)
             row.update(step_comparison(native_delta[adapter.index],gradient[adapter.index],raw_delta[adapter.index],delta[adapter.index],adapter.model.coord_scale))
             drift=predicted_coordinates[adapter.index]-before_coordinates[adapter.index]
@@ -107,6 +119,8 @@ def run_suffix(adapter, reward, output, budget, arm):
                 base_pred,_=probe(times=comparison_times)
                 base_endpoint=adapter.endpoint(base_pred)
                 try:
+                    if graph_review.needs_review(reward,base_endpoint):
+                        raise ValueError('Native graph changed; review on the next step before extra guidance')
                     base_value,base_detail=evaluate_with_state(
                         reward,adapter,base_endpoint,adapter.curr['coords'])
                     row['next_base_reward']=float(base_value)
@@ -137,6 +151,7 @@ def run_suffix(adapter, reward, output, budget, arm):
                             row['accepted_to_native_ratio']=row['accepted_guidance_l2_angstrom']/max(row['native_step_l2_angstrom'],1e-16)
                             row['same_time_reward_gain']=float(score-base_value)
                             row['candidate_graph_changed_from_base']=reward.graph(candidate)!=reward.graph(base_endpoint)
+                            row['chemical_review_on_next_step']=graph_review.needs_review(reward,candidate)
                             if step+2<len(adapter.grid) and adapter.model.integrator.coord_strategy=='continuous' and not adapter.model.integrator.use_cosine_scheduler:
                                 response=candidate_pred['coords'][adapter.index]-base_pred['coords'][adapter.index]
                                 row.update(linear_flow_retention(proposal_delta[adapter.index],response,
@@ -148,7 +163,8 @@ def run_suffix(adapter, reward, output, budget, arm):
                 del base_pred,base_endpoint
             del gradient
         row['injected_path_max_angstrom']=float(path_used.max())
-        adapter.guidance_state=dict(arm=arm,program_id=reward.spec['program_id'],path_used=path_used)
+        adapter.guidance_state.update(arm=arm,program_id=reward.spec['program_id'],path_used=path_used)
+        graph_review.save_state()
         rows.append(row)
         if adapter.config.get('record_tensor_trace',False):
             tensor_trace.append(dict(step=step,t=row['t'],state_after=adapter.curr['coords'][adapter.index].detach().cpu().clone(),
@@ -168,6 +184,7 @@ def run_suffix(adapter, reward, output, budget, arm):
     torch.save(adapter.checkpoint(),output/'resume_final.pt')
     if tensor_trace:torch.save(tensor_trace,output/'tensor_trace.pt')
     result=dict(arm=arm,steps=len(rows),accepted_steps=sum(r['accepted'] for r in rows),
+        final_program_id=reward.spec['program_id'],graph_reviews=graph_review.state.get('reviews',0),
         gradient_steps=sum('gradient_norm' in r for r in rows),
         max_injected_path_angstrom=float(path_used.max()),wall_seconds=time.perf_counter()-start,
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(adapter.device),
