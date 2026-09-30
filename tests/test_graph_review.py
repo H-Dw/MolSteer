@@ -12,7 +12,7 @@ from molsteer.molreader import enrich_packet
 from molsteer.molexecutor.chemistry import encode_mol
 from molsteer.molexecutor.interfaces import GuidanceBudget
 from molsteer.molmonitor.graph_change import packet_change_event,tensor_graph,graph_changes
-from molsteer.molmonitor.graph_review import GraphReviewSession,refresh_reward
+from molsteer.molmonitor.graph_review import GraphReviewSession,refresh_reward,live_graphs
 
 
 def molecule(smiles):
@@ -82,6 +82,22 @@ class Adapter:
 def reward_for(pred,program='old'):
     return SimpleNamespace(p0={k:pred[k] for k in ('atomics','charges','bonds')},vocab=load_config(),
                            uses_state_view=False,spec={'program_id':program,'evaluator':'agent_mixed'},x0=pred['coords'],receptor=[])
+
+
+def test_graph_independent_state_terms_do_not_trigger_replanning(tmp_path):
+    old=molecule('CCC');adapter=Adapter(old)
+    adapter.predict=lambda **kwargs:({k:v.unsqueeze(0) for k,v in old.items()},adapter.cond)
+    reward=reward_for(old);reward.uses_state_view=True
+    reward.spec['terms']=[dict(view='prediction',graph_dependent=True),
+                          dict(view='state',graph_dependent=False)]
+    session=GraphReviewSession(adapter,reward,tmp_path,GuidanceBudget(),'agent',
+        reviewer=lambda *a:pytest.fail('Unrelated state change triggered review'))
+    # The live prediction is unchanged; only the noisy state categories move.
+    adapter.curr['atomics'][0]=molecule('COC')['atomics']
+    assert set(live_graphs(adapter,reward,old))=={'prediction'}
+    assert session.before_step(reward)[1] is None
+    reward.spec['terms'][1]['graph_dependent']=True
+    assert set(live_graphs(adapter,reward,old))=={'prediction','state'}
 
 
 def test_review_runs_once_and_preserves_rng_state_budget_and_resume(tmp_path):

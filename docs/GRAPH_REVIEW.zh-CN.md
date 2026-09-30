@@ -56,7 +56,7 @@ R = -L_geometry_clash_pocket_movement - lambda_graph * C_G
 
 ### Agent 工作流
 
-适配器每段返回新的 enriched StatePacket 时，MolMonitor 独立比较 state/prediction 的元素、形式电荷与键关系。仅坐标、时间或类别置信度变化不触发这条通路；非有限数值仍优先走已有停止路径。
+适配器每段返回新的 enriched StatePacket 时，MolMonitor 独立比较 state/prediction 的元素、形式电荷与键关系。仅坐标、时间或类别置信度变化不触发这条通路；非有限数值仍优先走已有停止路径。FLOWR 实时入口则按奖励项声明的 `graph_dependent` 视图激活复核：纯坐标的 state 最小距离项不会因噪声态类别每步波动而反复触发；prediction 的键长类项仍在预测图变化时触发。若旧程序未声明依赖性，保持保守的全视图检测。
 
 ```text
 新图事件

@@ -12,9 +12,23 @@ from molsteer.molexecutor.expert_control import probe_predict
 from .graph_change import tensor_graph,graph_changes,review_event
 
 
+def graph_dependent_views(reward):
+    """Only chemistry-dependent terms need a new chemical interpretation."""
+    terms=reward.spec.get('terms')
+    if isinstance(terms,list):
+        views={term['view'] for term in terms if term.get('graph_dependent',True)}
+    else:
+        views={'prediction'}
+        if getattr(reward,'uses_state_view',False):views.add('state')
+    if float(reward.spec.get('lambda_graph',0))>0:views.add('prediction')
+    return views
+
+
 def live_graphs(adapter,reward,endpoint):
-    graphs={'prediction':tensor_graph(endpoint,reward.vocab)}
-    if getattr(reward,'uses_state_view',False):
+    views=graph_dependent_views(reward)
+    graphs={}
+    if 'prediction' in views:graphs['prediction']=tensor_graph(endpoint,reward.vocab)
+    if 'state' in views:
         current={k:adapter.curr[k][adapter.index] for k in ('atomics','charges','bonds')}
         graphs['state']=tensor_graph(current,reward.vocab)
     return graphs
@@ -106,10 +120,12 @@ class GraphReviewSession:
         self.state.setdefault('reviews',0);self.state.setdefault('guidance_ready',True)
         self.state.setdefault('strength_cap',budget.strength)
         if 'graphs' not in self.state:
-            graphs={'prediction':tensor_graph(reward.p0,reward.vocab)}
+            views=graph_dependent_views(reward)
+            graphs={}
+            if 'prediction' in views:graphs['prediction']=tensor_graph(reward.p0,reward.vocab)
             # Compare state only once a live observation is available. Subsequent
             # state changes are detected independently of predicted endpoints.
-            if getattr(reward,'uses_state_view',False):
+            if 'state' in views:
                 from molsteer.common import observation
                 context=observation(reward.spec.get('source_packet',{}),'chemistry_context','state') if reward.spec.get('source_packet') else None
                 if context:
