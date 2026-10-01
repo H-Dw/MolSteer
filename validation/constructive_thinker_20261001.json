@@ -1,0 +1,81 @@
+{
+  "verification_date": "2026-10-01",
+  "verification_kind": "historical_before_intermediate_state_forward_correction",
+  "superseded_by": "validation/forward_decision_20261001.json",
+  "timezone": "Asia/Shanghai",
+  "status": "code_and_constructive_copy_replay_verified",
+  "baseline_commit": "939c4c9f82cf34f2cb15a3f675aac9a951938b9f",
+  "optimized_changes": "working_tree_at_historical_validation",
+  "model_configuration": "z-ai/glm-5.3",
+  "changes": [
+    "Advisory conditional counterfactual forecasts and partial ordering",
+    "Mechanism transfer cards for all 21 reviewed knowledge functions",
+    "Expert-selected local potential construction with host AST/source/probe serialization",
+    "Norm exponent derivation from a chosen marginal-response design point",
+    "Measured copy-coordinate candidate allocation and conflicts",
+    "Forward expert prompts and public workspace records"
+  ],
+  "new_required_handoff_fields": false,
+  "new_scientific_submission_gates": false,
+  "auxiliary_incomplete_input": "needs_input observation; does not consume run_tools repair budget",
+  "tests": {
+    "tests": "326",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "94.678"
+  },
+  "test_scope": "Project tests/; vendor FLOWR and copied experiment harnesses excluded",
+  "local_replay": {
+    "status": "host_replay_validated",
+    "authorship": "Host reconstructed the previously supplied pilot choices; no new GLM decisions or API approval.",
+    "source_sha256": "790b33fa6edb9b784b3019f33290e22728e69bb37d19f7b9e053cccf3e9c59c5",
+    "source_unchanged": true,
+    "construction_seconds": 0.09819839999545366,
+    "argument_sizes": [
+      {
+        "direction_id": "dir_bond4_12_elongation",
+        "manual_direction_argument_characters": 8629,
+        "constructor_argument_characters": 1825,
+        "reduction_fraction": 0.7885038822575038
+      },
+      {
+        "direction_id": "dir_receptor_polar_contacts",
+        "manual_direction_argument_characters": 8926,
+        "constructor_argument_characters": 3167,
+        "reduction_fraction": 0.6451938158189559
+      }
+    ],
+    "numerical_passed": true,
+    "reward_id": "rw_7ebee199974a6364a726f0d6"
+  },
+  "remote_replay": {
+    "status": "host_replay_validated",
+    "source_unchanged": true,
+    "numerical_passed": true,
+    "reward_id": "rw_4954af72b8fbae6548d2ef94",
+    "construction_seconds": 0.4560499042272568
+  },
+  "data_integrity": {
+    "data_unchanged": true,
+    "data_file_count": 404,
+    "changed_data_files": [],
+    "evidence": "Remote audit_sources(after) completed with passed=true after deployment/replay"
+  },
+  "deployment": {
+    "files": 41,
+    "local_hashes_match_downloaded_remote_manifest": true,
+    "backup": "/root/private_data/MolSteer/test/glm_design_audit_20260930/deployment_backup_constructive_20261001"
+  },
+  "api_requests": 0,
+  "monitor_enabled": false,
+  "graph_review_enabled": false,
+  "live_generator_derivative": "not_run",
+  "new_weight_continuations": "not_run",
+  "limitations": [
+    "No new GLM decisions or API success-rate/latency measurement",
+    "No calibrated future-value forecasts or terminal-utility improvement claim",
+    "Saved-state host replay does not replace live guidance or five-weight experiments",
+    "Historical API 402 and GPU readiness records are not reclassified"
+  ]
+}

@@ -122,6 +122,18 @@ def test_rejected_lineage_feedback_identifies_field_without_echoing_formula(case
     assert 'rejected-private-input' not in json.dumps(feedback)
 
 
+def test_lineage_ignores_math_layout_but_rejects_changed_coefficients_or_prose(case):
+    from molsteer.agents.expert_contracts import _formula_layout
+    assert _formula_layout('$E=a + b$; unchanged prose')==_formula_layout('$E=a+b$; unchanged prose')
+    assert _formula_layout('$E=2*a+b$')!=_formula_layout('$E=a+b$')
+    assert _formula_layout('$E=a+b$; two words')!=_formula_layout('$E=a+b$; twowords')
+    p,r,b,d,ret=copy.deepcopy(case)
+    formula=d['directions'][0]['function_lineage'][0]['original_formula']
+    if '$' in formula:
+        d['directions'][0]['function_lineage'][0]['original_formula']=formula.replace('\\', ' \\')
+        assert validate_math(d,b,p,[ret],{})
+
+
 def test_rejected_evidence_feedback_identifies_direction_without_echoing_ids(case):
     from molsteer.agents.loop import _validation_feedback
     p,r,b,d,ret=case
@@ -258,6 +270,7 @@ def make_models(case,research=False,revisions=0):
 def test_dual_runtime_researcher_and_checkpoint_bridge(case,tmp_path):
     from molsteer.molexecutor.agent_bridge import compile_validated_agent_checkpoint
     cfg=load_config();cfg.repo_root=ROOT;cfg.runtime.trace_dir=Path('outputs/test_experts');cfg.thinker.external_research=False
+    cfg.thinker.require_design_audit=False  # Legacy synthetic handoff compatibility.
     models=make_models(case,research=True)
     state=AgentRuntime(cfg,models=models).run(*case[:2],run_id='dual_fixture')
     assert state['status']=='validated',state['trace'][-4:]
@@ -274,11 +287,65 @@ def test_dual_runtime_researcher_and_checkpoint_bridge(case,tmp_path):
 
 def test_bounded_reconsideration_stops_before_executor(case):
     cfg=load_config();cfg.runtime.trace_dir=Path('outputs/test_experts');cfg.thinker.external_research=False
+    cfg.thinker.require_design_audit=False
     models=make_models(case,revisions=3)
     state=AgentRuntime(cfg,models=models).run(*case[:2],run_id='bounded_fixture')
     assert state['status']=='design_deferred'
     assert len(state['expert_history'])==3
     assert models['molexecutor'].calls==0
+
+
+def test_role_references_are_actually_forwarded_without_duplicate_entire_skill(case):
+    cfg=load_config();cfg.runtime.trace_dir=Path('outputs/test_experts');cfg.thinker.external_research=False
+    cfg.thinker.require_design_audit=False
+    models=make_models(case);seen=set()
+    for role in ('biology','mathematics'):
+        model=models['molthinker.'+role];original=model.respond
+        def respond(n,messages,role=role,original=original):
+            assert 'Generic background reference' in messages[0].content
+            assert ('1. Ground the decision' if role=='biology' else '1. Build a function-basis ledger') in messages[0].content
+            assert 'Required core-target and mathematical-shape reference' not in messages[0].content
+            seen.add(role);return original(n,messages)
+        model.respond=respond
+    result=AgentRuntime(cfg,models=models).run(*case[:2],run_id='skill_forwarded')
+    assert result['status']=='validated' and seen=={'biology','mathematics'}
+
+
+def test_math_submits_the_exact_host_retained_tested_artifact_without_regeneration(case):
+    cfg=load_config();cfg.runtime.trace_dir=Path('outputs/test_experts')
+    cfg.thinker.require_design_audit=False
+    models=make_models(case)
+    model=models['molthinker.mathematics'];original=model.respond
+    def respond(n,messages):
+        return [(name,{} if name=='submit_mathematical_design' else args)
+                for name,args in original(n,messages)]
+    model.respond=respond
+    result=AgentRuntime(cfg,models=models).run(*case[:2],run_id='submit_retained_artifact')
+    assert result['status']=='validated'
+    assert result['mathematical_design']['directions'][0]['expression']==case[3]['directions'][0]['expression']
+    submitted=next(e for e in result['trace'] if e.get('tool_name')=='submit_mathematical_design')
+    assert submitted['input']=={} and submitted['output']['mathematical_design']==result['mathematical_design']
+
+
+def test_math_can_patch_failed_draft_only_after_full_revalidation(case):
+    cfg=load_config();cfg.runtime.trace_dir=Path('outputs/test_experts');cfg.thinker.require_design_audit=False
+    models=make_models(case);model=models['molthinker.mathematics'];original=model.respond
+    def respond(n,messages):
+        if n==3:
+            return [('patch_and_test_mathematical_design',{'changes':[{'path':['directions',0,'expression'],
+                'value':case[3]['directions'][0]['expression']}]})]
+        if n==4:return [('submit_mathematical_design',{})]
+        calls=original(n,messages)
+        if n==2:
+            args=copy.deepcopy(next(args for name,args in calls if name=='test_mathematical_design'))
+            args['design']['directions'][0]['expression']={'op':'observable','id':'invalid_observable'}
+            return [('test_mathematical_design',args)]
+        return calls
+    model.respond=respond
+    result=AgentRuntime(cfg,models=models).run(*case[:2],run_id='patch_failed_draft')
+    assert result['status']=='validated'
+    assert result['mathematical_design']['directions'][0]['expression']==case[3]['directions'][0]['expression']
+    assert any(e.get('tool_name')=='patch_and_test_mathematical_design' and e['output'].get('passed') for e in result['trace'])
 
 
 def test_legacy_config_inherits_single_and_expert_model_validation():
@@ -324,7 +391,8 @@ def test_independent_role_model_profiles(monkeypatch):
     cfg.models['bio']=cfg.models['default'].model_copy(update={'model':'test-biology'})
     cfg.thinker.experts={'biology':'bio'}
     constructor=Mock();secrets=Mock();secrets.get.return_value='test-only'
-    monkeypatch.setitem(sys.modules,'langchain_openrouter',SimpleNamespace(ChatOpenRouter=constructor))
+    from molsteer.agents import openrouter_transport
+    monkeypatch.setattr(openrouter_transport, 'OpenRouterChat', constructor)
     create_chat_model(cfg,'molthinker.biology',secrets)
     assert constructor.call_args.kwargs['model']=='test-biology'
     create_chat_model(cfg,'molthinker.mathematics',secrets)
@@ -427,6 +495,10 @@ def test_compiled_expert_reward_binds_live_graph_and_formula(case):
         changed=dict(pred,**{key:pred[key].roll(1,-1)})
         changed_value,_=reward.evaluate(changed)
         assert float(changed_value)==pytest.approx(float(value))
+    reward.reference_policy='suspend_on_graph_change'
+    with pytest.raises(ValueError,match='reference_graph_changed'):
+        reward.evaluate(dict(pred,atomics=pred['atomics'].roll(1,-1)))
+    reward.reference_policy=None
     with pytest.raises(ValueError,match='slot count'):
         reward.evaluate(dict(pred,coords=pred['coords'][:-1]))
 
@@ -480,6 +552,7 @@ def test_engine_rejected_expert_probes_preserve_native_path_and_rng(tmp_path,mon
 @pytest.mark.parametrize('role',['biology','mathematics'])
 def test_expert_api_failure_never_falls_back(case,role):
     cfg=load_config();cfg.runtime.trace_dir=Path('outputs/test_experts')
+    cfg.thinker.require_design_audit=False
     models=make_models(case)
     models['molthinker.'+role]=ScriptModel(lambda n,m:(_ for _ in ()).throw(RuntimeError('PRIVATE_FAILURE')))
     state=AgentRuntime(cfg,models=models).run(*case[:2],run_id='failure_'+role)

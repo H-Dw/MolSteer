@@ -16,7 +16,7 @@ from typing import Any
 from molsteer.common import digest
 
 _ALLOWED_KINDS = {"decision", "tool", "observation", "checkpoint", "error"}
-_SECRET_KEYS = re.compile(r"(?:api[_-]?key|secret|password|authorization|credential|private_reasoning|reasoning_details|reasoning_content|chain_of_thought|^thinking$|^reasoning$|^access_token$)", re.I)
+_SECRET_KEYS = re.compile(r"(?:api[_-]?key|secret|password|authorization|credential|private_reasoning|reasoning_details|reasoning_content|openrouter_reasoning_(?:deltas|text_deltas)|chain_of_thought|^thinking$|^reasoning$|^access_token$)", re.I)
 
 
 def _redact(value: Any) -> Any:
@@ -86,8 +86,9 @@ def save_checkpoint(state: dict[str, Any], trace_dir: str | Path) -> Path:
     payload["artifacts"] = _redact({key: state.get(key) for key in (
         "packet", "diagnostic_report", "reward_spec", "plan", "validation",
         "execution_result", "config", "segments", "strength", "replans",
-        "biology_plan", "mathematical_design", "model_dynamics", "expert_history",
-        "retrieval_records", "research_packets", "reward_design_deferral", "expert_prompt_digests")})
+        "biology_plan", "mathematical_design", "model_dynamics", "expert_history", "expert_workspace_history",
+        "retrieval_records", "research_packets", "reward_design_deferral", "expert_prompt_digests",
+        "expert_guidance_sources", "workflow_reference_digests")})
     payload["artifacts_digest"] = digest(payload["artifacts"])
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     temporary.replace(target)

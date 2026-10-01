@@ -28,6 +28,8 @@ def validate_observables(observables, packet, evidence_ids):
         raise ValueError('Use 1 to 32 bound observables per direction')
     ids = set()
     evidence_index={e['evidence_id']:(m['view'],e) for m in packet['observations'] for e in m.get('evidence',[])}
+    from molsteer.molreader.measurement_refs import measurement_references
+    evidence_index.update({ident:(ref['view'],ref) for ident,ref in measurement_references(packet).items()})
     for obs in observables:
         if set(obs) != {'observable_id', 'kind', 'view', 'atom_ids', 'evidence_ids', 'parameters'}:
             raise ValueError('Observable fields disagree with contract')

@@ -1,0 +1,118 @@
+{
+  "verification_date": "2026-10-01",
+  "timezone": "Asia/Shanghai",
+  "status": "software_verified_real_api_partial_http_402",
+  "baseline_commit": "939c4c9f82cf34f2cb15a3f675aac9a951938b9f",
+  "implementation_document": "docs/MOLTHINKER_FORWARD_IMPLEMENTATION.zh-CN.md",
+  "model_configuration": "z-ai/glm-5.3",
+  "changes": [
+    "Current-state and contemporaneous-prediction evidence remain separate; no invented terminal-outcome forecasts",
+    "Mechanism integration and minimal sufficient goals assisted by optional editable public records and declared set-removal review",
+    "Scientific selections, preservation, research and biological compilation candidates are separate; required unresolved goals reach mathematics",
+    "Mechanism retrieval and retain/specialize/reconstruct decisions precede target-set, local-response and candidate construction guidance",
+    "Actual configured Markdown references supplied by role and readable on demand with source digests",
+    "Unresolved designs and controllers retained without false execution or numerical approval"
+  ],
+  "skills_changed_from_baseline": false,
+  "forward_record_helpers_required": false,
+  "forward_stage_order_gate_added": false,
+  "forward_forecast_scoring_or_automatic_goal_selection": false,
+  "tests": {
+    "scope": "project tests/; vendor and copied experiment harnesses excluded",
+    "tests": 336,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 248.857,
+    "evidence": "outputs/forward_decision_20261001/pytest.xml"
+  },
+  "real_api": {
+    "phase": "saved_state_api_design",
+    "target": "5i0b",
+    "molecule": "ligand_000",
+    "stage_t": 0.5,
+    "attempt": "glm_forward_20261001_01",
+    "status": "failed",
+    "requests_started": 8,
+    "requests_completed": 7,
+    "requests_failed": 1,
+    "completed_by_role": {
+      "molreader": 4,
+      "molthinker.biology": 3
+    },
+    "served_models": [
+      "z-ai/glm-5.3"
+    ],
+    "failure": {
+      "role": "molthinker.mathematics",
+      "error_type": "APIStatusError",
+      "http_status": 402
+    },
+    "accepted_biology": true,
+    "mathematical_design_produced": false,
+    "biological_directions": [
+      {
+        "direction_id": "repair_c4_c12_bond",
+        "disposition": "optimize",
+        "required": true
+      },
+      {
+        "direction_id": "reduce_mmff_strain",
+        "disposition": "optimize",
+        "required": true
+      },
+      {
+        "direction_id": "preserve_pocket_sterics",
+        "disposition": "constraint",
+        "required": true
+      },
+      {
+        "direction_id": "monitor_identity_and_graph",
+        "disposition": "monitor",
+        "required": false
+      }
+    ],
+    "biology_submission_attempts": 2,
+    "existing_evidence_binding_corrections": 1,
+    "optional_forward_helpers_called": false,
+    "public_review": [
+      "Biology retained separate local-bond and global-strain goals, preservation and decision-changing chemical uncertainty.",
+      "A different relaxation-displacement region is not an energy decomposition or proof of independent mechanisms; scientific sufficiency remains unverified.",
+      "No real mathematical response was returned; source transfer, target-set and local-response construction quality cannot be assessed."
+    ],
+    "monitor_enabled": false,
+    "graph_review_enabled": false,
+    "live_generator_derivative": "not_run",
+    "new_weight_continuations": {
+      "1": "not_run",
+      "10": "not_run",
+      "100": "not_run",
+      "300": "not_run",
+      "500": "not_run"
+    },
+    "evidence_root": "outputs/forward_decision_20261001",
+    "remote_output": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_forward_20261001_01",
+    "checkpoint_sha256": "9de9b5792f271c34d483e9d4307cabd700b768815876c6703bc6d54a11cbc08a"
+  },
+  "data_integrity": {
+    "passed": true,
+    "data_unchanged": true,
+    "data_file_count": 404,
+    "changed_data_files": []
+  },
+  "source_copies_unchanged": true,
+  "deployment": {
+    "files": 45,
+    "source_script_test_config_skill_hashes_match_remote_manifest": true,
+    "retired_modules": [
+      "src/molsteer/agents/opportunity.py"
+    ],
+    "backup": "/root/private_data/MolSteer/test/glm_design_audit_20260930/deployment_backup_forward_20261001"
+  },
+  "limitations": [
+    "Software tests verify actual role inputs, tools and handoff behavior; scripted models do not establish private reasoning or real-model quality.",
+    "HTTP 402 stopped the mathematics phase; no silent model fallback and no complete real-API workflow success claim.",
+    "This saved-state attempt ran no new live pullback, generation continuation or five-weight comparison.",
+    "No terminal outcome priors were supplied and no calibrated efficacy forecast or terminal utility improvement is claimed."
+  ]
+}

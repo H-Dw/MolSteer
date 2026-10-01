@@ -35,7 +35,7 @@ class MarkdownCorpus:
                             retrieval_scope='inspected local source passage')
                 if entry:
                     item.update({k: entry[k] for k in ('function_id', 'formula', 'variables',
-                                'gradient_target', 'prerequisites', 'sources', 'tags', 'name_en')})
+                                'gradient_target', 'prerequisites', 'sources', 'tags', 'name_en', 'role')})
                 item['source_id'] = 'src_' + digest(item['source_key'])[:20]
                 item['chunk_id'] = 'chunk_' + digest(item)[:24]
                 self.chunks[item['chunk_id']] = item
@@ -58,18 +58,22 @@ class MarkdownCorpus:
                         start = number
                     block.append(line)
             add(start, block)
-        self.version = digest(files)
+        self.version = digest({'files': files, 'index_schema': '2-role-and-function-filter'})
 
-    def search(self, query, limit=5):
+    def search(self, query, limit=5, function_id=None):
         if not isinstance(query, str) or not query.strip() or not 1 <= limit <= 10:
             raise ValueError('Nonempty query and bounded result count required')
         tokens = set(tokenize(query))
+        if function_id is not None and function_id not in {c.get('function_id') for c in self.chunks.values()}:
+            raise ValueError('Unknown reviewed function ID')
         ranked = []
         for item in self.chunks.values():
+            if function_id is not None and item.get('function_id') != function_id:
+                continue
             content = ' '.join(str(item.get(k, '')) for k in
                                ('title', 'excerpt', 'tags', 'name_en', 'variables'))
             score = len(tokens & set(tokenize(content)))
-            if score:
+            if score or function_id is not None:
                 ranked.append(dict(item, retrieval_score=score))
         ranked.sort(key=lambda x: (-x['retrieval_score'], x['chunk_id']))
         return {'status': 'ok' if ranked else 'zero_hits', 'query': query,

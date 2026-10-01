@@ -206,7 +206,8 @@ def test_tool_loop_keeps_openrouter_reasoning_details_only_in_memory():
         def invoke(self, messages):
             self.turn += 1
             if self.turn == 2:
-                assert messages[2].additional_kwargs['reasoning_details'] == details
+                previous=next(message for message in messages if isinstance(message,AIMessage))
+                assert previous.additional_kwargs['reasoning_details'] == details
             return AIMessage(content='', additional_kwargs={'reasoning_details': details},
                              tool_calls=[{'name': 'check', 'args': {'step': self.turn},
                                           'id': f'call_{self.turn}'}])

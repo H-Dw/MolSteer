@@ -129,7 +129,8 @@ def _compile_expert(spec,packet,report,checkpoint,guard_template,strength):
                  expert_spec=deepcopy(spec),source_packet=deepcopy(packet),source_report=deepcopy(report),
                  region_atom_ids=editable,active_objectives=[],weights=[],lambda_graph=0.,
                  knowledge_source={'corpus':'knowledge/','retrieval':deepcopy(spec['retrieval'])},
-                 graph_policy='allow_changes; MolMonitor reviews current chemical roles',
+                 graph_policy=spec['mathematical_design'].get('design_audit',{}).get('graph_policy',
+                     'allow_changes; MolMonitor reviews current chemical roles'),
                  constraints=['current slot mapping','editable mask','live component derivative preflight','post-injection direction','explicit constraint predicates'],
                  inactive_compatibility_fields=['tau','rho','weights','lambda_graph'])
     program.update({k:deepcopy(guard_template[k]) for k in _GUARD_FIELDS})

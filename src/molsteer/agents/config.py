@@ -69,6 +69,10 @@ class ModelConfig(StrictModel):
     timeout: float | None = Field(default=None, gt=0)
     max_retries: int = Field(default=2, ge=0)
     reasoning_enabled: bool = False
+    reasoning_effort: Literal['low', 'high', 'max'] | None = None
+    api_transport: Literal['native', 'openai_compatible'] = 'native'
+    require_parameters: bool = True
+    streaming: bool = False
 
     @field_validator("model")
     @classmethod
@@ -115,6 +119,8 @@ class ThinkerConfig(StrictModel):
     research_max_searches: int = Field(default=3, ge=1, le=10)
     research_result_limit: int = Field(default=5, ge=1, le=10)
     external_research: bool = True
+    # Legacy handoffs remain readable; the shipped API config opts into audits.
+    require_design_audit: bool = False
 
 
 class MonitoringConfig(StrictModel):
@@ -158,6 +164,10 @@ class AgentSystemConfig(StrictModel):
                 raise ValueError(f"model profile {name!r} references unknown provider {profile.provider!r}")
             if profile.reasoning_enabled and self.providers[profile.provider].kind != "openrouter":
                 raise ValueError(f"model profile {name!r} enables OpenRouter reasoning for a different provider")
+            if (profile.reasoning_effort is not None or profile.api_transport != 'native') and self.providers[profile.provider].kind != 'openrouter':
+                raise ValueError('OpenRouter effort and transport settings require an OpenRouter provider')
+            if profile.reasoning_effort is not None and not profile.reasoning_enabled:
+                raise ValueError('reasoning_effort requires reasoning_enabled=true')
         for name, profile in self.agents.items():
             if profile.model not in self.models:
                 raise ValueError(f"agent profile {name!r} references unknown model {profile.model!r}")

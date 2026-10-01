@@ -8,7 +8,7 @@
 
 `configs/agents.json` 采用 `agents → models → providers` 引用结构。四个 Agent 默认通过 OpenRouter 使用 `z-ai/glm-5.3`，端点为 `https://openrouter.ai/api/v1`；可分别改用其他模型、服务端点和凭据引用。运行真实 API 前，需要由宿主环境注入 `OPENROUTER_API_KEY`。安装依赖使用项目虚拟环境，不改变系统 Python。
 
-默认模型启用 OpenRouter reasoning 参数。`ChatOpenRouter` 在同一 Agent 的临时多轮工具调用中传递 `reasoning_details`；审计 trace 与 checkpoint 不保存供应商的私有 reasoning 内容。
+默认模型启用 OpenRouter reasoning 参数并明确设置 `low` 推理强度、32768-token 输出预算和 300 秒超时。默认采用 OpenAI 兼容聊天接口；适配器在同一 Agent 的临时多轮工具调用中原样传递 `reasoning_details`，审计 trace 与 checkpoint 不保存供应商的私有 reasoning 内容。原生 `ChatOpenRouter` 路线仍可配置。科学决策与调用验证见 [GLM 与专家奖励设计审计](GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md)。
 
 旧 `think` / `demo` 命令保留其历史语义；新 Agent 调度不是把历史离线实验重新标记为 LLM 实验。
 
@@ -27,6 +27,8 @@
 各特征获取路径通过独立工具暴露。事实与风险诊断保留来源、表示空间、原子映射、单位和不可用状态。工具不能由 LLM 任意指定本机路径以读取文件。已保存的数据读取与重新执行外部评估应区分，不把工具名称当成测量已运行的证明。
 
 ### MolThinker
+
+双专家已按[生成中间态前向决策方案](MOLTHINKER_INTERMEDIATE_STATE_PLAN.zh-CN.md)修改实际提示词、工作区和交接：整合当前证据、评估潜在修复收益、选择最小充分目标，再检索迁移知识、确定数学目标集合和局部响应、构造候选。科学目标与执行候选分开，必要但未实现的目标继续进入数学研究；辅助工作区不增加提交 gate。[实施说明](MOLTHINKER_FORWARD_IMPLEMENTATION.zh-CN.md)记录改动和验证边界，[上一轮设计说明](MOLTHINKER_VALUE_AND_SYNTHESIS.zh-CN.md)仅保留为历史。
 
 采用 ReAct（用户所述 RecAct 的思考—执行循环）：先规划，再按需调用 StatePack、知识检索和计算工具，消费 observation 后修订方案。Web 搜索和外部计算由宿主注册的适配器提供；未接入时明确返回 unavailable，不捏造检索结果。
 
@@ -75,11 +77,11 @@ python -X utf8 -m molsteer agents --packet examples/5i0b_A__5vef_M77/ligand_002/
 ## 当前实现范围与验收
 
 - Reader tools 读取绑定 StatePacket 的 geometry、chemistry、uncertainty 三条证据路径，并调用原领域诊断器。没有把全部 43 项指标的原始文件采集与外部评分逐项重新接线。
-- Thinker 的 API 工具循环可提交计划、检索与选择/重参数化已支持的奖励基元。Skill 的完整 `ConflictAwareControlDecision` 是设计契约；运行时保存的是较小的 `ControlPlan`，不声称自动完成任意公式推导、全部约束 QP 或离散分支求解。`conflict_weights` 是可调用的数值库函数，尚非自动应用到所有奖励的控制器。
-- Executor 的自动修复范围是声明式程序检查和有界测试参数，不能自主编写并部署任意新 Python 后端。新公式需要受审查的后端实现。Web 和外部计算需注入宿主 callable；默认不联网执行这些工具。
+- Thinker 默认使用顺序生物/数学双专家，保存 `BiologyPlan`、`MathematicalDesign` 与绑定奖励。生物专家审查八类因素；数学专家检索实际知识函数，提出带单位的声明式表达式，并验证来源、参数、条款与函数形状。单专家遗留路径仍可配置。`common_descent` 会用实际传入同一变量的目标梯度求解方向；`scalar_potential` 只接受明确的单目标、maximum 或 lp_norm。完整在线冲突与生成器导数需要真实适配器验证。
+- Executor 的自动修复范围是声明式程序检查和有界测试参数，不能自主编写并部署任意新 Python 后端。新增未支持的物理量仍需要受审查的实现。Researcher 配置开启外部研究时可调用 Europe PMC/arXiv；通用 Web 检索需要宿主注入 search/fetch callable。检索失败保留缺失证据，不伪造来源。
 - 新工作流正式推理接入协议为 `adapter(packet=..., reward_spec=..., execution_result=validation, request=...)`，返回 `{'done': bool, 'metrics': {...}}`；`request` 含 segment/strength/run_id/monitor_event。适配器必须实际消费 strength，并负责实时梯度、硬约束和生成器状态；不能把旧 FLOWR CLI 配置直接当成该 callable。
 - 当前监控对每个指标分别维护基线，不混合原始量纲，异常不会污染正常基线。它尚未自动按 diffusion 时间阶段分桶；生产阈值仍需按真实轨迹校准。
-- 验收：完整测试 **144 passed**，包含四个 API Agent 的模拟 tool-call 测试、OpenRouter reasoning 消息传递、真实领域数值测试、监控先 retune 后 replan 的图级测试与审计快照完整性测试。另有一个原有 PyTorch Tensor 转标量警告。没有运行真实付费 API、在线检索或 GPU 生成器推理。
+- 首次接线验收为 **144 passed**，当时未运行真实 API 或 GPU。后续 GLM-5.3 的真实请求、坐标副本测试、科学审计与 GPU 限制单独记录在 [GLM 与专家奖励设计审计](GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md)，最终回归记录见 `validation/glm53_expert_design_20260930.json`。模拟测试通过不能替代真实 API 或在线生成器验证。
 
 ## 验证方法
 

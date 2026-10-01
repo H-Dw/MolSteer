@@ -16,6 +16,7 @@ from .reader import reader_tools
 from .thinker import thinker_tools
 from .executor import executor_tools, validate_and_test_reward
 from .monitor import RobustMonitor, monitor_metrics
+from .workflow_guidance import load_workflow_materials
 
 
 class AgentRuntime:
@@ -58,7 +59,7 @@ class AgentRuntime:
         tools,result=reader_tools(state['packet'],state.get('diagnostic_report') or None)
         if self.config.mode=='offline':
             for t in tools:
-                if t.name!='read_bound_statepack':
+                if t.name in ('inspect_geometry', 'inspect_chemistry', 'inspect_uncertainty', 'submit_diagnosis'):
                     observation=t.invoke({})
                     append_trace(state,node='reader',kind='tool',summary='Offline evidence path',tool_name=t.name,output=observation)
         else:
@@ -247,7 +248,7 @@ class AgentRuntime:
         if type(execute) is not bool: raise ValueError('execute must be boolean')
         if execute and (not self.approve_inference or not callable(self.inference_adapter)): raise ValueError('execute requires an explicitly approved inference adapter')
         skill=self.config.skill_path.read_text(encoding='utf-8')
-        if self.config.skill_path.parent.name=='molthinker-reward-creativity':
+        if self.config.thinker.architecture=='single' and self.config.skill_path.parent.name=='molthinker-reward-creativity':
             reference=self.config.skill_path.parent/'references'/'core-target-and-shape.md'
             skill+='\n\n# Required core-target and mathematical-shape reference\n'+reference.read_text(encoding='utf-8')
         state=initial_state(run_id=run_id,packet=deepcopy(packet),diagnostic_report=deepcopy(diagnostic_report))
@@ -255,6 +256,9 @@ class AgentRuntime:
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
         state['model_dynamics']=deepcopy(self.model_dynamics)
+        if self.config.thinker.architecture=='dual_expert':
+            state['workflow_materials']=load_workflow_materials(self.config.skill_path)
+            state['workflow_reference_digests']={ident:row['sha256'] for ident,row in state['workflow_materials'].items()}
         if feedback is not None:state['monitor_event']=deepcopy(feedback)
         self.monitor=RobustMonitor(self.config.monitoring) if self.config.agents['molmonitor'].enabled else None
         try:
@@ -268,6 +272,7 @@ class AgentRuntime:
             state['status']='failed'; state['route']='error'; state['errors']=[type(exc).__name__+': workflow failed; review validated tool observations']
             append_trace(state,node='runtime',kind='error',summary='Workflow failed without fallback',output={'error_type':type(exc).__name__})
         state.pop('skill_text',None)
+        state.pop('workflow_materials',None)
         state['trace_path']=str(save_trace(state,self.config.trace_dir))
         state['checkpoint_path']=str(save_checkpoint(state,self.config.trace_dir))
         return state

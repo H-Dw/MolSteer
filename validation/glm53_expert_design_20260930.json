@@ -1,0 +1,1594 @@
+{
+  "started_date": "2026-09-30",
+  "verification_date": "2026-10-01",
+  "status": "code_verified_final_online_revalidation_blocked",
+  "final_scientific_api_acceptance": false,
+  "baseline_commit": "939c4c9f82cf34f2cb15a3f675aac9a951938b9f",
+  "test_scope": "MolSteer tests/; external FLOWR vendor suite and copied experiment harnesses are outside this scope",
+  "tests": {
+    "tests": "314",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "85.943"
+  },
+  "legacy_reward_validation": {
+    "passed": true,
+    "reward_id": "rw_577145f70b965de7d013349e"
+  },
+  "model": "z-ai/glm-5.3",
+  "credentials": "Server environment OPENROUTER_API_KEY; no key persisted",
+  "monitor_enabled": false,
+  "graph_review_enabled": false,
+  "connectivity": {
+    "passed": true,
+    "model": "z-ai/glm-5.3",
+    "calls": [
+      "inspect_contract",
+      "submit_probe"
+    ],
+    "receipts": [
+      {
+        "step": 0,
+        "seconds": 2.4208320192992687,
+        "model": "z-ai/glm-5.3",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 218,
+          "output_tokens": 6,
+          "total_tokens": 224,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0,
+            "cache_creation": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        },
+        "tools": [
+          "inspect_contract"
+        ],
+        "invalid_calls": 0
+      },
+      {
+        "step": 1,
+        "seconds": 1.6016436703503132,
+        "model": "z-ai/glm-5.3",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 249,
+          "output_tokens": 12,
+          "total_tokens": 261,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 192,
+            "cache_creation": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        },
+        "tools": [
+          "submit_probe"
+        ],
+        "invalid_calls": 0
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "attempt": "glm_design_01",
+      "status": {
+        "status": "interrupted_for_prompt_repair",
+        "reason": "Repeated factor prerequisite contract failures with insufficient actionable feedback; preserved actual API/tool records.",
+        "model": "z-ai/glm-5.3",
+        "fallback": false,
+        "owned_process_count": 1
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 7
+      },
+      "served_models": [],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.biology",
+          "event": "request_failed",
+          "request_id": "01a0f299-2634-71c3-98a4-f11136bb7f63",
+          "error_type": "KeyboardInterrupt",
+          "status_code": null
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Evidence does not belong to the direction findings",
+          "validation_path": [
+            "directions",
+            0,
+            "evidence_ids"
+          ]
+        },
+        {
+          "validation_rule": "Active factors need measured evidence and matching controllable directions",
+          "validation_path": [
+            "factor_assessment",
+            0
+          ]
+        },
+        {
+          "validation_rule": "Active factors need measured evidence and matching controllable directions",
+          "validation_path": [
+            "factor_assessment",
+            0
+          ]
+        },
+        {
+          "validation_rule": "Active factors need measured evidence and matching controllable directions",
+          "validation_path": [
+            "factor_assessment",
+            0
+          ]
+        },
+        {
+          "validation_rule": "Active factors need measured evidence and matching controllable directions",
+          "validation_path": [
+            "factor_assessment",
+            0
+          ]
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 737733,
+        "output_tokens": 34944,
+        "reasoning_tokens": 3522,
+        "total_tokens": 772677
+      }
+    },
+    {
+      "attempt": "glm_design_02",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_02/agent_runs/api_5i0b_glm_design_02.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 3,
+        "molthinker.mathematics": 5
+      },
+      "served_models": [],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f29f-468e-74c1-9d8f-e2e0aaa2b794",
+          "error_type": "JSONDecodeError",
+          "status_code": null
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [],
+      "token_usage": {
+        "input_tokens": 558070,
+        "output_tokens": 7282,
+        "reasoning_tokens": 863,
+        "total_tokens": 565352
+      }
+    },
+    {
+      "attempt": "glm_design_03",
+      "status": {
+        "status": "interrupted_for_prompt_repair",
+        "reason": "Repeated mathematical prerequisite failures exposed ambiguous copy-evaluation scope and missing stereochemical measurement references; repairing contracts and preserving all actual API/tool records.",
+        "model": "z-ai/glm-5.3",
+        "fallback": false,
+        "owned_process_count": 1
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 3,
+        "molthinker.mathematics": 14
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f2be-5951-7761-84bb-68544d5a8898",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 869,
+            "body_character_count": 869,
+            "line": 159,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 235.7291925549507
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f2c5-c846-7982-ab2f-d15dd7e10e79",
+          "error_type": "KeyboardInterrupt",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "__iter__",
+            "_receive_response_body",
+            "_receive_event",
+            "read",
+            "recv",
+            "read"
+          ],
+          "wall_seconds": 59.58657222613692
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        },
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        },
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        },
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        },
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        },
+        {
+          "validation_rule": "Executable formulas need inspected sources and all prerequisites"
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 1667108,
+        "output_tokens": 96026,
+        "reasoning_tokens": 8316,
+        "total_tokens": 1763134
+      }
+    },
+    {
+      "attempt": "glm_design_04",
+      "status": {
+        "status": "interrupted_for_prompt_repair",
+        "reason": "Mathematical draft claimed nonexistent host contact-count and burial acceptance gates; adding explicit per-clause coverage before continuing genuine GLM validation. Public revision and actual API records preserved.",
+        "model": "z-ai/glm-5.3",
+        "fallback": false,
+        "owned_process_count": 1
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 6,
+        "molthinker.mathematics": 12,
+        "molthinker.researcher": 6
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.biology",
+          "event": "request_failed",
+          "request_id": "01a0f2d8-e6b0-7090-bbe8-f0ed2efd81d8",
+          "error_type": "KeyboardInterrupt",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "__iter__",
+            "_receive_response_body",
+            "_receive_event",
+            "read",
+            "recv",
+            "read"
+          ],
+          "wall_seconds": 59.97136326134205
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Observable must cite its direction diagnostic evidence"
+        },
+        {
+          "validation_rule": "Observable support is not localized by its evidence"
+        },
+        {
+          "validation_rule": "Research claims require fetched evidence observations"
+        },
+        {
+          "validation_rule": "Fetch requires an identifier returned by this research session"
+        },
+        {
+          "validation_rule": "Observable must cite its direction diagnostic evidence"
+        },
+        {
+          "validation_rule": "Observable must cite its direction diagnostic evidence"
+        },
+        {
+          "validation_rule": "Assess every biophysical factor before selecting a reward",
+          "validation_path": [
+            "factor_assessment"
+          ]
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 2186014,
+        "output_tokens": 52336,
+        "reasoning_tokens": 8918,
+        "total_tokens": 2238350
+      }
+    },
+    {
+      "attempt": "glm_design_05",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_05/agent_runs/api_5i0b_glm_design_05.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 24
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Repair clauses must cite their direction bound evidence",
+          "validation_path": [
+            "directions",
+            0,
+            "repair_clauses"
+          ]
+        },
+        {
+          "validation_rule": "Biological direction cites unknown diagnostic evidence"
+        },
+        {
+          "validation_rule": "Biological direction cites unknown diagnostic evidence"
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 2961746,
+        "output_tokens": 22762,
+        "reasoning_tokens": 2545,
+        "total_tokens": 2984508
+      }
+    },
+    {
+      "attempt": "glm_design_06",
+      "status": {
+        "status": "interrupted_for_prompt_repair",
+        "reason": "Repeated full mathematical JSON regeneration and response JSON decoding failures; adding bounded draft field replacement with mandatory revalidation, specific lineage/arity feedback and global predicate coverage lint. Preserving actual API records; no fallback.",
+        "model": "z-ai/glm-5.3",
+        "fallback": false,
+        "owned_process_count": 1
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 4,
+        "molthinker.mathematics": 15
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f2f7-9717-7e73-83ba-da19e58d2326",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 1100,
+            "body_character_count": 1100,
+            "line": 201,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 303.343877106905
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f2fe-835e-74f2-9d1f-0fe655fce3a2",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 1100,
+            "body_character_count": 1100,
+            "line": 201,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 303.10117235034704
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f305-87fa-7772-b2e9-9d78f9315496",
+          "error_type": "KeyboardInterrupt",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "__iter__",
+            "_receive_response_body",
+            "_receive_event",
+            "read",
+            "recv",
+            "read"
+          ],
+          "wall_seconds": 117.0803856253624
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Repair clauses must cite their direction bound evidence",
+          "validation_path": [
+            "directions",
+            0,
+            "repair_clauses",
+            1,
+            "evidence_ids",
+            0
+          ]
+        },
+        {
+          "validation_rule": "Function lineage must identify an inspected source location"
+        },
+        {
+          "validation_rule": "Each direction requires its own actual local retrieval"
+        },
+        {
+          "validation_rule": "Invalid operator arity",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        },
+        {},
+        {},
+        {
+          "validation_rule": "Invalid operator arity",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 1934563,
+        "output_tokens": 107326,
+        "reasoning_tokens": 6522,
+        "total_tokens": 2041889
+      }
+    },
+    {
+      "attempt": "glm_design_07",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "ValueError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_07/agent_runs/api_5i0b_glm_design_07.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 4,
+        "molthinker.mathematics": 14
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Repair clauses must cite their direction bound evidence",
+          "validation_path": [
+            "directions",
+            1,
+            "repair_clauses",
+            1,
+            "evidence_ids",
+            1
+          ]
+        },
+        {
+          "validation_rule": "Unknown bound measurement reference",
+          "validation_path": [
+            "evidence_ids",
+            4
+          ]
+        },
+        {
+          "validation_rule": "Constants need a finite value, unit and provenance",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        },
+        {
+          "validation_rule": "Invalid operator arity",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        },
+        {
+          "validation_rule": "Invalid operator arity",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        },
+        {},
+        {},
+        {},
+        {},
+        {}
+      ],
+      "token_usage": {
+        "input_tokens": 1453471,
+        "output_tokens": 50686,
+        "reasoning_tokens": 3892,
+        "total_tokens": 1504157
+      }
+    },
+    {
+      "attempt": "glm_design_08",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "KeyError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_08/agent_runs/api_5i0b_glm_design_08.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 2
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [],
+      "token_usage": {
+        "input_tokens": 184243,
+        "output_tokens": 9619,
+        "reasoning_tokens": 1465,
+        "total_tokens": 193862
+      }
+    },
+    {
+      "attempt": "glm_design_09",
+      "status": {
+        "status": "interrupted_for_prompt_repair",
+        "reason": "Repeated JSON-encoded biology object under reference-based provider tool schema; adapting schema to inline nonrecursive fields and a bounded recursive preview. Preserving API records and strict host validation; no fallback.",
+        "model": "z-ai/glm-5.3",
+        "fallback": false,
+        "owned_process_count": 1
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 8
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.biology",
+          "event": "request_failed",
+          "request_id": "01a0f32d-469b-71f1-bd6d-e6d0d9d4aa27",
+          "error_type": "KeyboardInterrupt",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "__iter__",
+            "_receive_response_body",
+            "_receive_event",
+            "read",
+            "recv",
+            "read"
+          ],
+          "wall_seconds": 20.664554722607136
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {},
+        {},
+        {},
+        {},
+        {}
+      ],
+      "token_usage": {
+        "input_tokens": 772800,
+        "output_tokens": 28896,
+        "reasoning_tokens": 6824,
+        "total_tokens": 801696
+      }
+    },
+    {
+      "attempt": "glm_design_10",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "ValueError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_10/agent_runs/api_5i0b_glm_design_10.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 3,
+        "molthinker.mathematics": 14
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {},
+        {},
+        {},
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        },
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        },
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        },
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        },
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        },
+        {
+          "validation_rule": "Lineage formula/source must match the inspected passage and explain specialization",
+          "validation_path": [
+            "directions",
+            0,
+            "function_lineage",
+            0,
+            "original_formula"
+          ]
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 1502427,
+        "output_tokens": 21149,
+        "reasoning_tokens": 4953,
+        "total_tokens": 1523576
+      }
+    },
+    {
+      "attempt": "glm_design_11",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "ValueError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_11/agent_runs/api_5i0b_glm_design_11.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 3,
+        "molthinker.mathematics": 16
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Assess every biophysical factor before selecting a reward",
+          "validation_path": [
+            "factor_assessment"
+          ]
+        },
+        {
+          "validation_rule": "Unknown selected biological direction"
+        },
+        {
+          "validation_rule": "Observable fields disagree with contract",
+          "validation_path": [
+            "directions",
+            0,
+            "observables"
+          ]
+        },
+        {
+          "validation_rule": "Each local objective must be dimensionless and use all declared observables",
+          "validation_path": [
+            "directions",
+            1,
+            "expression"
+          ]
+        },
+        {},
+        {
+          "validation_rule": "Strategy needs mode, aggregation and scientific justification"
+        },
+        {
+          "validation_rule": "Function basis must cite inspected source locations",
+          "validation_path": [
+            "directions",
+            0,
+            "function_basis"
+          ]
+        },
+        {},
+        {
+          "validation_rule": "Every expression constant needs one exact parameter provenance record",
+          "validation_path": [
+            "directions",
+            1,
+            "reference_parameters"
+          ]
+        },
+        {}
+      ],
+      "token_usage": {
+        "input_tokens": 1774268,
+        "output_tokens": 33756,
+        "reasoning_tokens": 8468,
+        "total_tokens": 1808024
+      }
+    },
+    {
+      "attempt": "glm_design_12",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_12/agent_runs/api_5i0b_glm_design_12.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 5,
+        "molthinker.biology": 2,
+        "molthinker.mathematics": 7
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f34c-db73-7df1-8841-8ed6d315f6e3",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 1100,
+            "body_character_count": 1100,
+            "line": 201,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 302.89964501932263
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f351-ae57-76a3-a8ad-66e07c4ab249",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 1100,
+            "body_character_count": 1100,
+            "line": 201,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 302.8857718408108
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f356-4d7e-7af3-b6ad-23108d7560b3",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "decoder": {
+            "position": 1100,
+            "body_character_count": 1100,
+            "line": 201,
+            "column": 1
+          },
+          "frame_names": [
+            "parse",
+            "_parse",
+            "json",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 317.2187028005719
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [],
+      "token_usage": {
+        "input_tokens": 794903,
+        "output_tokens": 9893,
+        "reasoning_tokens": 2046,
+        "total_tokens": 804796
+      }
+    },
+    {
+      "attempt": "glm_design_13",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_13/agent_runs/api_5i0b_glm_design_13.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 3,
+        "molthinker.mathematics": 5
+      },
+      "served_models": [
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f364-68fb-7601-8182-c5caa9d4bd8e",
+          "error_type": "RuntimeError",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "generate",
+            "_generate_with_cache",
+            "_stream",
+            "_validate_stream_end"
+          ],
+          "wall_seconds": 304.1606851220131
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Repair clauses must cite their direction bound evidence",
+          "validation_path": [
+            "directions",
+            0,
+            "repair_clauses",
+            2,
+            "evidence_ids",
+            0
+          ]
+        }
+      ],
+      "token_usage": {
+        "input_tokens": 641231,
+        "output_tokens": 16145,
+        "reasoning_tokens": 1589,
+        "total_tokens": 657376
+      }
+    },
+    {
+      "attempt": "glm_design_14",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_14/agent_runs/api_5i0b_glm_design_14.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 5,
+        "molthinker.mathematics": 8
+      },
+      "served_models": [
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f37f-9cbf-7ec2-b98e-543b599fb9d4",
+          "error_type": "RuntimeError",
+          "status_code": null,
+          "decoder": {},
+          "frame_names": [
+            "generate",
+            "_generate_with_cache",
+            "_stream",
+            "_validate_stream_end"
+          ],
+          "wall_seconds": 304.1786220520735
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [],
+      "token_usage": {
+        "input_tokens": 873969,
+        "output_tokens": 13038,
+        "reasoning_tokens": 3189,
+        "total_tokens": 887007
+      }
+    },
+    {
+      "attempt": "glm_design_15",
+      "status": {
+        "status": "validated",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_15/agent_runs/api_5i0b_glm_design_15.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "executor",
+          "reader",
+          "thinker",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 4,
+        "molthinker.mathematics": 12,
+        "molexecutor": 3
+      },
+      "served_models": [
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": {
+        "passed": false,
+        "rule": "Independent monitors cannot be claimed as executable acceptance gates",
+        "path": [
+          "directions",
+          0,
+          "acceptable_set"
+        ],
+        "original_api_status": "validated",
+        "original_numerical_validation_passed": true,
+        "reason": "Independent monitors in the mathematical acceptable set are not installed Executor gates; final acceptance requires the repaired contract."
+      },
+      "request_failures": [],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Active factors need measured evidence and matching controllable directions",
+          "validation_path": [
+            "factor_assessment",
+            4
+          ]
+        },
+        {},
+        {
+          "validation_rule": "Strategy needs mode, aggregation and scientific justification"
+        },
+        {}
+      ],
+      "token_usage": {
+        "input_tokens": 1036376,
+        "output_tokens": 26041,
+        "reasoning_tokens": 5300,
+        "total_tokens": 1062417
+      }
+    },
+    {
+      "attempt": "glm_design_16",
+      "status": {
+        "status": "failed",
+        "mode": "api",
+        "phase": "saved_state_api_design",
+        "errors": [
+          "RuntimeError: workflow failed; review validated tool observations"
+        ],
+        "checkpoint_path": "/root/private_data/MolSteer/test/glm_design_audit_20260930/glm_design_16/agent_runs/api_5i0b_glm_design_16.checkpoint.json",
+        "monitor_enabled": false,
+        "graph_review_enabled": false,
+        "live_generator_derivative": "not_run",
+        "trace_nodes": [
+          "reader",
+          "runtime",
+          "thinker.biology",
+          "thinker.mathematics"
+        ]
+      },
+      "completed_by_agent": {
+        "molreader": 4,
+        "molthinker.biology": 6,
+        "molthinker.mathematics": 19
+      },
+      "served_models": [
+        "z-ai/glm-5.3"
+      ],
+      "post_validation_reaudit": null,
+      "request_failures": [
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f3a8-9624-72b3-a448-5dada1d69038",
+          "error_type": "JSONDecodeError",
+          "status_code": null,
+          "stream_receipt": {},
+          "decoder": {
+            "position": 12,
+            "body_character_count": 12,
+            "line": 1,
+            "column": 13
+          },
+          "frame_names": [
+            "_generate_with_cache",
+            "_stream",
+            "_validate_stream_end",
+            "loads",
+            "decode",
+            "raw_decode"
+          ],
+          "wall_seconds": 184.2036714181304
+        },
+        {
+          "agent": "molthinker.mathematics",
+          "event": "request_failed",
+          "request_id": "01a0f3ac-a4b8-7e00-8db8-08eddce15bca",
+          "error_type": "APIStatusError",
+          "status_code": 402,
+          "stream_receipt": {},
+          "decoder": {},
+          "frame_names": [
+            "_stream",
+            "_stream",
+            "wrapper",
+            "create",
+            "post",
+            "request"
+          ],
+          "wall_seconds": 3.084268219769001
+        }
+      ],
+      "invalid_tool_messages": 0,
+      "validation_errors": [
+        {
+          "validation_rule": "Evidence does not belong to the direction findings",
+          "validation_path": [
+            "directions",
+            5,
+            "evidence_ids"
+          ]
+        },
+        {},
+        {
+          "validation_rule": "Each local objective must be dimensionless and use all declared observables",
+          "validation_path": [
+            "directions",
+            0,
+            "expression"
+          ]
+        },
+        {}
+      ],
+      "token_usage": {
+        "input_tokens": 2280476,
+        "output_tokens": 65251,
+        "reasoning_tokens": 6810,
+        "total_tokens": 2345727
+      }
+    }
+  ],
+  "blocking_conditions": [
+    "HTTP 402 on final GLM revalidation; key daily limit remains available, account payment condition needs confirmation",
+    "No visible GPU matching the saved CUDA RNG layout"
+  ],
+  "billing_readiness": {
+    "verification_date": "2026-10-01",
+    "metadata_endpoint": "GET /api/v1/key",
+    "metadata_http_status": 200,
+    "key_limit_usd": 50,
+    "key_limit_remaining_usd": 37.758459924,
+    "key_limit_reset": "daily",
+    "key_usage_daily_usd": 12.241540076,
+    "account_balance": "Not returned by key metadata endpoint; unverified",
+    "last_inference_http_status": 402,
+    "interpretation": "Final request blocked by HTTP 402. Key daily quota is available; exact account/payment or in-flight budget condition has not been verified."
+  },
+  "host_scope_candidate": {
+    "status": "host_scope_candidate_numerically_validated",
+    "authorship": "Host corrected scope prose only; this candidate is NOT an API-approved GLM artifact",
+    "expressions_unchanged": true,
+    "api_after_scope_correction": "not_run_HTTP_402"
+  },
+  "source_integrity": {
+    "phase": "after",
+    "data_unchanged": true,
+    "changed_data_files": [],
+    "data_file_count": 404,
+    "sources": [
+      {
+        "source": "/root/private_data/MolSteer/outputs/flowr_100target_checkpoints/025_5i0b_A_rec_5vef_m77_lig_tt_min_0/molecule_000.pt",
+        "copy": "/root/private_data/MolSteer/test/glm_design_audit_20260930/source_trajectory/molecule_000.pt",
+        "source_unchanged": true,
+        "copy_unchanged": true
+      },
+      {
+        "source": "/root/private_data/MolSteer/outputs/flowr_100target_checkpoints/025_5i0b_A_rec_5vef_m77_lig_tt_min_0/batch_000.pt",
+        "copy": "/root/private_data/MolSteer/test/glm_design_audit_20260930/source_trajectory/batch_000.pt",
+        "source_unchanged": true,
+        "copy_unchanged": true
+      },
+      {
+        "source": "/root/private_data/MolSteer/data/crossdocked_pocket10/PAK4_HUMAN_291_591_ATP_0/5i0b_A_rec_5vef_m77_lig_tt_min_0_pocket10.pdb",
+        "copy": "/root/private_data/MolSteer/test/glm_design_audit_20260930/inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0_pocket10.pdb",
+        "source_unchanged": true,
+        "copy_unchanged": true
+      },
+      {
+        "source": "/root/private_data/MolSteer/data/crossdocked_pocket10/PAK4_HUMAN_291_591_ATP_0/5i0b_A_rec_5vef_m77_lig_tt_min_0.sdf",
+        "copy": "/root/private_data/MolSteer/test/glm_design_audit_20260930/inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0.sdf",
+        "source_unchanged": true,
+        "copy_unchanged": true
+      }
+    ],
+    "passed": true
+  },
+  "gpu_preflight": {
+    "status": "blocked",
+    "blockers": [
+      "no_visible_gpu_for_saved_cuda_rng",
+      "visible_gpu_layout_differs_from_recorded_trajectory"
+    ],
+    "modules": {
+      "torch": true,
+      "rdkit": true,
+      "langgraph": true,
+      "langchain_core": true,
+      "langchain_openrouter": true
+    },
+    "credentials_present": {
+      "molreader": true,
+      "molthinker": true,
+      "molexecutor": true
+    },
+    "environment_credentials_present": {
+      "molreader": true,
+      "molthinker": true,
+      "molexecutor": true
+    },
+    "runtime": {
+      "version": "2.5.1+cu121",
+      "gpu_count": 0,
+      "gpu_available": false
+    },
+    "recorded_torch": "2.5.1+cu121",
+    "source_hashes_match": {
+      "source_trajectory/molecule_000.pt": true,
+      "source_trajectory/batch_000.pt": true,
+      "inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0_pocket10.pdb": true,
+      "inputs/5i0b_A_rec_5vef_m77_lig_tt_min_0.sdf": true
+    },
+    "monitor_enabled": false,
+    "graph_review_enabled": false,
+    "weights": {
+      "1": {
+        "status": "not_run"
+      },
+      "10": {
+        "status": "not_run"
+      },
+      "100": {
+        "status": "not_run"
+      },
+      "300": {
+        "status": "not_run"
+      },
+      "500": {
+        "status": "not_run"
+      }
+    }
+  },
+  "live_generator_derivative": "not_run",
+  "weights": {
+    "1": {
+      "status": "not_run",
+      "reason": "No visible GPU matching saved CUDA RNG layout"
+    },
+    "10": {
+      "status": "not_run",
+      "reason": "No visible GPU matching saved CUDA RNG layout"
+    },
+    "100": {
+      "status": "not_run",
+      "reason": "No visible GPU matching saved CUDA RNG layout"
+    },
+    "300": {
+      "status": "not_run",
+      "reason": "No visible GPU matching saved CUDA RNG layout"
+    },
+    "500": {
+      "status": "not_run",
+      "reason": "No visible GPU matching saved CUDA RNG layout"
+    }
+  },
+  "deployment_manifest": [
+    {
+      "path": "configs/README.md",
+      "sha256": "fec3a9f1d63b5e5cae43c1c98c5c3146366455ce467d8cc4510019dfb84496fd",
+      "baseline_sha256": "003df3f0b5eb4f3b7f252a145da6ff03700e6698357f0e993a7546db25581afd"
+    },
+    {
+      "path": "configs/agents.json",
+      "sha256": "ae42786177e882e8ecd195b309cc11ccdd8334a68659abd61c893b78d3dd3e2b",
+      "baseline_sha256": "3840a80ac9b95a19f0d2ba5705d5983ae13775597024deeab876284cd4075b22"
+    },
+    {
+      "path": "docs/AGENT_SYSTEM.zh-CN.md",
+      "sha256": "3b39eb6c3eb5340c7ba2db7237be2e1a4ccbcfab405ded29325be7d59c2f98fc",
+      "baseline_sha256": "6ff66861836eb0dfd4cd7f54dac7a53b6c07e8c40554bc69f3872d68609413ac"
+    },
+    {
+      "path": "scripts/analyze_5i0b_api_weights.py",
+      "sha256": "4a7f5a575e2a4a6dc9c0528107a910e0208deef67656e8b2253ccfc37f2e9e3e",
+      "baseline_sha256": "2adcae6cae8e306f567ab3e2395cde206f3e71d512ef6e315fc34b4a47448838"
+    },
+    {
+      "path": "scripts/test_5i0b_api_weights.py",
+      "sha256": "78aac41ba9556a0eff6b7d733685487d1b33d14d6d0940f8a1457488c1be523d",
+      "baseline_sha256": "ac8b9e1b3fb64c04af13f6ceb6ef6a9f3a13261f9886bf861026bd9fec04c2b3"
+    },
+    {
+      "path": "src/molsteer/agents/config.py",
+      "sha256": "b62e78e9808ec597b5bc9881929b8a2ba2c8bc1e345340461200599a099ce1b9",
+      "baseline_sha256": "cedb6fb931bfc355868e8071444daac341ea22208c62f15db49b6907112758a0"
+    },
+    {
+      "path": "src/molsteer/agents/expert_contracts.py",
+      "sha256": "37277f7f4a1f6f7b89235e138c65c75f5bcaae6b569b94e812bb1e1b63944e6e",
+      "baseline_sha256": "d38f300a5300c4f38d7dd7ae5ed2d839fd800c21fe6303c5ce00673458311a03"
+    },
+    {
+      "path": "src/molsteer/agents/experts.py",
+      "sha256": "057d1f12bc811675f423df410c747302d5c394f38a0392f5eca1397f6ee46272",
+      "baseline_sha256": "f97145c9c774b37f1af0c4e95c63b353d2ed6fff792bad67ff5cfc323d5d6950"
+    },
+    {
+      "path": "src/molsteer/agents/loop.py",
+      "sha256": "9063984666e72c94d7fdf88e945066b23a9de3de1bb0d2ce5db3761bdbf6ae03",
+      "baseline_sha256": "57f666967708f823000de5b1c853a9a55c65b4232596427a98c86343b7afb355"
+    },
+    {
+      "path": "src/molsteer/agents/models.py",
+      "sha256": "7d8d4da5ccc5b045a2c935a256c22a60351e6ac3f3038377392a2f631d166bd9",
+      "baseline_sha256": "29fb8bd629e6fa695d95d40c3a5d9e0bce74c17cc050cd95a6e2d2d3e73343e9"
+    },
+    {
+      "path": "src/molsteer/agents/reader.py",
+      "sha256": "f1a319b97596c6e2ec2b7432a2360c5b60a924c604bdb122170c83a8c2e2e27e",
+      "baseline_sha256": "c8a793a53c5ba37c871158bd0d6646905ac9a9efd2c2ba3555f19ebebfd6ba7b"
+    },
+    {
+      "path": "src/molsteer/agents/researcher.py",
+      "sha256": "e3deb58a4f9f74fc85e598eccf4857e01be93e001437d9961b9a895265e24b4e",
+      "baseline_sha256": "2790e17b20964f574c3d6960c190af81781066dea2df019295ac2ffe6717f1d3"
+    },
+    {
+      "path": "src/molsteer/agents/runtime.py",
+      "sha256": "5fb8ff7c0be6ffbdfc6f37a858455410dfa19f02574cfa2ba99870be7bc247b7",
+      "baseline_sha256": "49ec4ca220ae4f9d50857e44b7e7f6d86584ec1196f1db0ce7ade596bf694471"
+    },
+    {
+      "path": "src/molsteer/agents/trace.py",
+      "sha256": "d9c09083d0bff150009b22665bab043b186e40cfdfc083a7bbec27840985ddcf",
+      "baseline_sha256": "a6230192b56f207e369fb4623eeb9f59a5cbe9190d61770ea80a3ae378b52421"
+    },
+    {
+      "path": "src/molsteer/molexecutor/agent_bridge.py",
+      "sha256": "5bc95aa6a5248996a5ec41a93fc6ff1761b8028110b6e1fd13310964372622a2",
+      "baseline_sha256": "d5b63788dbbeeb4c9107bc949098893269d5a8154c7f97217393bb5aa1e6ae20"
+    },
+    {
+      "path": "src/molsteer/molexecutor/expert_reward.py",
+      "sha256": "8aff14d9f3f67000f82c125e1b743079a28c518d5ffe744427c778c0dc71cab4",
+      "baseline_sha256": "9a136b7aecf319d85f185775f5305c0faff1b15648dd1f9af0cc2b22bd60e9ba"
+    },
+    {
+      "path": "src/molsteer/molthinker/expressions.py",
+      "sha256": "97a88243d57542899d12a7590071560715dbf4c55352a9ab4725f55ee330a01b",
+      "baseline_sha256": "2e96b6774eaeeb15739f71c166b07fd567642787628837b30d722d8471c9a179"
+    },
+    {
+      "path": "src/molsteer/molthinker/research/corpus.py",
+      "sha256": "e5d901c40032eb1f5298949ba11ec32be84631eac1a88fb70f177527e575b215",
+      "baseline_sha256": "f4b93d7a64ed6ba274435b93ffb779466e4977a3115f131b08ad9f1190663c8a"
+    },
+    {
+      "path": "tests/test_agent_config.py",
+      "sha256": "6bfb0f822236cd666b9c518377ce746b17f5eb59f7cae5a3782986a7a1172027",
+      "baseline_sha256": "c0c0c7c2ffff92ac098e3c1ebde24e63f095c0f2405a06f16e450c052584b1ab"
+    },
+    {
+      "path": "tests/test_agent_runtime.py",
+      "sha256": "46a607c6d7e0e64e8d864f3868528a693f165b7b9798f4073612b190b02363ae",
+      "baseline_sha256": "8219271332881814069e59d30f730b06952b207e03da7f792ebe0cd03b1fa840"
+    },
+    {
+      "path": "tests/test_expert_system.py",
+      "sha256": "864ea36f53282000284d6b486e8f53d77422dfce985efc4430f33a84753b71ce",
+      "baseline_sha256": "caf8f9d39bf79476b9744648c3f312ba742fa81ccb22c781d6dd358bb2a47baf"
+    },
+    {
+      "path": "tests/test_tool_validation_feedback.py",
+      "sha256": "f8e4adf62afb3769498ec82b94770a8485633a384eee2b37b19b3de7ac31b527",
+      "baseline_sha256": "72e80a406ab1f97575ba961eaa819fa9d767884fbd27ef8e6e70fec801220e26"
+    },
+    {
+      "path": "docs/GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md",
+      "sha256": "1903202c50ccb5dbbfbc8bc2506c37b4a5dac327b69f806525309b638bfda865",
+      "baseline_sha256": null
+    },
+    {
+      "path": "scripts/test_glm53_expert_design.py",
+      "sha256": "8510d77bd6a38ce32989e969fe0948b6b41ca8dd95828cc52ff864f10758f3db",
+      "baseline_sha256": null
+    },
+    {
+      "path": "scripts/test_glm53_saved_state_api.py",
+      "sha256": "a8d1fa50720756fa444abf0567c4eb1a360d06469fe8674092e5061e77378e50",
+      "baseline_sha256": null
+    },
+    {
+      "path": "src/molsteer/agents/audit_contracts.py",
+      "sha256": "326f69865e69877d91c663f953c933391c4c22abb0e3ae825e2a26706f97507a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "src/molsteer/agents/design_audit.py",
+      "sha256": "d7f388e4c8b5140eac78553ebdaa01739e35e43ed59b7c3ec15165b971738bdf",
+      "baseline_sha256": null
+    },
+    {
+      "path": "src/molsteer/agents/expression_contracts.py",
+      "sha256": "9c3b16f21b62d9291b78ef7307543dc3cc4bb1dcb400fd7e2e9d34d2aa51f787",
+      "baseline_sha256": null
+    },
+    {
+      "path": "src/molsteer/agents/openrouter_transport.py",
+      "sha256": "b654edcdba9a67ffb756d9ae54948937eed3b877445ec31e6733a50604e0a879",
+      "baseline_sha256": null
+    },
+    {
+      "path": "src/molsteer/molreader/measurement_refs.py",
+      "sha256": "c44f11495bc405911c17b759d1f47d1656e5baa93c0d04aac0d6218f314b7087",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tests/test_design_audit.py",
+      "sha256": "4f64758b3f75e9315220ef599874345fe7d51ad7b28e109409935513dbadba15",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tests/test_incomplete_tool_response.py",
+      "sha256": "18cbde35e09a40c4e7dfff06a1fae9fca23fbd86ec84308031a4d6d67f29815f",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tests/test_openrouter_streaming.py",
+      "sha256": "aff6824e295bfc56a0c28941bfd156a43b4804e59b22d7581b87de98d55fb62c",
+      "baseline_sha256": null
+    }
+  ]
+}

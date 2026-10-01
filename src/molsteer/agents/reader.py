@@ -6,6 +6,7 @@ from typing import Any, Callable
 from langchain_core.tools import tool
 from .state import validate_packet, validate_report
 from .tools import make_statepack_tool
+from .design_audit import bounded_values
 
 class Reader:
     def __init__(self, *, model: Any = None, reader_fn: Callable[..., dict[str, Any]] | None = None, tools: list[Any] | None = None):
@@ -40,7 +41,17 @@ def reader_tools(packet: dict, supplied_report: dict | None = None):
         observations = frozen.get("observations", [])
         if path in groups: observations = [x for x in observations if x.get("metric_id") in groups[path]]
         else: observations = [x for x in observations if "confidence" in x.get("metric_id", "") or "entropy" in x.get("metric_id", "")]
-        return {"path": path, "observations": deepcopy(observations), "availability": "observed" if observations else "unavailable", "limit": "Missing metrics are not passes; no external programs launched"}
+        scoped = [dict(metric_id=m['metric_id'], view=m['view'], status=m['status'],
+                       values=bounded_values(m['values']), thresholds=m.get('thresholds', {}),
+                       evidence=deepcopy(m.get('evidence', [])), notes=m.get('notes', [])) for m in observations]
+        return {"path": path, "observations": scoped, "availability": "observed" if observations else "unavailable", "limit": "Value arrays are explicitly bounded; evidence IDs and host packet are preserved. Use inspect_metric for a full metric. Missing metrics are not passes; no external programs launched"}
+    @tool
+    def inspect_metric(metric_id: str, view: str = 'prediction') -> dict:
+        """Read one full bound metric when a bounded array or neighboring chemical context needs inspection."""
+        matches = [m for m in frozen['observations'] if m['metric_id'] == metric_id and m['view'] == view]
+        if len(matches) != 1:
+            raise ValueError('Metric lookup must identify one bound observation')
+        return deepcopy(matches[0])
     @tool
     def inspect_geometry() -> dict:
         """Read local geometry and pocket-clash evidence with original IDs."""
@@ -63,7 +74,7 @@ def reader_tools(packet: dict, supplied_report: dict | None = None):
             report = make_localized_report(frozen)
         validate_report(report, frozen); result["report"] = report
         return {"status": "accepted", "packet_id": frozen["packet_id"], "report": report}
-    return [make_statepack_tool(frozen), inspect_geometry, inspect_chemistry, inspect_uncertainty, submit_diagnosis], result
+    return [make_statepack_tool(frozen), inspect_geometry, inspect_chemistry, inspect_uncertainty, inspect_metric, submit_diagnosis], result
 
 def reader_node(state: dict[str, Any], reader: Reader) -> dict[str, Any]:
     report = reader.run(state["packet"], report=state.get("diagnostic_report") or None)

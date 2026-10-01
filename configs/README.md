@@ -19,7 +19,7 @@ MolSteer now has a provider-neutral orchestration layer under `src/molsteer/agen
 
 The default in [`configs/agents.json`](../configs/agents.json) assigns all four agents to `z-ai/glm-5.3` through OpenRouter (`https://openrouter.ai/api/v1`). Set `OPENROUTER_API_KEY` in the host environment before an API run. The key is not stored in this repository. OpenAI and Anthropic providers remain available for independently configured agent profiles.
 
-`reasoning_enabled: true` sends OpenRouter's `reasoning: {"enabled": true}` request parameter. The OpenRouter LangChain adapter preserves `reasoning_details` in the transient tool-call conversation, including follow-up calls. Provider messages and private reasoning are not written to the audit trace or checkpoint.
+`reasoning_enabled: true` sends the configured effort (`low` for the shipped profiles), or `reasoning: {"enabled": true}` without an explicit effort. The compatible OpenRouter adapter preserves `reasoning_details` in the transient tool-call conversation, including follow-up calls. Provider messages and private reasoning are not written to the audit trace or checkpoint.
 
 `configs/secrets.local.json` supports either:
 
@@ -31,7 +31,11 @@ or the configured secret reference directly under each provider. Environment var
 
 ## Independent models and runtime paths
 
-To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout`, `max_retries` and optional `reasoning_enabled`, then point each `agents.<name>.model` at the appropriate name. `timeout` is configured in seconds and converted to milliseconds for `ChatOpenRouter`. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. `reasoning_enabled` applies only to OpenRouter profiles. Do not pass a model's unsupported parameters.
+To use different models, add named objects under `models` with `provider`, `model`, `temperature`, `max_tokens`, `timeout`, `max_retries` and optional `reasoning_enabled`, then point each `agents.<name>.model` at the appropriate name. `timeout` is configured in seconds; only the legacy native `ChatOpenRouter` transport converts it to milliseconds. The shipped GLM profile uses `api_transport: openai_compatible`, `reasoning_effort: low`, a 32768-token output budget and a 300-second timeout. Reasoning blocks remain ephemeral but round-trip across tool turns. `require_parameters: true` restricts routing to compatible providers. These transport/effort options apply only to OpenRouter. Multiple providers of the same `kind` can have different endpoints and environment/secret references. `temperature: null` omits the parameter for models that do not accept sampling controls. Do not pass a model's unsupported parameters.
+
+`thinker.require_design_audit: true` requires eight-factor biological coverage, inspected function candidates, exact parameter provenance and executable shape/derivative probes. Legacy handoffs remain readable with the option absent. See [the GLM and expert-design audit](../docs/GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md).
+
+`thinker.experts.mathematics: mathematics` selects a second profile of the same GLM-5.3 model with `reasoning_effort: low`, a 16384-token budget and `streaming: true`. High-effort trials repeatedly ended without a terminal marker at about 304 seconds; lowering the per-call budget does not relax scientific validation. Multiple selected directions use staged drafts and a complete assembled-design test. The compatible adapter strictly parses raw tool arguments before execution; partially repaired JSON or a missing terminal marker cannot authorize a tool. Expert report arrays are bounded previews and reference catalogs are paged metadata; original packet data remain available for exact measurement inspection and Executor validation.
 
 All runtime-relative paths resolve against the repository root, including when the config JSON is elsewhere or the current working directory differs. The source checkout must retain its `configs`, `skills` and `knowledge` directories; a wheel containing only Python modules is not a complete deployment bundle.
 

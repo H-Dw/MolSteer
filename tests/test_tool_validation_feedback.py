@@ -22,4 +22,6 @@ def test_unknown_exception_messages_do_not_enter_model_feedback():
 
 def test_fixed_public_contract_rules_can_be_repaired():
     message='Each direction requires its own actual local retrieval'
-    assert _validation_feedback(ValueError(message)) == {'validation_rule':message}
+    feedback=_validation_feedback(ValueError(message))
+    assert feedback['validation_rule']==message
+    assert 'direction_id' in feedback['validation_hint']

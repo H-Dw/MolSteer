@@ -6,6 +6,8 @@ MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 
 
 四个 Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。
 
+默认双专家从生成中间态整合多因素证据、选择最小充分目标，再检索知识、推导局部响应和构造候选；科学目标与执行能力分开，辅助工作区可选。改动和验证边界见[前向流程实施说明](docs/MOLTHINKER_FORWARD_IMPLEMENTATION.zh-CN.md)，此前调用配置和奖励问题的追溯见 [GLM-5.3 与专家设计审计](docs/GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md)。
+
 Linux 服务器的 [Conda 环境与 Docker 镜像配置](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md)包含 MolSteer Agent、FLOWR 生成器和 CUDA 12.1 的当前验证版本。
 
 SCNet 的 DTK 26.04 异构加速卡 Notebook 使用单独的 [推理 Conda 环境配置记录](docs/SCNET_DTK_CONDA_INFERENCE.zh-CN.md)。

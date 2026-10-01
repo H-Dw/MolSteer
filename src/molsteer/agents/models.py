@@ -46,20 +46,38 @@ def create_chat_model(
         kwargs["timeout"] = profile.timeout
     if provider.base_url is not None:
         kwargs["base_url"] = provider.base_url
+    if profile.streaming:
+        kwargs['streaming'] = True
     # Keep exceptions from provider constructors (which may echo arguments) out
     # of logs. Missing optional packages get a separate, actionable message.
     if provider.kind == "openrouter":
-        try:
-            from langchain_openrouter import ChatOpenRouter
-        except ImportError:
-            raise RuntimeError("install langchain-openrouter to use this provider") from None
-        constructor = ChatOpenRouter
-        # ModelConfig.timeout is expressed in seconds like the other providers,
-        # while ChatOpenRouter's `timeout` argument is milliseconds.
-        if profile.timeout is not None:
-            kwargs["timeout"] = max(1, round(profile.timeout * 1000))
+        reasoning = {}
         if profile.reasoning_enabled:
-            kwargs["reasoning"] = {"enabled": True}
+            reasoning = {'effort': profile.reasoning_effort} if profile.reasoning_effort else {'enabled': True}
+        if profile.api_transport == 'openai_compatible':
+            try:
+                from .openrouter_transport import OpenRouterChat
+            except ImportError:
+                raise RuntimeError('install langchain-openai to use the compatible OpenRouter transport') from None
+            constructor = OpenRouterChat
+            kwargs['base_url'] = provider.base_url or 'https://openrouter.ai/api/v1'
+            kwargs['use_responses_api'] = False
+            kwargs['extra_body'] = {'provider': {'require_parameters': profile.require_parameters}}
+            if reasoning:
+                kwargs['extra_body']['reasoning'] = reasoning
+            kwargs['model_kwargs'] = {'parallel_tool_calls': False}
+            if profile.streaming:
+                kwargs['stream_usage'] = True
+        else:
+            try:
+                from langchain_openrouter import ChatOpenRouter
+            except ImportError:
+                raise RuntimeError("install langchain-openrouter to use this provider") from None
+            constructor = ChatOpenRouter
+            if profile.timeout is not None:
+                kwargs["timeout"] = max(1, round(profile.timeout * 1000))
+            if reasoning:
+                kwargs['reasoning'] = reasoning
     elif provider.kind == "openai":
         try:
             from langchain_openai import ChatOpenAI

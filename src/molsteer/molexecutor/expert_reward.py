@@ -19,8 +19,11 @@ class ExpertReward(MolecularReward):
         self.uses_state_view=any(o['view']=='state' for d in self.evaluator.directions for o in d['observables'])
         self.uses_state_graph='state' in self.evaluator.mmff
         self.control_diagnostics={};self.component_gradients=None
+        self.reference_policy=program['expert_spec']['mathematical_design'].get('design_audit', {}).get('graph_policy')
 
     def components(self,pred,state_coords=None,state_graph=None):
+        if getattr(self, 'reference_policy', None) == 'suspend_on_graph_change' and self.graph(pred) != self.graph(self.p0):
+            raise ValueError('reward_reference_graph_changed_guidance_suspended')
         if self.uses_state_view and state_coords is None:
             raise ValueError('Expert expressions require live state-world coordinates')
         coordinates={'prediction':pred['coords'],'state':state_coords}
@@ -42,7 +45,7 @@ class ExpertReward(MolecularReward):
         return reward,{'components':{k:float(v.detach()) for k,v in values.items()},
                        'control_mode':self.evaluator.strategy['mode'],
                        'scalar_is_reporting_only':self.evaluator.strategy['mode']=='common_descent',
-                       'chemical_applicability':'Coordinate expressions evaluated; semantic review belongs to MolMonitor'}
+                       'chemical_applicability': self.reference_policy or 'Coordinate expressions evaluated; semantic review belongs to MolMonitor'}
 
     def control_gradient(self,adapter,endpoint,x,mask):
         current=self.state_graph(adapter)

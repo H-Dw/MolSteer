@@ -29,8 +29,8 @@ class ResearchService:
         state['research_packets'] = []
         state['retrieval_records'] = []
 
-    def local_search(self, direction_id, query):
-        result = self.local.search(query, self.config.research_result_limit)
+    def local_search(self, direction_id, query, function_id=None):
+        result = self.local.search(query, self.config.research_result_limit, function_id=function_id)
         event = dict(result, direction_id=direction_id, provider='local')
         event['retrieval_id'] = 'ret_'+digest(event)[:24]
         if not any(r['retrieval_id'] == event['retrieval_id'] for r in self.state['retrieval_records']):

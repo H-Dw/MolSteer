@@ -83,19 +83,33 @@ def observed_api_runtime(config, dynamics, receipt_path):
         def on_llm_end(self, response, *, run_id, **kwargs):
             usage = []
             finish_reasons = []
+            served_models = []
             for group in response.generations:
                 for generation in group:
                     metadata = getattr(generation.message, 'usage_metadata', None) or {}
                     usage.append({key:metadata[key] for key in
                                   ('input_tokens','output_tokens','total_tokens') if key in metadata})
+                    reasoning_tokens=metadata.get('output_token_details',{}).get('reasoning')
+                    if reasoning_tokens is not None:usage[-1]['reasoning_tokens']=reasoning_tokens
                     finish_reasons.append((getattr(generation.message,'response_metadata',None) or {}).get('finish_reason'))
+                    served_models.append((getattr(generation.message,'response_metadata',None) or {}).get('model_name'))
             self.record(dict(event='request_completed', request_id=str(run_id), usage=usage,
                 finish_reasons=finish_reasons,
+                served_models=served_models,
                 wall_seconds=time.perf_counter()-self.started.pop(str(run_id),time.perf_counter())))
 
         def on_llm_error(self, error, *, run_id, **kwargs):
+            frames=[];traceback=error.__traceback__
+            while traceback:
+                frames.append(traceback.tb_frame.f_code.co_name)
+                traceback=traceback.tb_next
+            decoder = ({'position':error.pos,'body_character_count':len(error.doc),
+                        'line':error.lineno,'column':error.colno} if isinstance(error,json.JSONDecodeError) else {})
             self.record(dict(event='request_failed', request_id=str(run_id),
-                             error_type=type(error).__name__))
+                error_type=type(error).__name__, status_code=getattr(error,'status_code',None),
+                stream_receipt=getattr(error,'stream_receipt',{}),
+                decoder=decoder, frame_names=frames[-6:],
+                wall_seconds=time.perf_counter()-self.started.pop(str(run_id),time.perf_counter())))
 
     class ObservedRuntime(AgentRuntime):
         def run(self, *args, **kwargs):

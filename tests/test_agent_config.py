@@ -47,8 +47,11 @@ def test_default_config_selects_openrouter_glm_without_secrets(monkeypatch, tmp_
     assert config.providers["openrouter"].base_url == "https://openrouter.ai/api/v1"
     assert config.providers["openrouter"].api_key_env == "OPENROUTER_API_KEY"
     assert all(agent.model == "default" for agent in config.agents.values())
-    assert config.runtime.max_agent_steps == 12
-    assert config.runtime.max_repairs == config.runtime.max_replans == 2
+    assert config.runtime.max_agent_steps == 24
+    assert config.runtime.max_repairs == 8 and config.runtime.max_replans == 2
+    assert config.thinker.require_design_audit is True
+    assert config.models['default'].api_transport == 'openai_compatible'
+    assert config.models['default'].reasoning_effort == 'low'
     assert config.runtime.max_segments == 20
     assert config.monitoring.window == 8
     assert config.monitoring.decay == 0.5
@@ -62,14 +65,66 @@ def test_default_openrouter_factory_forwards_reasoning_without_network(monkeypat
     constructor = Mock()
     secret_store = Mock()
     secret_store.get.return_value = "test-only-openrouter-key"
-    monkeypatch.setitem(sys.modules, "langchain_openrouter", SimpleNamespace(ChatOpenRouter=constructor))
+    from molsteer.agents import openrouter_transport
+    monkeypatch.setattr(openrouter_transport, 'OpenRouterChat', constructor)
     assert create_chat_model(config, "molreader", secret_store) is constructor.return_value
     secret_store.get.assert_called_once_with("openrouter")
     assert constructor.call_args.kwargs["model"] == "z-ai/glm-5.3"
-    assert constructor.call_args.kwargs["timeout"] == 120000
+    assert constructor.call_args.kwargs["timeout"] == 300.0
     assert constructor.call_args.kwargs["base_url"] == "https://openrouter.ai/api/v1"
     assert constructor.call_args.kwargs["api_key"] == "test-only-openrouter-key"
-    assert constructor.call_args.kwargs["reasoning"] == {"enabled": True}
+    assert constructor.call_args.kwargs['extra_body'] == {
+        'reasoning': {'effort': 'low'}, 'provider': {'require_parameters': True}}
+    assert constructor.call_args.kwargs['model_kwargs']['parallel_tool_calls'] is False
+
+
+def test_compatible_transport_preserves_reasoning_without_strict_provider_schema():
+    from molsteer.agents.openrouter_transport import OpenRouterChat
+    details = [{'type': 'reasoning.text', 'text': 'synthetic private block'}]
+    model = OpenRouterChat(model='z-ai/glm-5.3', api_key='test-only', base_url='https://example.invalid/v1')
+    # Provider extensions are tolerated; no generated OpenRouter response schema.
+    result = model._create_chat_result({'id':'test', 'model':'z-ai/glm-5.3',
+        'choices':[{'index':0,'finish_reason':'tool_calls','message':{'role':'assistant','content':None,
+            'reasoning_details':details, 'tool_calls':[{'id':'call_test','type':'function',
+                'function':{'name':'inspect','arguments':'{}'}}]}}],
+        'usage':{'prompt_tokens':12,'completion_tokens':4,'total_tokens':16,'provider_extension':None}})
+    message = result.generations[0].message
+    assert message.additional_kwargs['reasoning_details'] == details
+    assert model._get_request_payload([message])['messages'][0]['reasoning_details'] == details
+
+
+def test_openrouter_recursive_tools_bind_without_missing_refs_or_schema_expansion():
+    from langchain_core.tools import tool
+    from molsteer.agents.openrouter_transport import OpenRouterChat
+    from molsteer.agents.experts import mathematical_draft_tool_schema
+    from molsteer.agents.expert_contracts import MathematicalDesign
+    @tool(args_schema=mathematical_draft_tool_schema())
+    def test_draft(design:dict)->dict:
+        """Retain a draft before full validation."""
+        return design
+    @tool
+    def submit_draft(design:MathematicalDesign | None=None)->dict:
+        """Submit a validated draft."""
+        return {}
+    model=OpenRouterChat(model='z-ai/glm-5.3',api_key='test-only',base_url='https://example.invalid/v1')
+    bound=model.bind_tools([test_draft,submit_draft])
+    for item in bound.kwargs['tools']:
+        schema=item['function']['parameters']
+        assert len(str(schema))<40000
+        design=schema['properties']['design']
+        if 'anyOf' in design:design=next(x for x in design['anyOf'] if x.get('type')=='object')
+        expression=design['properties']['directions']['items']['properties']['expression']['anyOf'][0]
+        binary=next(x for x in expression['oneOf'] if 'maximum' in x['properties']['op'].get('enum',[]))
+        assert binary['properties']['args']['maxItems']==2
+        assert 'constant' in binary['properties']['args']['items']['properties']['op']['enum']
+        def inspect(node):
+            if isinstance(node,dict):
+                assert '$ref' not in node and '$defs' not in node
+                for value in node.values():inspect(value)
+            elif isinstance(node,list):
+                for value in node:inspect(value)
+        inspect(schema)
+    assert test_draft.invoke({'design':{'directions':'invalid raw draft'}})=={'directions':'invalid raw draft'}
 
 
 def test_openrouter_adapter_round_trips_reasoning_details():

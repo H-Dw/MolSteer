@@ -145,7 +145,7 @@ def main():
     lines+=['','所有引导分支通过 t=0.50 的实时有限差分检查。最终分子由独立 MolReader 重新评价，提交坐标不做事后最小化。',
         '',f't=0.50 控制梯度按全局权重成比例缩放：{scale_verified}。接受步包括零位移提议，因此单列有效位移步。',
         '',f"data 完整性检查：{summary['data_integrity']['passed']}；文件数：{summary['data_integrity']['data_file_count']}。",
-        '', '奖励设计与化学图适用性：',
+        '', '历史局部探针 4–12 与当前图适用性（不代表奖励的全部目标）：',
         '', '| 权重 | 终态slot 4元素 | 4–12实际键长 Å | 当前图MMFF参考 Å | 当前图相对偏差 | QED | SA |',
         '|---:|:---:|---:|---:|---:|---:|---:|']
     for row in rows:
@@ -153,10 +153,19 @@ def main():
         lines.append('| '+' | '.join(map(str,[row['weight'],atom.get('element','未测得'),
             number(bond.get('distance_angstrom')),number(bond.get('reference_angstrom')),
             number(bond.get('relative_deviation')),number(m['qed']),number(m['sa_score'])]))+' |')
-    lines+=['', 'API 选择的是当前预测假设下的局部几何代理，而非完整 MMFF 能量。设计表达式、来源、假设与失败模式完整保存在 RewardProgram.api.json。局部键偏差与全分子应变同时出现，不能据此证明应变由这一条键造成。',
-        '', '五档奖励固定不重写。元素、键类别或局部化学角色改变后，原参考常数的数值仍可计算，但不等于旧修复假设仍有效；本实验关闭图复核，所以终态必须用当前图复评，不能把类别改变后旧奖励下降当作原键的修复成功。',
+    audit=design.get('design_audit',{})
+    lines+=['', '奖励以本轮真实 API 提交的表达式、函数谱系与适用性合同为准，完整保存在 RewardProgram.api.json。局部键偏差与全分子应变同时出现，不能据此证明应变由这一条键造成。',
+        '', '五档奖励固定不重写。终态必须用当前化学图独立复评，不能把类别改变后的旧代理下降当作原修复假设成立。',
         '', '本表为一个分子的机制测试。不同化学图不能用固定键长参考或 MMFF 总能量直接排名。',
         '亲和力是生成器预测值，未运行实验测定或独立对接。五档参数不能据此得到跨靶点最优权重。']
+    if audit:
+        lines+=['', f"奖励审计范围：{audit['execution_scope']}；图变化策略：{audit['graph_policy']}。",
+                '', '| 生物因素 | 处理方式 | 相关方向 |', '|---|---|---|']
+        for factor in program['expert_spec']['biology_plan'].get('factor_assessment',[]):
+            lines.append('| '+factor['factor']+' | '+factor['disposition']+' | '+', '.join(factor['direction_ids'])+' |')
+    lines+=['', '引导不可用原因（区分零梯度与参考失效）：']
+    for row in rows:
+        if row['weight']:lines.append(f"- 权重 {row['weight']}：{row['guidance_unavailable_counts']}")
     (run/'experiment_report.zh.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     print(json.dumps({'status':'analysis_completed','output':str(run/'experiment_analysis.json')}),flush=True)
 
