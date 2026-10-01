@@ -117,8 +117,10 @@ def main():
     program=read(run/'RewardProgram.api.json')
     design=program.get('expert_spec',{}).get('mathematical_design',{})
     gradients={r['weight']:r['execution'].get('initial_gradient_norm') for r in rows if r['weight']}
-    scale_verified=(isinstance(gradients.get(1),(int,float)) and gradients[1]>0
-                    and all(isinstance(v,(int,float)) and math.isclose(v/w,gradients[1],rel_tol=1e-5,abs_tol=1e-10)
+    base_weight=min(gradients) if gradients else None
+    base_gradient=gradients.get(base_weight)
+    scale_verified=(isinstance(base_gradient,(int,float)) and base_gradient>0
+                    and all(isinstance(v,(int,float)) and math.isclose(v/w,base_gradient/base_weight,rel_tol=1e-5,abs_tol=1e-10)
                             for w,v in gradients.items()))
     summary=dict(status='completed',target=target,molecule_index=0,initial_time=.5,
         initial=initial_metrics,api=api,api_requests_by_agent=dict(Counter(r['agent'] for r in completed)),
@@ -129,7 +131,7 @@ def main():
         data_integrity=read(root/'source_integrity_after.json'),
         scope='One molecule, one checkpoint and matched native randomness; model affinity is not experimental affinity')
     write(run/'experiment_analysis.json',summary)
-    lines=['# 5i0b 单分子真实 API 与五档奖励权重实验','',
+    lines=['# 5i0b 单分子真实 API 与匹配奖励权重实验','',
         f'目标：{target}；分子：molecule_000；t=0.50→1.00。MolMonitor 和图复核关闭。','',
         f"真实 API 完成请求：{len(completed)}；按 Agent 分布：{summary['api_requests_by_agent']}。",
         f"模型：{', '.join(sorted({p['model'] for p in summary['model_profiles'].values()}))}（服务器 OPENROUTER_API_KEY）。",
@@ -155,9 +157,9 @@ def main():
             number(bond.get('relative_deviation')),number(m['qed']),number(m['sa_score'])]))+' |')
     audit=design.get('design_audit',{})
     lines+=['', '奖励以本轮真实 API 提交的表达式、函数谱系与适用性合同为准，完整保存在 RewardProgram.api.json。局部键偏差与全分子应变同时出现，不能据此证明应变由这一条键造成。',
-        '', '五档奖励固定不重写。终态必须用当前化学图独立复评，不能把类别改变后的旧代理下降当作原修复假设成立。',
+        '', '各权重使用同一奖励，不重写函数。终态必须用当前化学图独立复评，不能把类别改变后的旧代理下降当作原修复假设成立。',
         '', '本表为一个分子的机制测试。不同化学图不能用固定键长参考或 MMFF 总能量直接排名。',
-        '亲和力是生成器预测值，未运行实验测定或独立对接。五档参数不能据此得到跨靶点最优权重。']
+        '亲和力是生成器预测值；独立对接需另行记录，不能替代实验测定。单分子参数不能据此得到跨靶点最优权重。']
     if audit:
         lines+=['', f"奖励审计范围：{audit['execution_scope']}；图变化策略：{audit['graph_policy']}。",
                 '', '| 生物因素 | 处理方式 | 相关方向 |', '|---|---|---|']

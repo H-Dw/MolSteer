@@ -9,6 +9,7 @@ from copy import deepcopy
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -19,6 +20,16 @@ from types import SimpleNamespace
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO/'src'))
 WEIGHTS = (1, 10, 100, 300, 500)
+
+
+def normalized_weights(values):
+    """Keep the requested matched experiment arms explicit and reproducible."""
+    weights = tuple(int(v) if float(v).is_integer() else float(v) for v in values)
+    if not weights or any(not math.isfinite(w) or w <= 0 for w in weights):
+        raise ValueError('Weights must be finite positive numbers')
+    if len(set(weights)) != len(weights):
+        raise ValueError('Each weight must identify one unique experiment arm')
+    return weights
 
 
 def sha(path):
@@ -138,7 +149,7 @@ def observed_api_runtime(config, dynamics, receipt_path):
     return ObservedRuntime(config, model_dynamics=dynamics)
 
 
-def preflight(root, agent_file):
+def preflight(root, agent_file, weights=WEIGHTS):
     manifest = json.loads((root/'source_manifest.json').read_text(encoding='utf-8'))
     saved = json.loads((root/'generation_provenance.json').read_text(encoding='utf-8'))
     config = json.loads(agent_file.read_text(encoding='utf-8'))
@@ -191,7 +202,7 @@ def preflight(root, agent_file):
                   environment_credentials_present=environment_credentials, runtime=torch_state,
                   recorded_torch=saved['environment']['torch'], source_hashes_match=copies,
                   monitor_enabled=False, graph_review_enabled=False,
-                  weights={str(w):{'status':'not_run'} for w in WEIGHTS})
+                  weights={str(w):{'status':'not_run'} for w in weights})
     write(root/'readiness.json', result)
     print(json.dumps(result), flush=True)
     return result
@@ -238,7 +249,7 @@ def live_adapter(root, output):
     return a,bundle
 
 
-def execute(root, agent_file, attempt):
+def execute(root, agent_file, attempt, weights=WEIGHTS):
     import torch
     from molsteer.common import digest
     from molsteer.preprocessing.checkpoints import assert_equal, cpu_copy
@@ -289,7 +300,7 @@ def execute(root, agent_file, attempt):
     result=observed_api_runtime(config,dynamics,output/'api_requests.jsonl').run(packet,report,
         run_id='api_5i0b_'+attempt,execute=False,feedback={
             'kind':'UserTaskContext',
-            'task':'Test one 5i0b molecule from the copied t=0.50 checkpoint: design and validate a real coordinate reward, then run live gradient guidance at weights 1, 10, 100, 300, 500.',
+            'task':'Test one 5i0b molecule from the copied t=0.50 checkpoint: design and validate a real coordinate reward, then run live gradient guidance at weights '+', '.join(map(str,weights))+'.',
             'monitor_enabled':False,'graph_review_enabled':False,
             'scope':'A controlled mechanism experiment under the current prediction hypothesis; native categorical sampling continues. Independently evaluate final molecules, including changed graph applicability. Do not claim terminal repair from an intermediate reward decrease.',
             'comparison':'Same checkpoint, self-conditioning, RNG, execution strength and displacement budgets for every arm.'})
@@ -323,7 +334,7 @@ def execute(root, agent_file, attempt):
     assert_equal(cpu_copy(final),bundle['final']['prediction'],'native.final_prediction')
     write(output/'native_replay_verification.json',{'passed':True,'scope':'All batch state, SC, RNG and final head'})
     matrix=[]
-    for weight in WEIGHTS:
+    for weight in weights:
         weighted=deepcopy(program);weighted['reward_weight']=weight
         weighted['program_id']='rp_'+digest({k:v for k,v in weighted.items() if k!='program_id'})[:24]
         armout=output/f'weight_{weight}';armout.mkdir()
@@ -344,7 +355,7 @@ def execute(root, agent_file, attempt):
         write(output/'weight_summary.json',dict(status='in_progress',native=native,weights=matrix))
     write(output/'weight_summary.json',dict(status='completed',native=native,weights=matrix,
         monitor_enabled=False,graph_review_enabled=False,weight_definition='Rw=wR; expert final direction is also multiplied by w'))
-    print(json.dumps({'status':'completed','output':str(output),'weights':list(WEIGHTS)}),flush=True)
+    print(json.dumps({'status':'completed','output':str(output),'weights':list(weights)}),flush=True)
 
 
 def main():
@@ -353,19 +364,25 @@ def main():
     parser.add_argument('--agent-config',type=Path,default=REPO/'configs/agents.json')
     parser.add_argument('--attempt',default='run_01')
     parser.add_argument('--preflight-only',action='store_true')
+    parser.add_argument('--weights',type=float,nargs='+',default=WEIGHTS,
+                        help='Positive distinct global reward weights; all use the same reward and native randomness.')
     args=parser.parse_args()
     root=args.test_root.resolve()
     if not root.is_relative_to(REPO/'test') or Path(args.attempt).name!=args.attempt:
         parser.error('All output must remain under the repository test directory')
-    readiness=preflight(root,args.agent_config.resolve())
+    try:
+        weights=normalized_weights(args.weights)
+    except ValueError as exc:
+        parser.error(str(exc))
+    readiness=preflight(root,args.agent_config.resolve(),weights)
     if readiness['status']!='ready':return 2
     if args.preflight_only:return 0
     exit_code = 0
     try:
-        execute(root,args.agent_config.resolve(),args.attempt)
+        execute(root,args.agent_config.resolve(),args.attempt,weights)
     except Exception as exc:
         write(root/(args.attempt+'.failure.json'),dict(status='failed',error_type=type(exc).__name__,
-            message=str(exc)[:400],weights={str(w):{'status':'see_attempt_artifacts'} for w in WEIGHTS}))
+            message=str(exc)[:400],weights={str(w):{'status':'see_attempt_artifacts'} for w in weights}))
         raise
     finally:
         if not audit_sources(root, 'after')['passed']:

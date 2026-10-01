@@ -38,6 +38,18 @@ def test_audit_only_writes_test_outputs(harness):
     assert (root/'source_integrity_before.json').is_file()
 
 
+def test_requested_weight_arms_are_preserved_without_default_expansion(harness):
+    module = harness[0]
+    assert module.normalized_weights([100., 200., 300.]) == (100, 200, 300)
+    assert module.normalized_weights([0.5, 2.5]) == (0.5, 2.5)
+
+
+@pytest.mark.parametrize('weights', [[], [0], [-1], [float('nan')], [float('inf')], [100, 100]])
+def test_weight_arms_require_finite_positive_unique_values(harness, weights):
+    with pytest.raises(ValueError):
+        harness[0].normalized_weights(weights)
+
+
 @pytest.mark.parametrize('change', ['data_content', 'data_added', 'data_deleted', 'copy_content'])
 def test_audit_rejects_mutated_or_missing_input(harness, change):
     module, root, source, copy = harness
