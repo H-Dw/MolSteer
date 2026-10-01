@@ -88,7 +88,7 @@ def save_checkpoint(state: dict[str, Any], trace_dir: str | Path) -> Path:
         "execution_result", "config", "segments", "strength", "replans",
         "biology_plan", "mathematical_design", "model_dynamics", "expert_history", "expert_workspace_history",
         "retrieval_records", "research_packets", "reward_design_deferral", "expert_prompt_digests",
-        "expert_guidance_sources", "workflow_reference_digests")})
+        "expert_guidance_sources", "workflow_reference_digests", "raw_reference_context", "raw_reference_analysis")})
     payload["artifacts_digest"] = digest(payload["artifacts"])
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     temporary.replace(target)

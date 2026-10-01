@@ -15,6 +15,8 @@ from molsteer.common import digest
 from .decision_workspace import (BIOLOGY_GUIDE, MATH_GUIDE, current_state_context,
     new_workspace, update_workspace, selected_directions, goal_pools)
 from .workflow_guidance import initial_role_reference, reference_catalog, read_reference
+from .raw_reference_tools import raw_reference_tools
+from molsteer.molreader.raw_reference import bound_raw_context, raw_reference_summary
 from .reward_synthesis import (SYNTHESIS_GUIDE, function_card, construct_direction,
                                preview_architectures, derive_allocation_response)
 
@@ -37,6 +39,23 @@ scientific repair-goal set from the current generator checkpoint and MolReader d
 public evidence-linked decisions, not private thought traces. State, contemporaneous prediction
 and an observed final result are different objects. No paired intervention outcomes are supplied;
 do not invent terminal gains or probabilities of persistence, success or retention.
+
+When raw_reference is available or partial, a configured suffix of the SAME raw path has already
+been observed. Read its comparison overview and inspect_raw_comparison/read_raw_reference when
+details matter. Compare persistent defects, sampled clearance intervals, recurrence and later risks;
+compare contact/burial, conformational and chemical evolution with configured affinity, SA and
+stability trends. Integrate these candidates with the current diagnosis, not as a separate formula
+list. For raw persistent risks ask what native continuation failed to resolve. For later clearance
+ask whether earlier repair is locally controllable and would conflict with useful native rearrangement.
+For region enhancement require a plausible mechanism and present control channel; a global score
+change alone cannot assign causal benefit to that region. Changed elements, charge or topology are
+chemical transitions, not successful movement of the old chemical object. Coordinate gradients
+cannot promise categorical groups or improved synthesis feasibility. These raw outcomes are valid
+reference observations, while guided outcomes and the benefit of acting earlier remain unobserved.
+No risk/score ranking or intervention is selected by the comparison helper. Keep unknowns and
+counter-explanations and choose the smallest sufficient current goal set, including preservation.
+Optionally record raw_reference_review with comparison_id/locators and selection/omission reasons;
+this editable public decision is passed to mathematics and never becomes an additional gate.
 
 Integrate the problem before selecting a formula:
 1. Read current_state and inspect_biophysical_context. Keep representations and chemical hypotheses
@@ -75,6 +94,16 @@ material, not additional submission gates or prior outcome information.'''
 MATH_INSTRUCTIONS = '''You are MolThinker's mathematics expert. Construct case-specific functions
 from the biologically selected goals, current-state mechanisms, preservation and uncertainty.
 Produce public derivation summaries, not private thought traces. Work forward:
+
+Configured raw_reference describes an observed original suffix, not a guided counterfactual.
+Read biological raw_reference_review and the selected goal's temporal support when available;
+use the shared temporal tools to inspect mechanisms before source transfer. A raw contact/fragment
+or screening improvement may motivate a hypothesis, but raw final coordinates, distances and graph
+are not automatically acceptable sets, scales or numerical targets. Construct the function on
+CURRENT bound measurements and actual editable channels. Preserve chemical/representation changes
+and sampled timing uncertainty. rr_ references are contextual only; never use a future measurement
+as current observable evidence or manufacture a coordinate derivative of affinity, SA or a category.
+Retain necessary unsupported goals as design_only and explain their missing evaluator or control map.
 
 1. Read goal_pools and biology_decisions. Scientific goals include necessary unresolved directions;
 researchable directions and biological compilation candidates are separate. Review the original goal
@@ -137,7 +166,11 @@ def run_experts(runtime, state):
     history = state.setdefault('expert_history', [])
     workspace_history = state.setdefault('expert_workspace_history', [])
     feedback = None
-    current = current_state_context(packet, report, state['model_dynamics'])
+    raw_context = bound_raw_context(state.get('raw_reference_context'), packet)
+    temporal_tools = raw_reference_tools(raw_context, packet)
+    raw_summary = raw_reference_summary(raw_context)
+    raw_analysis = state.get('raw_reference_analysis', {}) if raw_context['status'] in ('available', 'partial') else {}
+    current = current_state_context(packet, report, state['model_dynamics'], raw_context)
 
     def invoke(role, tools, context, completed):
         run_tools(runtime._model('molthinker.'+role), tools, instructions=instructions_by_role[role],
@@ -169,7 +202,9 @@ def run_experts(runtime, state):
     for discussion in range(runtime.config.thinker.max_discussions+1):
         bio = {}
         inspected_factors = set()
-        workspace = {'round': discussion, 'decisions': new_workspace(), 'source_transfers': [], 'constructions': [], 'architecture_previews': []}
+        workspace = {'round': discussion, 'decisions': new_workspace(), 'source_transfers': [], 'constructions': [], 'architecture_previews': [],
+                     'raw_reference_binding': {'comparison_id': raw_context.get('comparison_id'),
+                                               'anchor_content_hash': raw_context['anchor_content_hash']}}
         workspace_history.append(workspace)
 
         @tool
@@ -202,10 +237,11 @@ def run_experts(runtime, state):
                 require_audit=runtime.config.thinker.require_design_audit)
             return {'status':'accepted', 'biology_plan':deepcopy(bio['plan'])}
 
-        invoke('biology', [get_expert_contract, inspect_biophysical_context, record_biology_decision, read_workflow_reference, list_measurement_references, inspect_measurement, inspect_measurements, service.tool_for('biology'), submit_biology_plan],
+        invoke('biology', [get_expert_contract, inspect_biophysical_context, record_biology_decision, read_workflow_reference, list_measurement_references, inspect_measurement, inspect_measurements, *temporal_tools, service.tool_for('biology'), submit_biology_plan],
                {'report':bounded_values(report), 'model_dynamics':state['model_dynamics'],
                 'monitor_feedback':state.get('monitor_event', {}), 'revision_request':feedback,
                 'current_state':current, 'decision_workspace':BIOLOGY_GUIDE,
+                'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'workflow_references':reference_catalog(materials),
                 'previous_plan':state.get('biology_plan'), 'discussion_round':discussion}, lambda:bool(bio))
         state['biology_plan'] = bio['plan']
@@ -416,7 +452,7 @@ def run_experts(runtime, state):
             math_result['design'] = checked
             return {'status':'accepted', 'mathematical_design':deepcopy(math_result['design'])}
 
-        math_tools = [get_expert_contract, get_function_catalog, prepare_function_synthesis, record_function_derivation, read_workflow_reference, construct_direction_potential,
+        math_tools = [get_expert_contract, get_function_catalog, prepare_function_synthesis, record_function_derivation, read_workflow_reference, *temporal_tools, construct_direction_potential,
                                compare_constructed_architectures, derive_allocation_operator, inspect_biophysical_context, list_measurement_references, inspect_measurement, inspect_measurements,
                                search_direction_knowledge, inspect_direction_functions, service.tool_for('mathematics'),
                                request_biology_revision, stage_mathematical_direction, test_staged_mathematical_design,
@@ -426,6 +462,7 @@ def run_experts(runtime, state):
         invoke('mathematics', math_tools,
                {'biology_plan':biology, 'report':bounded_values(report), 'model_dynamics':state['model_dynamics'],
                 'current_state':current, 'goal_pools':pools,
+                'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'synthesis_workspace':SYNTHESIS_GUIDE,
                 'function_derivation':MATH_GUIDE, 'biology_decisions':deepcopy(workspace['decisions']['biology']),
                 'workflow_references':reference_catalog(materials),

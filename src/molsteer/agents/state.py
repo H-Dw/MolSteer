@@ -25,6 +25,8 @@ class MolSteerState(TypedDict, total=False):
     run_id: str
     packet: dict[str, Any]
     diagnostic_report: dict[str, Any]
+    raw_reference_context: dict[str, Any]
+    raw_reference_analysis: dict[str, Any]
     reward_spec: dict[str, Any]
     biology_plan: dict[str, Any]
     mathematical_design: dict[str, Any]

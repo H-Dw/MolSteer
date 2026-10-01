@@ -7,7 +7,8 @@ from molsteer.common import digest
 import numpy as np
 
 ROW_KEYS = ('atoms', 'bonds', 'angles', 'torsions', 'per_atom', 'contacts',
-            'per_atom_nearest', 'candidates', 'geometry_assigned_centers', 'declared_centers')
+            'per_atom_nearest', 'candidates', 'geometry_assigned_centers', 'declared_centers',
+            'rings', 'systems')
 
 
 def measurement_references(packet):

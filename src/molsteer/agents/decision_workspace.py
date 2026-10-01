@@ -8,17 +8,21 @@ from copy import deepcopy
 
 
 BIOLOGY_GUIDE = {
-    'starting_point': 'The current generation state, its contemporaneous prediction and MolReader evidence; final outcomes are not observed.',
+    'starting_point': 'The current generation state, its contemporaneous prediction and MolReader evidence, plus an observed raw reference suffix only when configured. Guided outcomes remain unobserved.',
     'questions': [
         'Which measurements describe the same hypothesized mechanism, and which defects are independent?',
         'What does each goal directly repair, what independent defects does it cover, and what local feasibility can it improve?',
         'Which chemical hypotheses, editable variables and coupled risks qualify that potential repair benefit?',
         'Which smallest sufficient goal set covers the necessary mechanisms; what would remain uncovered if a goal were removed?',
-        'Which relations must be preserved, and which current measurements could change the decision?'],
+        'Which relations must be preserved, and which current measurements could change the decision?',
+        'Which current risks persist in sampled raw nodes; which clear later, recur or change chemical identity?',
+        'Would earlier repair remove a necessary defect or disrupt useful native evolution; what current control channel can act on it?',
+        'Which local changes accompany affinity/SA/stability trends, and what evidence is missing before assigning regional benefit?'],
     'stages': {
         'integration': 'Record mechanisms with evidence/finding IDs, competing explanations and couplings. Shared atom support is not a causal proof.',
         'candidate_goals': 'Optionally record goals as {goal_id, covers:[mechanism_id,...], repair_reason, risks, unknowns}; covers describes expert-declared mechanisms.',
-        'selection': 'Optionally record selected_goal_ids and necessary_mechanism_ids, omitted alternatives and removal reasons. Coverage assistance is logical, not an efficacy forecast.'},
+        'selection': 'Optionally record selected_goal_ids and necessary_mechanism_ids, omitted alternatives and removal reasons. Coverage assistance is logical, not an efficacy forecast.',
+        'raw_reference_review': 'Record comparison_id and exact raw references, persistent/late-repair/region candidates, counter-explanations, timing uncertainty, current controllability and selection or omission reasons. Cross-time references are contextual; current evidence still binds repair clauses.'},
     'handoff': 'Optimize directions are selected repairs; constraint directions are preservation. A scientifically necessary goal with missing execution inputs stays required=true, disposition=deferred, and proceeds to mathematics.',
     'scope': 'Optional editable public decisions. No terminal-benefit probabilities, utility scores, automatic ranking, weights or new eligibility gates.'}
 
@@ -53,7 +57,7 @@ def goal_pools(biology):
         'rule': 'Compilation candidates only have biological scope permission, not a validated mathematical evaluator. Research does not activate a direction. Necessary unresolved scientific goals remain in the design; execution needs present inputs and final tests, or an explicit biological revision.'}
 
 
-def current_state_context(packet, report, dynamics):
+def current_state_context(packet, report, dynamics, raw_reference_context=None):
     """Bind the problem without assigning causal regions or target values."""
     from .design_audit import bounded_values
     findings = []
@@ -62,12 +66,14 @@ def current_state_context(packet, report, dynamics):
             row = bounded_values(finding, 4)
             row['report_group'] = origin
             findings.append(row)
+    from molsteer.molreader.raw_reference import bound_raw_context, raw_reference_summary
     return dict(identity=deepcopy(packet['identity']), representations=deepcopy(packet['representations']),
         model_dynamics=deepcopy(dynamics), findings=findings,
         observation_availability=[{k: deepcopy(m[k]) for k in ('metric_id', 'view', 'status')}
                                   for m in packet['observations']],
         chemical_readiness=deepcopy(packet['steering']['chemical_readiness']),
-        interpretation='State and prediction describe this checkpoint in different representations. Prediction is not an observed terminal result. Reader grouping does not prove a shared mechanism; missing outcome information stays unavailable.')
+        raw_reference=raw_reference_summary(bound_raw_context(raw_reference_context, packet)),
+        interpretation='State and prediction describe this checkpoint in different representations. Prediction is not an observed terminal result. Separately configured raw suffix nodes are observations of the original path, not intervention outcomes. Reader grouping or raw co-evolution does not prove a shared cause or a regional benefit; missing measurements stay unavailable.')
 
 
 def new_workspace():

@@ -17,6 +17,8 @@ from .thinker import thinker_tools
 from .executor import executor_tools, validate_and_test_reward
 from .monitor import RobustMonitor, monitor_metrics
 from .workflow_guidance import load_workflow_materials
+from .raw_reference_tools import raw_reference_tools
+from molsteer.molreader.raw_reference import load_raw_reference, raw_reference_summary, bound_raw_context
 
 
 class AgentRuntime:
@@ -56,16 +58,30 @@ class AgentRuntime:
                   max_steps=self.config.runtime.max_agent_steps,max_repairs=self.config.runtime.max_repairs,completed=completed)
 
     def reader(self,state):
-        tools,result=reader_tools(state['packet'],state.get('diagnostic_report') or None)
+        raw_context=load_raw_reference(state['packet'],self.config.reader.raw_reference,self.config.repo_root)
+        tools,result=reader_tools(state['packet'],state.get('diagnostic_report') or None,
+                                  raw_reference_context=raw_context)
+        state['raw_reference_context']=raw_context
+        if raw_context['status']!='disabled':
+            append_trace(state,node='reader',kind='observation',summary='Saved raw suffix comparison bound to current checkpoint',
+                         output=raw_reference_summary(raw_context))
         if self.config.mode=='offline':
             for t in tools:
                 if t.name in ('inspect_geometry', 'inspect_chemistry', 'inspect_uncertainty', 'submit_diagnosis'):
                     observation=t.invoke({})
                     append_trace(state,node='reader',kind='tool',summary='Offline evidence path',tool_name=t.name,output=observation)
         else:
-            self._loop(state,'reader',tools,{'packet_id':state['packet']['packet_id']},
-                       'Inspect geometry, chemistry and uncertainty via their separate tools, then submit_diagnosis.',lambda:'report' in result)
+            self._loop(state,'reader',tools,{'packet_id':state['packet']['packet_id'],
+                       'raw_reference':raw_reference_summary(raw_context)},
+                       'Inspect geometry, chemistry and uncertainty via their separate tools. When configured raw references '
+                       'are available, compare selected views, persistent/current and later-emerging risks, sampled repair '
+                       'intervals, local contacts/burial/chemical evolution and configured affinity/SA/stability trends. '
+                       'Use inspect_raw_comparison and read_raw_reference for full facts as useful. Missing coverage is '
+                       'unknown; chemical retyping is not repair; global improvement does not prove a regional contribution. '
+                       'Optionally record_raw_reference_analysis with public interpretations and gaps. Keep DiagnosticReport '
+                       'bound to the current state, then submit_diagnosis. No extra comparison-call gate.',lambda:'report' in result)
         state['diagnostic_report']=result['report']; state['route']='thinker'
+        state['raw_reference_analysis']=result.get('raw_reference_analysis',{})
         if state.get('terminal_graph_review'):
             state['status']='completed';state['route']='done'
         return state
@@ -77,6 +93,8 @@ class AgentRuntime:
         tools,result,base=thinker_tools(state['packet'],state['diagnostic_report'],self.knowledge_path,
                                        search_fn=self.search_fn,compute_fn=self.compute_fn,feedback=state.get('monitor_event'),
                                        mode='creativity' if creative else 'selection')
+        raw_context=bound_raw_context(state.get('raw_reference_context'),state['packet'])
+        tools.extend(raw_reference_tools(raw_context,state['packet']))
         if self.config.mode=='offline':
             result['spec']=base
             append_trace(state,node='thinker',kind='tool',summary='Explicit offline evidence-bound derivation',tool_name='derive_reward_candidates',output=base)
@@ -96,8 +114,13 @@ class AgentRuntime:
                 instructions += (' Review the previous reward against the fresh graph. Keep native slot IDs; reassign '
                     'chemical roles and support. Retain valid function forms, rederive obsolete bounds, and explain '
                     'changes. A disappeared target is not proof of repair. Do not require the initial graph identity.')
-            self._loop(state,'thinker',tools,{'report':state['diagnostic_report'],'feedback':state.get('monitor_event',{})},
-                       state['skill_text']+'\n'+instructions,lambda:'spec' in result or 'deferral' in result)
+            self._loop(state,'thinker',tools,{'report':state['diagnostic_report'],'feedback':state.get('monitor_event',{}),
+                       'raw_reference':raw_reference_summary(raw_context),
+                       'raw_reference_analysis':state.get('raw_reference_analysis',{})},
+                       state['skill_text']+'\n'+instructions+' Review configured raw comparisons when available: decide '
+                       'whether persistent defects, earlier repair or associated region evolution warrant a current goal. '
+                       'Raw outcomes are observed context; guided effects remain unknown. Future references cannot bind '
+                       'current reward inputs.',lambda:'spec' in result or 'deferral' in result)
         if 'deferral' in result:
             state['reward_design_deferral']=result['deferral']
             state['status']='design_deferred';state['route']='done'

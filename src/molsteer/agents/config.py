@@ -123,6 +123,65 @@ class ThinkerConfig(StrictModel):
     require_design_audit: bool = False
 
 
+class RawOutcomeMetric(StrictModel):
+    """User-declared interpretation of an already measured outcome, not a reward."""
+    metric_id: str = Field(min_length=1)
+    value_path: list[str] = Field(min_length=1)
+    view: Literal['state', 'prediction', 'sdf'] = 'prediction'
+    direction: Literal['higher', 'lower']
+    min_delta: float = Field(default=0.0, ge=0)
+
+    @field_validator('value_path')
+    @classmethod
+    def nonempty_field_names(cls, value):
+        if any(not name.strip() for name in value):
+            raise ValueError('Outcome field paths must contain nonempty field names')
+        return value
+
+
+class RawReferenceConfig(StrictModel):
+    enabled: bool = False
+    manifest_path: Path | None = None
+    reference_times: list[float] = Field(default_factory=list)
+    include_final: bool = True
+    views: list[Literal['state', 'prediction', 'sdf']] = Field(default_factory=lambda: ['prediction', 'state'])
+    factors: list[str] = Field(default_factory=list,
+        description='Empty selects every available biophysical factor; these are measurement panels, not rewards')
+    analyses: list[Literal['persistent_defects', 'late_repair', 'beneficial_regions']] = Field(
+        default_factory=lambda: ['persistent_defects', 'late_repair', 'beneficial_regions'])
+    outcome_metrics: list[RawOutcomeMetric] = Field(default_factory=list)
+    cross_view_associations: bool = False
+    group_regional_candidates: bool = True
+
+    @field_validator('manifest_path', mode='before')
+    @classmethod
+    def local_manifest(cls, value):
+        if value is None:
+            return None
+        return RuntimeConfig.paths_are_relative(value)
+
+    @model_validator(mode='after')
+    def selections(self):
+        from .audit_contracts import FACTORS
+        if self.enabled and self.manifest_path is None:
+            raise ValueError('Enabled raw references require manifest_path')
+        for values in (self.reference_times, self.views, self.factors, self.analyses):
+            if len(values) != len(set(values)):
+                raise ValueError('Raw reference selections must be distinct')
+        if not self.views or set(self.factors) - set(FACTORS):
+            raise ValueError('Select at least one view and known biophysical factors')
+        if self.enabled and not self.reference_times and not self.include_final:
+            raise ValueError('Select reference_times or include_final')
+        outcomes = [(m.metric_id, m.view, tuple(m.value_path)) for m in self.outcome_metrics]
+        if len(outcomes) != len(set(outcomes)):
+            raise ValueError('Declare each outcome field interpretation once')
+        return self
+
+
+class ReaderConfig(StrictModel):
+    raw_reference: RawReferenceConfig = Field(default_factory=RawReferenceConfig)
+
+
 class MonitoringConfig(StrictModel):
     graph_review_enabled: bool = False
     window: int = Field(default=8, ge=1)
@@ -152,6 +211,7 @@ class AgentSystemConfig(StrictModel):
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
     thinker: ThinkerConfig = Field(default_factory=ThinkerConfig)
+    reader: ReaderConfig = Field(default_factory=ReaderConfig)
     mode: Literal["api", "offline"] = "api"
     repo_root: Path = Field(default=REPO_ROOT, exclude=True)
 
@@ -272,5 +332,5 @@ def load_config(path: str | Path | None = None) -> AgentSystemConfig:
 
 __all__ = [
     "AgentConfig", "AgentSystemConfig", "ModelConfig", "MonitoringConfig",
-    "ProviderConfig", "RuntimeConfig", "SecretStore", "load_config",
+    "ProviderConfig", "RuntimeConfig", "ReaderConfig", "RawReferenceConfig", "RawOutcomeMetric", "SecretStore", "load_config",
 ]

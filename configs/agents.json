@@ -64,6 +64,24 @@
       "description": "Monitoring and retuning agent"
     }
   },
+  "reader": {
+    "raw_reference": {
+      "enabled": false,
+      "manifest_path": null,
+      "reference_times": [],
+      "include_final": true,
+      "views": ["prediction", "state"],
+      "factors": [],
+      "cross_view_associations": false,
+      "group_regional_candidates": true,
+      "analyses": ["persistent_defects", "late_repair", "beneficial_regions"],
+      "outcome_metrics": [
+        {"metric_id": "affinity", "value_path": ["pkd"], "view": "prediction", "direction": "higher"},
+        {"metric_id": "sa_score", "value_path": ["sa_score"], "view": "prediction", "direction": "lower"},
+        {"metric_id": "mmff_strain", "value_path": ["strain_proxy_kcal_mol"], "view": "prediction", "direction": "lower"}
+      ]
+    }
+  },
   "thinker": {
     "architecture": "dual_expert",
     "experts": {

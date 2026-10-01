@@ -7,6 +7,8 @@ from langchain_core.tools import tool
 from .state import validate_packet, validate_report
 from .tools import make_statepack_tool
 from .design_audit import bounded_values
+from .raw_reference_tools import raw_reference_tools
+from molsteer.molreader.raw_reference import bound_raw_context
 
 class Reader:
     def __init__(self, *, model: Any = None, reader_fn: Callable[..., dict[str, Any]] | None = None, tools: list[Any] | None = None):
@@ -33,8 +35,10 @@ class Reader:
         validate_report(report, packet)
         return report
 
-def reader_tools(packet: dict, supplied_report: dict | None = None):
+def reader_tools(packet: dict, supplied_report: dict | None = None, *, raw_reference_context: dict | None = None):
     validate_packet(packet); frozen = deepcopy(packet); result = {}; observed_paths = set()
+    raw_context = bound_raw_context(raw_reference_context, frozen)
+    result['raw_reference_context'] = deepcopy(raw_context)
     def metrics(path):
         observed_paths.add(path)
         groups = {"geometry": {"bond_lengths", "bond_angles", "mmff_local_geometry", "protein_clashes", "intramolecular_clashes"}, "chemistry": {"chemical_validity", "valence", "atom_inventory", "formal_charge", "connectivity", "chemistry_context", "structural_alerts", "mmff_strain", "posebusters"}}
@@ -65,6 +69,14 @@ def reader_tools(packet: dict, supplied_report: dict | None = None):
         """Read categorical confidence and entropy separately from defects."""
         data = metrics("uncertainty"); data["categorical_uncertainty"] = deepcopy(frozen.get("steering", {}).get("categorical_uncertainty", {})); return data
     @tool
+    def record_raw_reference_analysis(record: dict) -> dict:
+        """Keep optional public temporal interpretations, competing explanations and gaps; current diagnosis stays risk-only."""
+        from .trace import _redact
+        result.setdefault('raw_reference_analysis', {}).update(_redact(deepcopy(record)))
+        return {'status': 'recorded', 'blocking': False,
+                'analysis': deepcopy(result['raw_reference_analysis']),
+                'limit': 'Temporal associations are descriptive; intervention selection belongs to MolThinker.'}
+    @tool
     def submit_diagnosis() -> dict:
         """Build and validate DiagnosticReport after inspecting all metric paths."""
         if observed_paths != {"geometry", "chemistry", "uncertainty"}: raise ValueError("all three metric paths are required")
@@ -74,7 +86,8 @@ def reader_tools(packet: dict, supplied_report: dict | None = None):
             report = make_localized_report(frozen)
         validate_report(report, frozen); result["report"] = report
         return {"status": "accepted", "packet_id": frozen["packet_id"], "report": report}
-    return [make_statepack_tool(frozen), inspect_geometry, inspect_chemistry, inspect_uncertainty, inspect_metric, submit_diagnosis], result
+    return [make_statepack_tool(frozen), inspect_geometry, inspect_chemistry, inspect_uncertainty,
+            inspect_metric, *raw_reference_tools(raw_context, frozen), record_raw_reference_analysis, submit_diagnosis], result
 
 def reader_node(state: dict[str, Any], reader: Reader) -> dict[str, Any]:
     report = reader.run(state["packet"], report=state.get("diagnostic_report") or None)
