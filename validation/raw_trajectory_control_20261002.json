@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-02",
+  "base_commit": "04223c5307179ee5104bd35f5876f8846dad13c4",
+  "scope": "Raw trajectory diagnosis, ranked biological decisions, revisable expert collaboration, chemistry-conditioned control, and compact public context",
+  "tests": [
+    {
+      "scope": "Full test suite",
+      "artifact": "outputs/evolving_mechanisms_validation/pytest.xml",
+      "tests": 410,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 246.946
+    },
+    {
+      "scope": "Final raw-node diagnosis changes",
+      "artifact": "outputs/evolving_mechanisms_validation/raw_final.xml",
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 93.077
+    },
+    {
+      "scope": "Final context, collaboration, and prompt changes",
+      "artifact": "outputs/evolving_mechanisms_validation/context_final.xml",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 43.465
+    }
+  ],
+  "test_mode": "Offline Python UTF-8 mode; deterministic scripted LLMs, actual Torch/RDKit numerical checks; no paid API calls",
+  "offline_saved_raw_evidence": {
+    "raw_status": "available",
+    "times": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "node_factor_panels": 96,
+    "tracks": 171,
+    "current_final_statuses": {
+      "not_flagged": 64,
+      "relation_absent": 105,
+      "flagged": 2
+    },
+    "comparison_id": "rtc_3cc2c6bd2ffa322a95ae0166",
+    "recovery_context_characters": {
+      "before": 157794,
+      "after": 1349,
+      "reduction_percent": 99.15
+    },
+    "scope": "Read-only reanalysis of existing raw snapshots; no API call, new inference, or quality improvement claim."
+  },
+  "new_real_api_calls": 0,
+  "new_sampler_inference_runs": 0,
+  "skills_modified": false,
+  "limitations": [
+    "No claim of GLM-5.3 decision quality or guided molecular-quality improvement from offline tests.",
+    "Existing literal reward constants must be reconstructed to use current-chemistry observables.",
+    "Rank preferences are configurable, not calibrated utility estimates or strict lexicographic priorities.",
+    "Typed bond/angle surrogates do not implement the complete local force-field or directional contact-area potential.",
+    "native_nonincrease compares the same-time unperturbed proposal on the current sampling path, not a saved independent raw path."
+  ],
+  "changed_source_sha256": {
+    "configs/agents.json": "449ecf80bd6f03537d443ea521b73993f3415cdb768e75ec611feece58d78ded",
+    "docs/MOLTHINKER_RAW_TRAJECTORY_CONTROL.zh-CN.md": "a011f3893d482a643f9f379cc0788732862d7b546ac3d725b181b31d8fd045ca",
+    "src/molsteer/agents/audit_contracts.py": "46daeb25d846e0dfffa8b2ef0e7ac5e3734d076340efa6649ed686a239096a80",
+    "src/molsteer/agents/config.py": "857a8d6c901e835551dc157674833cdd98188cd4a818ff8bdb2d156cabcba201",
+    "src/molsteer/agents/decision_workspace.py": "941cf28e7f397ed7cafd802941c1e5ac3f7eefab996a540a6fd4c0633604892b",
+    "src/molsteer/agents/design_audit.py": "da71c9e1f29c9bf7083148a595591f73011f6bc5f1787df8c28b6604ff010ea6",
+    "src/molsteer/agents/expert_context.py": "d5b7c0f785fa2ac2e3916cabf957bd73548c0086923627639edf9dc383e28a84",
+    "src/molsteer/agents/expert_contracts.py": "a3f5e9c99a3c53a42e359c934c1dc3abe91db5beeca51d454a1dc05518299f85",
+    "src/molsteer/agents/experts.py": "69d2e5b00f2ca0971ce212e58b7a9a9f8c208291c0845ebe5236c473997dc296",
+    "src/molsteer/agents/loop.py": "8f0f2eda8c1946db525d5314cadcb2cc08751334c40036a2a1c96a61032441b6",
+    "src/molsteer/agents/optimization.py": "26d2722e1e6cb3261981879c3e71d6ac5c094a333034661ae8f953ffcc7f664f",
+    "src/molsteer/agents/priority.py": "33cc77579fd3313e881bece6f977138c8cec224ddb4eb3cdef42ee56947b3bfd",
+    "src/molsteer/agents/raw_reference_tools.py": "c6ffc07230c2ac5b0b5a41007d8b1492995be08e51a64ba34f4930f40333eac0",
+    "src/molsteer/agents/reader.py": "15412d5bf2c07983d0288e6030c454a764ec132d93de66a4369ddac22e3efd4b",
+    "src/molsteer/agents/reward_synthesis.py": "7f5877d2e487f23ab5b0e8458591ddc8ff4729f559e9d8646786cb64aec5ea7c",
+    "src/molsteer/agents/runtime.py": "5ade44765d4f48ba6da4c9e905faf09ae8a9eb4d7553fbd385bbce00ea13ea57",
+    "src/molsteer/molexecutor/chemical_references.py": "b7a6108fb6d1db458ad398f6ad2ae8a1d2ee4d3373b57dce79d9df544b3d82ca",
+    "src/molsteer/molexecutor/expert_control.py": "39f5c8da8102278ec80720353d184c3c10a301a46439c515b4dd19232f2c2827",
+    "src/molsteer/molexecutor/expert_reward.py": "69f633b716476640c49f938410d502174fb695c28f88b86bd0e1acd3fc7fa286",
+    "src/molsteer/molreader/raw_reference.py": "fae9ac05c67cb03131d59f357adf19acb6860c32c1074cb72af58f9696aecf85",
+    "src/molsteer/molthinker/expressions.py": "51497a1d5573900ffbf23a20284f91a955ffb688e090e38788e8986ee2cdaf04",
+    "tests/test_agent_config.py": "76dcf6e50c4e3914aedbbdf7bebe08fe164cd31340114f969c5156e1524ed995",
+    "tests/test_design_audit.py": "436fed51daf24c8383fc7208709994054da648d9c62f9f65eee860b748434d36",
+    "tests/test_evolving_mechanisms.py": "3668ced4a8e3ec0a15cfb6bd8b6b33a6f813db81ff96fdc3794a529b92cef4f4",
+    "tests/test_expert_system.py": "277a8d1253720508f9b4b276d13bff4bf3373b6545722fb9a90d54363d5f66bb",
+    "tests/test_forward_decision.py": "a58b6d652b3ae72d08b7ab04f242263921f90051c86533be1cae6f6d3eaa71c6",
+    "tests/test_graph_review.py": "57116c9439f09ccf6117f54824a2b489cff4c3156fe66c827daf5a6d972d6275",
+    "tests/test_raw_reference.py": "a06c5b0211b9efaf675d3ef0421887e7cf74500268bcd862eb23487e7d70afa1"
+  },
+  "hash_normalization": "File bytes with CRLF normalized to LF for cross-platform comparison"
+}

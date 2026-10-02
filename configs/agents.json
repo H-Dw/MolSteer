@@ -68,7 +68,7 @@
     "raw_reference": {
       "enabled": false,
       "manifest_path": null,
-      "reference_times": [],
+      "reference_times": [0.6, 0.7, 0.8, 0.9, 1.0],
       "include_final": true,
       "views": ["prediction", "state"],
       "factors": [],
@@ -88,6 +88,9 @@
       "mathematics": "mathematics"
     },
     "max_discussions": 2,
+    "rank_decay": 0.5,
+    "history_max_chars": 32000,
+    "history_recent_rounds": 2,
     "max_research_requests": 4,
     "research_max_steps": 6,
     "research_max_searches": 3,

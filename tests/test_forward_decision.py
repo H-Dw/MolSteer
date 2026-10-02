@@ -107,7 +107,11 @@ def test_real_role_inputs_receive_current_state_and_references_without_forecast_
         assert 'current_state' in context and context['workflow_references']
         assert 'opportunity_workspace' not in context and 'opportunity_comparisons' not in context
     math_context=seen['mathematics'][1]
-    assert math_context['goal_pools']['scientific_goals'][0]['direction_id']=='repair'
+    assert math_context['goal_index']['optimize']==['repair']
+    assert 'goal_pools' not in math_context and 'raw_reference' not in math_context['current_state']
+    physics=math_context['function_derivation']['conditional_physics']
+    assert 'E_geom,S^q' in physics['family_to_reason_about'] and 'not a preset' in physics['family_to_reason_about']
+    assert 'CURRENT path' in physics['contacts']
     assert math_context['biology_decisions']=={}  # Optional helpers did not invent a biological decision.
     assert state['expert_guidance_sources']['mathematics']['reference_id']=='references/knowledge-guided-composition.md'
     assert 'workflow_materials' not in state
@@ -129,7 +133,7 @@ def test_unimplemented_required_goal_reaches_source_transfer_and_is_retained(cas
         return [('inspect_biophysical_context',{'factor':'all'})] if n==1 else [('submit_biology_plan',{'plan':biology})]
     def math_model(n,messages):
         if n==1:
-            context=json.loads(messages[1].content); seen.update(context['goal_pools'])
+            context=json.loads(messages[1].content); seen.update(context['goal_index'])
             return [('prepare_function_synthesis',{'direction_id':'repair','query':'flat-bottom local geometry'})]
         if n==2:
             return [('record_function_derivation',{'direction_id':'repair','stage':'source_transfer',
@@ -143,7 +147,7 @@ def test_unimplemented_required_goal_reaches_source_transfer_and_is_retained(cas
     models['molthinker.mathematics'].respond=math_model
     state=AgentRuntime(cfg,models=models).run(packet,report,run_id='unresolved_goal_fixture')
     assert state['status']=='design_deferred',state['trace'][-5:]
-    assert seen['compilation_candidate_ids']==[] and seen['unresolved_selected_goal_ids']==['repair']
+    assert seen['optimize']==[] and seen['deferred']==['repair']
     assert state['mathematical_design']['directions'][0]['status']=='design_only'
     assert state['reward_design_deferral']['blocked_directions']==['repair']
     assert models['molexecutor'].calls==0

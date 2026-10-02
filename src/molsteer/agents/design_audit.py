@@ -20,17 +20,15 @@ FACTOR_METRICS = {
     'terminal_task_utility': {'affinity', 'qed', 'sa_score', 'logp', 'tpsa', 'vina_score'},
 }
 FACTOR_OBSERVABLES = {
-    'bond_geometry': {'distance', 'mmff_strain'},
-    'angle_torsion_stereochemistry': {'angle', 'dihedral', 'signed_volume', 'mmff_strain'},
+    'bond_geometry': {'distance', 'bond_length_error', 'mmff_strain'},
+    'angle_torsion_stereochemistry': {'angle', 'bond_angle_error', 'dihedral', 'signed_volume', 'mmff_strain'},
     'intramolecular_stability': {'mmff_strain'},
-    'steric_feasibility': {'distance', 'receptor_distance', 'mmff_strain'},
+    'steric_feasibility': {'distance', 'receptor_distance', 'typed_steric_overlap', 'mmff_strain'},
     'target_contacts': {'receptor_distance', 'direction_alignment'},
     # Area targets and categorical transitions have no implemented derivatives.
     'target_surface_burial': set(), 'chemical_identity_functional_groups': set(),
     'terminal_task_utility': set(),
 }
-CHEMICAL_REFERENCE_METRICS = {'mmff_local_geometry','bond_lengths','chemistry_context',
-    'stereochemistry','ring_planarity','double_bond_planarity','protein_clashes','intramolecular_clashes'}
 
 
 def bounded_values(value, limit=12):
@@ -232,11 +230,6 @@ def validate_design_audit(design, biology, packet, report, passages, required=Fa
     if sum(c['decision'] == 'selected' for c in audit['architectures']) != 1:
         raise ContractValidationError('Select exactly one architecture and explain rejected alternatives', ['design_audit', 'architectures'])
     evidence = _evidence(packet, report)
-    chemical_references = {e['evidence_id'] for m in packet['observations']
-        if m['metric_id'] in CHEMICAL_REFERENCE_METRICS
-        for e in m.get('evidence', [])}
-    chemical_references.update(ident for ident, ref in measurement_references(packet).items()
-        if ref['metric_id'] in CHEMICAL_REFERENCE_METRICS)
     by_id = {d['direction_id']: d for d in design['directions']}
     for bio in biology['directions']:
         if bio['disposition'] not in ('optimize','constraint'):
@@ -297,11 +290,6 @@ def validate_design_audit(design, biology, packet, report, passages, required=Fa
         if 'P01' in selected_ids and 'mmff_strain' not in kinds and direction.get('source_transform') != 'new_surrogate':
             raise ContractValidationError('A distance proxy cannot be attributed to the complete MMFF energy', path + ['source_transform'])
         parameters = direction.get('reference_parameters', [])
-        chemical_binding = ('P01' in selected_ids or any(
-            p['role'] in ('reference', 'tolerance', 'physical_coefficient') and
-            set(p['evidence_ids']) & chemical_references for p in parameters))
-        if chemical_binding and audit['graph_policy'] != 'suspend_on_graph_change':
-            raise ContractValidationError('Chemical references require a graph-change applicability guard', path + ['reference_parameters'])
         constants = expression_constants(direction['expression'])
         for constant in constants:
             matches = [p for p in parameters if p['origin'] == constant['origin'] and p['unit'] == constant['unit']

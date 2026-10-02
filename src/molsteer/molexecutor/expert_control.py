@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from molsteer.common import digest, observation
 from molsteer.molthinker.expressions import observable_value, evaluate_expression, aggregate_objectives
-from molsteer.agents.optimization import conflict_weights
+from molsteer.agents.optimization import conflict_weights, priority_descent
 
 
 def probe_predict(adapter, **kwargs):
@@ -49,6 +49,11 @@ class ExpertEvaluator:
         self.directions = [d for d in spec['mathematical_design']['directions'] if d['status']=='executable']
         self.strategy = spec['mathematical_design']['strategy']
         self.roles = {d['direction_id']:d['disposition'] for d in spec['biology_plan']['directions']}
+        self.dependencies = {d['direction_id']:d['preservation_conditions'] for d in spec['biology_plan']['directions']}
+        self.constraint_modes = {d['direction_id']:d.get('constraint_mode', 'absolute') for d in self.directions}
+        self.dynamic_views = {o['view'] for d in self.directions for o in d['observables']
+                              if o['kind'] in ('bond_length_error', 'bond_angle_error', 'typed_steric_overlap')}
+        self.reference_diagnostics = {}; self.unavailable = {}
         self.mmff, self.molecules = {}, {}
         from .mmff_bridge import MMFFStrain
         for direction in self.directions:
@@ -60,27 +65,50 @@ class ExpertEvaluator:
                            ('graph_valid','protonation_validated','mmff_applicability_validated')):
                         raise ValueError('MMFF chemical applicability and protonation must be validated')
                     self.mmff[view], self.molecules[view] = MMFFStrain(), packet_molecule(packet,view)
+        for view in self.dynamic_views - set(self.molecules):
+            try:
+                self.molecules[view] = packet_molecule(packet, view)
+            except ValueError:
+                self.molecules[view] = None
+        self.elements = {}
+        for view in self.dynamic_views:
+            chemical = observation(packet, 'chemistry_context', view)
+            atoms = {a['atom_id']:a['element'] for a in (chemical or {}).get('values', {}).get('atoms', [])}
+            self.elements[view] = [atoms.get(a) for a in packet['steering']['coordinate_snapshots'][view]['atom_ids']]
 
-    def components(self, coordinates, molecules=None):
+    def components(self, coordinates, molecules=None, elements=None):
         # Offline trials use their bound snapshot. Live callers supply freshly
         # decoded molecules so force-field typing follows the current categories.
         molecules = self.molecules if molecules is None else molecules
+        elements = self.elements if elements is None else elements
+        from .chemical_references import ChemicalReferenceUnavailable
+        self.reference_diagnostics = {}; self.unavailable = {}
         values = {}
         for direction in self.directions:
-            local = {}
-            for obs in direction['observables']:
-                view = obs['view']
-                local[obs['observable_id']] = observable_value(obs, coordinates[view],
-                    self.packet['steering']['coordinate_snapshots'][view]['atom_ids'], self.packet,
-                    self.mmff.get(view), molecules.get(view))
+            local, bindings = {}, {}
+            try:
+                for obs in direction['observables']:
+                    view = obs['view']
+                    local[obs['observable_id']] = observable_value(obs, coordinates[view],
+                        self.packet['steering']['coordinate_snapshots'][view]['atom_ids'], self.packet,
+                        self.mmff.get(view), molecules.get(view), elements.get(view), bindings)
+            except ChemicalReferenceUnavailable as exc:
+                self.unavailable[direction['direction_id']] = str(exc)
+                continue
+            finally:
+                if bindings:
+                    self.reference_diagnostics[direction['direction_id']] = bindings
             values[direction['direction_id']] = evaluate_expression(direction['expression'], local)
         return values
 
     def objectives(self, values):
-        return {k:v for k,v in values.items() if self.roles[k]=='optimize'}
+        return {k:v for k,v in values.items() if self.roles[k]=='optimize' and
+                all(c in values for c in self.dependencies.get(k, []))}
 
-    def constraints(self, values):
-        return [k for k,v in values.items() if self.roles[k]=='constraint' and float(v.detach()) > 1e-10]
+    def constraints(self, values, baseline=None):
+        return [k for k,v in values.items() if self.roles[k]=='constraint' and
+                float(v.detach()) > (float(baseline[k].detach()) if self.constraint_modes[k] == 'native_nonincrease'
+                                     and baseline is not None and k in baseline else 0.) + 1e-10]
 
 
 def control_direction(objectives, variable, mask, strategy):
@@ -89,6 +117,8 @@ def control_direction(objectives, variable, mask, strategy):
     if mask.shape != variable.shape or not torch.isfinite(mask).all() or not ((mask==0)|(mask==1)).all():
         raise ValueError('Control mask must match the runtime variable')
     grads = []
+    if not objectives:
+        raise ValueError('No currently applicable optimization mechanism')
     for value in objectives.values():
         grad, = torch.autograd.grad(value, variable, retain_graph=True, allow_unused=False)
         if not torch.isfinite(grad).all():
@@ -107,7 +137,10 @@ def control_direction(objectives, variable, mask, strategy):
         if any(float(stacked[i].norm()) <= 1e-12 for i in active):
             diagnostics['status']='unresolved_zero_gradient'
             return torch.zeros_like(variable), stacked.detach(), diagnostics
-        solved = conflict_weights(stacked[active].detach().double().cpu().numpy(), mask.detach().cpu().numpy())
+        arrays = stacked[active].detach().double().cpu().numpy(), mask.detach().cpu().numpy()
+        weights = strategy.get('priority_weights')
+        solved = (priority_descent(*arrays, [weights.get(list(objectives)[i], 1.) for i in active]) if weights
+                  else conflict_weights(*arrays))
         diagnostics['active_solution'] = solved
         diagnostics['active_direction_ids'] = [list(objectives)[i] for i in active]
         diagnostics['status'] = solved['status']
@@ -151,6 +184,14 @@ def run_expert_trial(packet, spec, iterations=3, strength=1.):
     def components(x):
         return evaluator.components(dict(zip(views,torch.split(x,lengths))))
     initial = components(original)
+    if not evaluator.objectives(initial):
+        return {'numerical_gradient':{'passed':False, 'components':{}},
+                'unavailable_directions':dict(evaluator.unavailable),
+                'reference_bindings':dict(evaluator.reference_diagnostics),
+                'fixed_atoms_unchanged':True, 'input_snapshot_unchanged':True,
+                'live_gradient':'not_run', 'full_sampler_ablation':'not_run',
+                'scope':'No currently applicable optimization mechanism on the coordinate copy',
+                'revision_hint':'Inspect missing current chemical references and preservation dependencies; revise the mechanism or retain it as unresolved.'}
     checks = {key:gradient_check(lambda x,k=key:components(x)[k], original) for key in initial}
     if not all(c['passed'] for c in checks.values()):
         return {'numerical_gradient':{'passed':False,'components':checks},
@@ -173,7 +214,7 @@ def run_expert_trial(packet, spec, iterations=3, strength=1.):
             candidate = original+offset*(.20/offset.norm(dim=-1,keepdim=True).clamp(min=1e-30)).clamp(max=1)
             ok, derivatives = check_displacement(candidate-current, gradients, evaluator.strategy,scalar_gradient=-direction)
             after = components(candidate)
-            reasons = evaluator.constraints(after)
+            reasons = evaluator.constraints(after, values)
             if evaluator.strategy['mode']=='common_descent':
                 regression = any(float(after[k])>float(values[k])+1e-10 for k in objectives)
             else:

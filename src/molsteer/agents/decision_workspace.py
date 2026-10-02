@@ -22,9 +22,11 @@ BIOLOGY_GUIDE = {
         'integration': 'Record mechanisms with evidence/finding IDs, competing explanations and couplings. Shared atom support is not a causal proof.',
         'candidate_goals': 'Optionally record goals as {goal_id, covers:[mechanism_id,...], repair_reason, risks, unknowns}; covers describes expert-declared mechanisms.',
         'selection': 'Optionally record selected_goal_ids and necessary_mechanism_ids, omitted alternatives and removal reasons. Coverage assistance is logical, not an efficacy forecast.',
-        'raw_reference_review': 'Record comparison_id and exact raw references, persistent/late-repair/region candidates, counter-explanations, timing uncertainty, current controllability and selection or omission reasons. Cross-time references are contextual; current evidence still binds repair clauses.'},
+        'raw_reference_review': 'Trace mechanisms through every configured raw node and current_condition_trajectory. Separate old-object comparability from later-molecule validity. Record references, persistence, native clearance/retyping, recurrence, useful regions and tradeoffs.',
+        'value_ranking': 'Rank potential intervention value using persistence under current chemistry, severity, native repair timing, controllability, independent coverage, dependency and disruption of useful evolution. Explain pairwise priorities without invented intervention gains.',
+        'revision': 'Respond to mathematical mechanism conflicts: accept, modify or reject proposed hypothesis/target/priority changes with reasons. Earlier biological assumptions are revisable.'},
     'handoff': 'Optimize directions are selected repairs; constraint directions are preservation. A scientifically necessary goal with missing execution inputs stays required=true, disposition=deferred, and proceeds to mathematics.',
-    'scope': 'Optional editable public decisions. No terminal-benefit probabilities, utility scores, automatic ranking, weights or new eligibility gates.'}
+    'scope': 'Editable evidence-linked decisions. The expert owns value ranking; raw counts are not utility scores. No fabricated outcome probabilities or additional eligibility gate.'}
 
 MATH_GUIDE = {
     'workflow': ['Read the biologically selected goals and preservation conditions.',
@@ -37,6 +39,15 @@ MATH_GUIDE = {
         'target_sets': 'Record observables, conditional chemical references, target relations and scale origins. A reference value does not determine a tolerance.',
         'local_response': 'Describe the desired derivative or constrained direction across relevant regimes before choosing a shape or aggregate.',
         'candidates': 'Record source-retained and newly derived parts, alternatives, local measurements and unresolved evaluator needs.'},
+    'conditional_physics': {
+        'construction': 'For each supported current chemical hypothesis q, construct normalized local geometry energy plus typed exclusion and justified native-contact preservation. Use only diagnosed coupled mechanisms.',
+        'family_to_reason_about': 'Optional family: e_q=(E_geom,S^q-E_ref,S^q)/E_scale + lambda_s*sum(relu((d_min,ia^q-d_ia)/sigma_s)^2) + lambda_c*relu((C_native,S,t-C_S^q-delta_C)/sigma_C)^2. Retain only selected, evidenced mechanisms with evaluable observables; this is a reasoning example, not a preset objective or coefficient choice.',
+        'geometry': 'Use current typed bond/angle references or a ready physical energy; bond_length_error and bond_angle_error rebind MMFF references at runtime. A local surrogate is not the entire MMFF energy.',
+        'sterics': 'typed_steric_overlap uses current element radii and an explicit buffer; a current nearest distance is not an exclusion radius.',
+        'contacts': 'Retain meaningful same-stage native contacts. native_nonincrease compares with the same-time unperturbed proposal on the CURRENT path, not the stored independent raw trajectory. A historical raw contact baseline needs an explicit evaluator; typed direction/area claims need actual observables.',
+        'scales': 'Explain energy reference, normalization, buffers and allowed losses. Values are sourced or calibrated inputs, never invented from rank.',
+        'hypotheses': 'Chemical transitions update interpretation. Do not freeze the initial graph or average incompatible reference bond lengths. Multiple-hypothesis mixtures need validated hypotheses and a suitable evaluator.',
+        'collaboration': 'When physical references or local responses contradict biology, request_biology_revision with evidence and a concrete alternative before repairing the old formula.'},
     'scope': 'Public derivation workspace, not private reasoning. Partial records and any step order are allowed; no additional submission check.'}
 
 
@@ -57,7 +68,7 @@ def goal_pools(biology):
         'rule': 'Compilation candidates only have biological scope permission, not a validated mathematical evaluator. Research does not activate a direction. Necessary unresolved scientific goals remain in the design; execution needs present inputs and final tests, or an explicit biological revision.'}
 
 
-def current_state_context(packet, report, dynamics, raw_reference_context=None):
+def current_state_context(packet, report, dynamics, raw_reference_context=None, *, include_raw_reference=True):
     """Bind the problem without assigning causal regions or target values."""
     from .design_audit import bounded_values
     findings = []
@@ -67,13 +78,15 @@ def current_state_context(packet, report, dynamics, raw_reference_context=None):
             row['report_group'] = origin
             findings.append(row)
     from molsteer.molreader.raw_reference import bound_raw_context, raw_reference_summary
-    return dict(identity=deepcopy(packet['identity']), representations=deepcopy(packet['representations']),
+    result = dict(identity=deepcopy(packet['identity']), representations=deepcopy(packet['representations']),
         model_dynamics=deepcopy(dynamics), findings=findings,
         observation_availability=[{k: deepcopy(m[k]) for k in ('metric_id', 'view', 'status')}
                                   for m in packet['observations']],
         chemical_readiness=deepcopy(packet['steering']['chemical_readiness']),
-        raw_reference=raw_reference_summary(bound_raw_context(raw_reference_context, packet)),
         interpretation='State and prediction describe this checkpoint in different representations. Prediction is not an observed terminal result. Separately configured raw suffix nodes are observations of the original path, not intervention outcomes. Reader grouping or raw co-evolution does not prove a shared cause or a regional benefit; missing measurements stay unavailable.')
+    if include_raw_reference:
+        result['raw_reference'] = raw_reference_summary(bound_raw_context(raw_reference_context, packet))
+    return result
 
 
 def new_workspace():

@@ -12,6 +12,8 @@ UNITS = {'dimensionless': (0, 0, 0), 'angstrom': (1, 0, 0),
          'angstrom^3': (3, 0, 0), 'radian': (0, 1, 0), 'degree': (0, 1, 0),
          'kcal/mol': (0, 0, 1)}
 OBSERVABLES = {
+    'bond_length_error': (2, 'angstrom'), 'bond_angle_error': (3, 'radian'),
+    'typed_steric_overlap': (1, 'angstrom'),
     'distance': (2, 'angstrom'), 'receptor_distance': (1, 'angstrom'),
     'angle': (3, 'radian'), 'anchor_offset': (1, 'angstrom'),
     'direction_alignment': (2, 'dimensionless'), 'dihedral': (4, 'radian'),
@@ -42,7 +44,7 @@ def validate_observables(observables, packet, evidence_ids):
         representation=packet['representations'][view]
         if representation['coordinate_unit']!='angstrom':
             raise ValueError('Observable coordinates must use declared Angstrom units')
-        if kind in ('receptor_distance','anchor_offset','direction_alignment') and (
+        if kind in ('receptor_distance','typed_steric_overlap','anchor_offset','direction_alignment') and (
                 representation['coordinate_frame']!='receptor_world' or not representation.get('transform',{}).get('verified')):
             raise ValueError('Reference observables require a verified common world frame')
         atoms = obs['atom_ids']
@@ -61,6 +63,7 @@ def validate_observables(observables, packet, evidence_ids):
             raise ValueError('Observable support is not localized by its evidence')
         params = obs['parameters']
         required = {'receptor_distance': {'receptor_serial', 'residue_id'},
+                    'typed_steric_overlap': {'receptor_serial', 'residue_id', 'buffer_ratio'},
                     'anchor_offset': {'reference', 'origin'},
                     'direction_alignment': {'reference', 'origin'}}.get(kind, set())
         if not isinstance(params, dict) or set(params) != required:
@@ -73,8 +76,10 @@ def validate_observables(observables, packet, evidence_ids):
                 raise ValueError('Reference provenance is required')
             if kind == 'direction_alignment' and sum(x*x for x in ref) < 1e-16:
                 raise ValueError('Reference direction is degenerate')
-        if kind == 'receptor_distance':
+        if kind in ('receptor_distance', 'typed_steric_overlap'):
             receptor_reference(obs, packet)
+            if kind == 'typed_steric_overlap' and (not finite_number(params['buffer_ratio']) or not 0 < params['buffer_ratio'] <= 2):
+                raise ValueError('Typed exclusion needs an explicit positive buffer_ratio no greater than two')
             if not any(evidence_index[e][1].get('receptor_serial')==params['receptor_serial']
                        and evidence_index[e][1].get('residue_id')==params['residue_id'] for e in obs['evidence_ids']):
                 raise ValueError('Receptor pair must be localized by cited clash evidence')
@@ -199,10 +204,33 @@ def evaluate_expression(tree, values):
     return value
 
 
-def observable_value(obs, coords, atom_ids, packet, mmff=None, molecule=None):
+def observable_value(obs, coords, atom_ids, packet, mmff=None, molecule=None, elements=None, diagnostics=None):
     index = {a: i for i, a in enumerate(atom_ids)}
     q = [coords[index[a]] for a in obs['atom_ids']]
     kind, params = obs['kind'], obs['parameters']
+    if kind in ('bond_length_error', 'bond_angle_error'):
+        from molsteer.molexecutor.chemical_references import geometry_reference
+        reference = geometry_reference(molecule, kind, [index[a] for a in obs['atom_ids']])
+        if diagnostics is not None:
+            diagnostics[obs['observable_id']] = dict(status='current_typed_reference' if reference is not None else 'relation_absent',
+                reference=reference, unit=OBSERVABLES[kind][1], source='RDKit MMFF94s parameters on current chemistry')
+        if reference is None:
+            return sum(x.sum()*0 for x in q)
+        measured = observable_value({**obs, 'kind':'distance' if kind == 'bond_length_error' else 'angle', 'parameters':{}},
+                                     coords, atom_ids, packet)
+        return measured-reference
+    if kind == 'typed_steric_overlap':
+        from molsteer.molexecutor.chemical_references import exclusion_radius, ChemicalReferenceUnavailable
+        if elements is None:
+            raise ChemicalReferenceUnavailable('Current ligand elements are required for exclusion')
+        receptor = next(a for a in packet['steering']['receptor_atoms']
+                        if a['serial'] == params['receptor_serial'] and a['residue_id'] == params['residue_id'])
+        radius = exclusion_radius(elements[index[obs['atom_ids'][0]]], receptor['element'], params['buffer_ratio'])
+        distance = observable_value({**obs, 'kind':'receptor_distance'}, coords, atom_ids, packet)
+        if diagnostics is not None:
+            diagnostics[obs['observable_id']] = dict(status='current_typed_reference', reference=radius,
+                source='Current element van der Waals radii times declared buffer_ratio', unit='angstrom')
+        return torch.relu(coords.new_tensor(radius)-distance)
 
     def unit(v):
         length = v.norm()
@@ -234,18 +262,24 @@ def observable_value(obs, coords, atom_ids, packet, mmff=None, molecule=None):
         return (q[1]-q[0]).dot(torch.linalg.cross(q[2]-q[0], q[3]-q[0]))
     if kind == 'mmff_strain':
         if mmff is None or molecule is None:
-            raise ValueError('MMFF requires a validated stable graph and hydrogen preparation')
+            from molsteer.molexecutor.chemical_references import ChemicalReferenceUnavailable
+            raise ChemicalReferenceUnavailable('MMFF requires current typed chemistry and hydrogen preparation')
         return mmff.tensor(coords, molecule)
     raise ValueError('Unknown observable')
 
 
 def aggregate_objectives(values, strategy):
+    from molsteer.agents.priority import scaled_objectives
+    values = scaled_objectives(values, strategy)
+    if not values:
+        raise ValueError('No currently applicable optimization mechanism')
     if strategy['mode'] == 'common_descent':
         # Reporting only. The controller differentiates each objective separately.
         return torch.stack(list(values.values())).max()
     aggregation = strategy['aggregation']
     items = torch.stack(list(values.values()))
     if aggregation['op'] == 'single': return items[0]
+    if aggregation['op'] == 'weighted_sum': return items.sum()
     if aggregation['op'] == 'maximum': return items.max()
     if aggregation['op'] == 'lp_norm':
         p = aggregation['p']

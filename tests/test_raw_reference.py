@@ -101,6 +101,56 @@ def test_configurable_nodes_persistent_and_first_final_clearance(tmp_path):
     assert originals == {p.name: p.read_bytes() for p in tmp_path.iterdir()}
 
 
+@pytest.mark.parametrize('times', [(.5, .6, .7, .8, .9, 1.), (.19, .32, .41, .64, .81, .97)])
+def test_every_configured_raw_node_has_current_chemistry_diagnosis(tmp_path, times):
+    from molsteer.molreader.raw_reference import inspect_goal_trajectory, raw_reference_summary
+    packet, middle, final, manifest, cfg = setup_raw(tmp_path, times=(times[0], times[1], times[-1]))
+    cfg.reference_times = list(times[1:]); cfg.factors = ['bond_geometry', 'angle_torsion_stereochemistry']
+    for i, time in enumerate(times[2:-1], 2):
+        later = stamp(copy.deepcopy(middle), time)
+        manifest['nodes'].insert(-1, dict(node_id=f'reference_{i}', time=time, role='intermediate',
+            packet_path=save(tmp_path, f'reference_{i}.json', later)))
+    # Identity changes do not make the new molecule's own final diagnosis unknowable.
+    atoms = metric(final, 'chemistry_context')['values']['atoms']
+    next(a for a in atoms if a['atom_id'] == 1)['element'] = 'Cl'
+    for row in metric(final, 'mmff_local_geometry')['values']['bonds']:
+        if row['atom_ids'] == [1, 14]:
+            row.update(reference_angstrom=1.75, distance_angstrom=1.75, relative_deviation=0.)
+    save(tmp_path, 'end.json', stamp(final)); save(tmp_path, 'manifest.json', manifest)
+    originals = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    context = load_raw_reference(packet, cfg, tmp_path)
+    assert [n['time'] for n in context['nodes']] == list(times)
+    assert {r['time'] for r in context['node_diagnostics']} == set(times)
+    bond = track(context, 'bond_length')
+    assert bond['classification'] == 'chemical_retyped_or_graph_changed'
+    assert bond['current_condition_trajectory']['final_status'] == 'not_flagged'
+    assert bond['current_condition_trajectory']['first_clear_node_id'] == 'end'
+    assert bond['current_condition_trajectory']['chemical_transition_nodes'] == ['end']
+    assert bond['observations'][-1]['current_reference_parameters']
+    localized = inspect_goal_trajectory(context, atom_ids=[1, 14], limit=32)
+    assert any(r['track_id'] == bond['track_id'] for r in localized['tracks'])
+    assert all(len(r['observations']) == len(times) for r in localized['tracks'])
+    summary = raw_reference_summary(context)
+    assert summary['current_final_statuses']['not_flagged'] > 0
+    assert any(r['category'] == 'chemical_transition_assessment' for r in context['opportunities'])
+    assert originals == {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+
+
+def test_node_local_screens_distinguish_absent_relation_clearance_and_missing_input():
+    from molsteer.molreader.raw_reference import _current_condition
+    chemical = {'status': 'ok', 'values': {'atoms': [{'atom_id': 0}, {'atom_id': 1}],
+                                         'bonds': [{'atom_ids': [0, 1], 'bond_order': 0.}]}}
+    bond = {'status': 'ok', 'metric_id': 'bond_lengths', 'view': 'prediction', 'values': {}}
+    assert _current_condition(bond, {}, {'atom_ids': [0, 1]}, [], chemical, [0, 1]) == 'relation_absent'
+    assert _current_condition(bond, {}, {'atom_ids': [0, 1]}, [], {}, [0, 1]) == 'local_coverage_unavailable'
+    confidence = dict(bond, metric_id='atom_confidence', values={'row_count': 2, 'low_confidence_count': 0}, evidence=[])
+    assert _current_condition(confidence, {}, {'atom_ids': [0]}, [], chemical, [0, 1]) == 'not_flagged'
+    confidence['values']['row_count'] = 1
+    assert _current_condition(confidence, {}, {'atom_ids': [0]}, [], chemical, [0, 1]) == 'local_coverage_unavailable'
+    valence = dict(bond, metric_id='valence', values={'sanitized': True, 'explicit_bond_order_sum': [{'atom_id': 0}, {'atom_id': 1}]})
+    assert _current_condition(valence, {}, {'atom_ids': [0]}, [], chemical, [0, 1]) == 'not_flagged'
+
+
 def test_selection_can_exclude_final_and_support_decreasing_time(tmp_path):
     packet, _, _, _, cfg = setup_raw(tmp_path, times=(.92, .43, .08), direction='decreasing')
     cfg.include_final = False
@@ -347,6 +397,7 @@ def test_actual_reader_and_both_expert_loops_receive_temporal_context_and_public
                             'temporal_observation': 'Some current risks persist along the sampled raw path.'}})]
             if role == 'molthinker.biology' and n == 1:
                 return [('inspect_raw_comparison', {'section': 'opportunities'}),
+                        ('inspect_raw_goal_trajectory', {'atom_ids': [1, 14], 'limit': 8}),
                         ('record_biology_decision', {'stage': 'raw_reference_review', 'record': {
                             'comparison_id': comparison['comparison_id'],
                             'decision': 'Retain the current measured repair; raw association alone does not select another goal.'}})]
@@ -356,7 +407,9 @@ def test_actual_reader_and_both_expert_loops_receive_temporal_context_and_public
     assert state['status'] == 'validated', state['trace'][-4:]
     for role in originals:
         assert seen[role][1]['raw_reference']['comparison_id'] == comparison['comparison_id']
-        assert {'inspect_raw_comparison', 'read_raw_reference'} <= models[role].tools
+        assert {'inspect_raw_comparison', 'read_raw_reference', 'inspect_raw_goal_trajectory'} <= models[role].tools
+        assert {d['time'] for d in seen[role][1]['raw_reference']['node_diagnostics']} == {n['time'] for n in comparison['nodes']}
+    assert any(e.get('tool_name') == 'inspect_raw_goal_trajectory' and e['output']['tracks'] for e in state['trace'])
     math_context = seen['molthinker.mathematics'][1]
     assert math_context['biology_decisions']['raw_reference_review']['comparison_id'] == comparison['comparison_id']
     assert math_context['raw_reference_analysis']['temporal_observation']

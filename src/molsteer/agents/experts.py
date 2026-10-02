@@ -20,6 +20,8 @@ from .raw_reference_tools import raw_reference_tools
 from molsteer.molreader.raw_reference import bound_raw_context, raw_reference_summary
 from .reward_synthesis import (SYNTHESIS_GUIDE, function_card, construct_direction,
                                preview_architectures, derive_allocation_response)
+from .expert_context import task_context, recovery_candidate, recovery_support, goal_index, public_raw_analysis, draft_index
+from .priority import allocate_priorities
 
 def mathematical_draft_tool_schema(direction_only=False) -> dict:
     """Expose the full typed contract while allowing invalid drafts to be retained.
@@ -79,7 +81,16 @@ choose goals or rank benefits. Partial records and omitted helper calls do not b
 reasons and uncertainty. Optimize means selected repair; constraint means necessary preservation.
 A selected scientific goal lacking current execution inputs remains required=true, disposition=deferred
 with its actual missing facts. Mathematics can research it. Do not discard it to fit a distance backend.
-rank is a stable handoff order, not a value score, reward coefficient or activation schedule.
+rank expresses intervention-value priority. Trace candidates through ALL configured raw nodes with
+inspect_raw_goal_trajectory, including current chemical references and final diagnosis. Rank by
+plausible benefit, persistent unmet need, native repair timing, controllability, chemical dependencies,
+independent coverage and interference with useful evolution. Explain pairwise priorities in
+value_assessment/priority_reason. Coordinate implementation convenience does not determine value.
+The mathematical allocation must reflect these priorities. Rank is ordinal, not a gain probability.
+Do not call an observed raw final unknown: only the intervention outcome remains unobserved.
+When mathematics reports a mechanism conflict, revisit hypotheses, target sets, preservation bounds
+and rank. Earlier decisions are revisable proposals. Explain accepted, modified or rejected changes
+in the revision workspace and retain unaffected goals.
 
 The existing schema is available on demand. Record all finding dispositions and factor assessments.
 Use exact localized measurement IDs, including finding_ids=[] for independently measured context.
@@ -106,7 +117,7 @@ and sampled timing uncertainty. rr_ references are contextual only; never use a 
 as current observable evidence or manufacture a coordinate derivative of affinity, SA or a category.
 Retain necessary unsupported goals as design_only and explain their missing evaluator or control map.
 
-1. Read goal_pools and biology_decisions. Scientific goals include necessary unresolved directions;
+1. Read biology_plan, goal_index and biology_decisions. Scientific goals include necessary unresolved directions;
 researchable directions and biological compilation candidates are separate. Review the original goal
 even when the evaluator is unavailable; do not replace it with an unrelated easy coordinate proxy.
 2. Retrieve knowledge by the goal's mechanism, observable and role. prepare_function_synthesis can
@@ -130,7 +141,11 @@ relations, parameters and within-mechanism operators, with actual lineage and de
 Its shape helpers are compilation options, not the universe of reasonable mathematics. Custom
 constructs can use stage_mathematical_direction; unsupported evaluator needs stay design_only.
 Compose only independent necessary goals; derive joint acceptable-set semantics and marginal
-response. Rank alone never supplies a coefficient or stage. derive_allocation_operator is optional
+response. Reflect value rank in priority_weights or a priority-aware composition. Configured rank_decay
+supplies an explicit ordinal preference when weights are omitted; it is not measured efficacy.
+weighted_sum, maximum and lp_norm act on priority-scaled normalized deficits; common_descent projects
+the priority-weighted preferred gradient onto current common non-ascent directions. Inspect gradient
+magnitudes/conflicts before selecting explicit weights. derive_allocation_operator is optional
 calculation AFTER a justified response choice, not a source of biological importance.
 6. Compare actual copy-coordinate response with compare_constructed_architectures: duplication,
 inactive unresolved goals, coupling/conflict, projected norms and preservation effects. Revise the
@@ -147,7 +162,15 @@ one. A whole energy, area or field cannot be attributed to a pair-distance proxy
 and black-box scores retain their roles unless a verified estimator enables another path. Record new
 function/aggregation derivations separately from original source formulas. Exact schema/grammar are
 available on demand; generic background reference eligibility rules concern actual execution, not
-selection of scientific goals. No additional workflow gate is introduced. Guidance strength remains
+selection of scientific goals. Bind mechanisms to CURRENT chemistry: bond_length_error and
+bond_angle_error subtract current MMFF references; typed_steric_overlap uses current radii.
+Do not bake one initial bond type into a universal constraint or suspend all guidance on graph change.
+Use native_nonincrease when preservation means not worsening the same-stage native baseline.
+A disappeared bond is no longer an active bond relation, not proof of successful intervention.
+Follow function_derivation.conditional_physics to retain/specialize/reconstruct local geometry,
+exclusion and contact terms. If mechanisms conflict with biology, call request_biology_revision with
+evidence and a concrete alternative; you may challenge assumptions rather than repair their syntax.
+No additional workflow gate is introduced. Guidance strength remains
 external; unrun live/terminal validation stays not_run rather than a claimed acceptance condition.'''
 
 
@@ -156,7 +179,7 @@ def run_experts(runtime, state):
     instructions_by_role = {}
     for role, text in [('biology', BIOLOGY_INSTRUCTIONS), ('mathematics', MATH_INSTRUCTIONS)]:
         reference = initial_role_reference(materials, role)
-        instructions_by_role[role] = text + ('\n\nGeneric background reference; apply under the current-state task and assigned role:\n' + reference['text'] if reference else '')
+        instructions_by_role[role] = text + ('\n\nGeneric background reference; current instructions on value rank, chemistry rebinding and revisable hypotheses supersede any conflicting older background advice:\n' + reference['text'] if reference else '')
     state['expert_guidance_sources'] = {role: {k: v for k, v in initial_role_reference(materials, role).items() if k in ('reference_id', 'sha256')}
                                       for role in instructions_by_role}
     state['expert_prompt_digests']={role:digest(text) for role,text in
@@ -170,14 +193,45 @@ def run_experts(runtime, state):
     raw_context = bound_raw_context(state.get('raw_reference_context'), packet)
     temporal_tools = raw_reference_tools(raw_context, packet)
     raw_summary = raw_reference_summary(raw_context)
-    raw_analysis = state.get('raw_reference_analysis', {}) if raw_context['status'] in ('available', 'partial') else {}
-    current = current_state_context(packet, report, state['model_dynamics'], raw_context)
+    raw_analysis = public_raw_analysis(state.get('raw_reference_analysis')) if raw_context['status'] in ('available', 'partial') else {}
+    current = current_state_context(packet, report, state['model_dynamics'], raw_context, include_raw_reference=False)
+    carried_drafts, carried_biology = {}, {}
+    staged_directions, proposed_draft, tested_draft, last_validation = {}, {}, {}, {}
 
     def invoke(role, tools, context, completed):
         run_tools(runtime._model('molthinker.'+role), tools, instructions=instructions_by_role[role],
                   context=context, state=state, node='thinker.'+role,
                   max_steps=runtime.config.runtime.max_agent_steps,
-                  max_repairs=runtime.config.runtime.max_repairs, completed=completed)
+                  max_repairs=runtime.config.runtime.max_repairs, completed=completed,
+                  working_memory=lambda: {'decisions':deepcopy(workspace['decisions'][role]),
+                      'draft_index':draft_index(staged_directions) if role == 'mathematics' else {},
+                       'latest_validation':bounded_values(last_validation),
+                      'artifact_access':'read_expert_workspace reads current drafts, canonical recovery, decisions or archived public observations.'},
+                  history_max_chars=runtime.config.thinker.history_max_chars,
+                  history_recent_rounds=runtime.config.thinker.history_recent_rounds)
+
+    @tool
+    def read_expert_workspace(section: str, direction_id: str | None = None,
+                              event_id: str | None = None, path: list[str | int] | None = None) -> dict:
+        """Read drafts/biology/decisions, canonical recovery, recovery_support or an archived observation; path selects a subtree. Historical recovery support is not current binding evidence."""
+        sections = {'drafts':staged_directions, 'biology':state.get('biology_plan'),
+                    'decisions':workspace['decisions'], 'recovery':recovery_candidate(state.get('monitor_event')),
+                    'recovery_support':recovery_support(state.get('monitor_event'))}
+        if section == 'observation':
+            value = next((e.get('output') for e in state.get('trace', [])
+                          if e.get('event_id') == event_id and e.get('kind') == 'tool'), None)
+        else:
+            value = sections.get(section)
+        if direction_id and section == 'drafts':
+            value = staged_directions.get(direction_id)
+        elif section == 'drafts' and not path:
+            value = draft_index(staged_directions)
+        try:
+            for key in path or []:
+                value = value[key]
+        except (KeyError, TypeError, IndexError):
+            return {'status':'needs_input', 'blocking':False, 'hint':'Use an existing JSON path in the selected artifact.'}
+        return {'status':'available' if value is not None else 'unavailable', 'section':section, 'value':deepcopy(value)}
 
     @tool
     def read_workflow_reference(reference_id: str, section: str | None = None) -> dict:
@@ -238,15 +292,20 @@ def run_experts(runtime, state):
                 require_audit=runtime.config.thinker.require_design_audit)
             return {'status':'accepted', 'biology_plan':deepcopy(bio['plan'])}
 
-        invoke('biology', [get_expert_contract, inspect_biophysical_context, record_biology_decision, read_workflow_reference, list_measurement_references, inspect_measurement, inspect_measurements, *temporal_tools, service.tool_for('biology'), submit_biology_plan],
-               {'report':bounded_values(report), 'model_dynamics':state['model_dynamics'],
-                'monitor_feedback':state.get('monitor_event', {}), 'revision_request':feedback,
+        invoke('biology', [get_expert_contract, inspect_biophysical_context, record_biology_decision, read_workflow_reference, read_expert_workspace, list_measurement_references, inspect_measurement, inspect_measurements, *temporal_tools, service.tool_for('biology'), submit_biology_plan],
+               {'model_dynamics':state['model_dynamics'],
+                'task_context':task_context(state.get('monitor_event')), 'revision_request':feedback,
                 'current_state':current, 'decision_workspace':BIOLOGY_GUIDE,
                 'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'workflow_references':reference_catalog(materials),
                 'previous_plan':state.get('biology_plan'), 'discussion_round':discussion}, lambda:bool(bio))
         state['biology_plan'] = bio['plan']
         biology = bio['plan']
+        if feedback:
+            old = carried_biology
+            workspace['revision_resolution'] = {'requested':feedback,
+                'changed_direction_ids':[d['direction_id'] for d in biology['directions'] if d != old.get(d['direction_id'])],
+                'removed_direction_ids':sorted(set(old)-{d['direction_id'] for d in biology['directions']})}
         record = dict(round=discussion, biology_plan=deepcopy(biology))
         history.append(record)
         pools = goal_pools(biology)
@@ -257,7 +316,9 @@ def run_experts(runtime, state):
         tested_designs = set()
         tested_draft = {}
         proposed_draft = {}
-        staged_directions = {}
+        staged_directions = {d['direction_id']:deepcopy(carried_drafts[d['direction_id']]) for d in biology['directions']
+            if d['direction_id'] in carried_drafts and d == carried_biology.get(d['direction_id'])}
+        last_validation = {}
         targets = {d['direction_id'] for d in selected_directions(biology)}
         target_map = {d['direction_id']: d for d in biology['directions'] if d['direction_id'] in targets}
         research_map = {d['direction_id']: d for d in biology['directions']}
@@ -276,6 +337,8 @@ def run_experts(runtime, state):
                     'audit_required': runtime.config.thinker.require_design_audit,
                     'observable_fields':['observable_id','kind','view','atom_ids','evidence_ids','parameters'],
                     'parameters':{'receptor_distance':['receptor_serial','residue_id'],
+                                  'typed_steric_overlap':['receptor_serial','residue_id','buffer_ratio'],
+                                  'bond_length_error':[], 'bond_angle_error':[],
                                   'anchor_offset':['reference (three-vector)','origin'],
                                   'direction_alignment':['reference (three-vector)','origin'],
                                   'others':[]},
@@ -288,6 +351,7 @@ def run_experts(runtime, state):
                                   'reduce':['sum','mean'], 'power_extra_field':'exponent in [0.5,8]',
                                   'units':list(UNITS), 'limits':'128 nodes, depth 12; scalar nonnegative dimensionless output'},
                     'strategy_examples':[{'mode':'scalar_potential','aggregation':{'op':'single'},'justification':'Case-specific reason required'},
+                                         {'mode':'scalar_potential','aggregation':{'op':'weighted_sum'},'priority_weights':{'goal_a':1.0,'goal_b':0.5},'justification':'Explain value ranking and normalized marginal response'},
                                          {'mode':'common_descent','aggregation':None,'justification':'Case-specific reason required'},
                                          {'mode':'design_only','aggregation':None,'justification':'Retain unresolved function/controller needs without execution'}],
                     'state_context':{'representations':bounded_values(packet['representations']),
@@ -351,6 +415,7 @@ def run_experts(runtime, state):
                          for need in factor['missing_requirements']]
                         or ['Selected biology goal retains deferred execution scope; resolve its inputs and request explicit biology revision before activation.'])))
                 staged_directions[direction_id] = deepcopy(result['direction'])
+                tested_draft.clear(); last_validation.clear()
             result['derivation_record'] = deepcopy(workspace['decisions']['mathematics'].get(direction_id, {}))
             workspace['constructions'].append(deepcopy(result))
             return result
@@ -358,6 +423,8 @@ def run_experts(runtime, state):
         @tool
         def compare_constructed_architectures(strategies: list[dict[str, Any]]) -> dict:
             """Measure alternative draft controllers on coordinate copies; report allocation/conflict without choosing or gating."""
+            strategies = [allocate_priorities({'directions':list(staged_directions.values()),'strategy':s}, biology,
+                            runtime.config.thinker.rank_decay)['strategy'] for s in strategies]
             result = preview_architectures(packet, biology, staged_directions, state['model_dynamics'], strategies)
             workspace['architecture_previews'].append(deepcopy(result))
             return result
@@ -388,11 +455,15 @@ def run_experts(runtime, state):
             return {'retrievals':[service.local_search(direction_id,'Inspect candidate '+ident,ident) for ident in function_ids]}
 
         @tool
-        def request_biology_revision(direction_ids: list[str], issue: str, requested_change: str) -> dict:
-            """Return evidence gaps, infeasible priorities or conflicting requirements to biology (bounded rounds)."""
+        def request_biology_revision(direction_ids: list[str], issue: str, requested_change: str,
+                                     evidence_ids: list[str] | None = None, proposed_changes: dict[str, Any] | None = None) -> dict:
+            """Challenge earlier biology with a mechanism conflict, evidence and proposed hypothesis/target/rank changes; biology reviews the proposal next."""
             if math_result or not direction_ids or not set(direction_ids) <= set(research_map) or min(len(issue),len(requested_change)) < 12:
                 raise ValueError('Revision must identify selected directions and a concrete issue/change')
-            math_result['revision'] = dict(direction_ids=direction_ids, issue=issue, requested_change=requested_change)
+            math_result['revision'] = dict(direction_ids=direction_ids, issue=issue, requested_change=requested_change,
+                evidence_ids=evidence_ids or [], proposed_changes=deepcopy(proposed_changes or {}),
+                mathematical_evidence={ident:deepcopy(workspace['decisions']['mathematics'].get(ident, {})) for ident in direction_ids},
+                response_requested='Reconsider mechanism, target, preservation and rank; explain accepted, modified or rejected changes. Earlier plans are revisable.')
             return {'status':'revision_requested', **math_result['revision']}
 
         @tool(args_schema=mathematical_draft_tool_schema())
@@ -401,15 +472,17 @@ def run_experts(runtime, state):
             if not isinstance(design,(dict,MathematicalDesign)):
                 raise ValueError('Propose a complete mathematical draft before patching')
             proposed_draft['design']=deepcopy(design.model_dump() if isinstance(design,MathematicalDesign) else design)
+            tested_draft.clear(); last_validation.clear()
             retain_proposed_directions(staged_directions,proposed_draft['design'],targets)
             checked=validate_math(design,biology,packet,state['retrieval_records'],service.sources(), report=report,
-                require_audit=runtime.config.thinker.require_design_audit)
+                require_audit=runtime.config.thinker.require_design_audit, rank_decay=runtime.config.thinker.rank_decay)
             spec,deferred=compile_expert_spec(packet,report,biology,checked,state['retrieval_records'],state['model_dynamics'],service.sources())
             if deferred:
                 tested_draft['design']=deepcopy(checked)
                 return deferred
             from .executor import validate_and_test_reward
             validation=validate_and_test_reward(packet,spec,report)
+            last_validation.clear(); last_validation.update(deepcopy(validation))
             if validation.get('passed'):
                 tested_designs.add(digest(checked))
                 tested_draft['design']=deepcopy(checked)
@@ -427,7 +500,9 @@ def run_experts(runtime, state):
         @tool(args_schema=mathematical_draft_tool_schema(direction_only=True))
         def stage_mathematical_direction(direction: dict[str, Any]) -> dict:
             """Retain one complete selected-direction draft only; never authorize execution or claim validation."""
-            return stage_direction_draft(staged_directions, direction, targets)
+            result = stage_direction_draft(staged_directions, direction, targets)
+            tested_draft.clear(); last_validation.clear()
+            return result
 
         @tool
         def test_staged_mathematical_design(strategy: dict[str, Any], conflict_assessment: str,
@@ -448,14 +523,14 @@ def run_experts(runtime, state):
                     raise ValueError('test_mathematical_design must pass for the exact submitted artifact')
                 design=tested_draft['design']
             checked=validate_math(design, biology, packet, state['retrieval_records'], service.sources(), report=report,
-                require_audit=runtime.config.thinker.require_design_audit)
+                require_audit=runtime.config.thinker.require_design_audit, rank_decay=runtime.config.thinker.rank_decay)
             spec,deferred=compile_expert_spec(packet,report,biology,checked,state['retrieval_records'],state['model_dynamics'],service.sources())
             if not deferred and digest(checked) not in tested_designs:
                 raise ValueError('test_mathematical_design must pass for the exact submitted artifact')
             math_result['design'] = checked
             return {'status':'accepted', 'mathematical_design':deepcopy(math_result['design'])}
 
-        math_tools = [get_expert_contract, get_function_catalog, prepare_function_synthesis, record_function_derivation, read_workflow_reference, *temporal_tools, construct_direction_potential,
+        math_tools = [get_expert_contract, get_function_catalog, prepare_function_synthesis, record_function_derivation, read_workflow_reference, read_expert_workspace, *temporal_tools, construct_direction_potential,
                                compare_constructed_architectures, derive_allocation_operator, inspect_biophysical_context, list_measurement_references, inspect_measurement, inspect_measurements,
                                search_direction_knowledge, inspect_direction_functions, service.tool_for('mathematics'),
                                request_biology_revision, stage_mathematical_direction, test_staged_mathematical_design,
@@ -463,9 +538,11 @@ def run_experts(runtime, state):
         if len(targets)==1:
             math_tools.append(test_mathematical_design)
         invoke('mathematics', math_tools,
-               {'biology_plan':biology, 'report':bounded_values(report), 'model_dynamics':state['model_dynamics'],
-                'task_context':deepcopy(state.get('monitor_event', {})),
-                'current_state':current, 'goal_pools':pools,
+               {'biology_plan':biology, 'model_dynamics':state['model_dynamics'],
+                'task_context':task_context(state.get('monitor_event')),
+                'current_state':current, 'goal_index':goal_index(biology),
+                'rank_allocation':{'default_decay':runtime.config.thinker.rank_decay,
+                    'meaning':'Ordinal preference scaling; provide explicit priority_weights to override after response analysis.'},
                 'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'synthesis_workspace':SYNTHESIS_GUIDE,
                 'function_derivation':MATH_GUIDE, 'biology_decisions':deepcopy(workspace['decisions']['biology']),
@@ -476,6 +553,8 @@ def run_experts(runtime, state):
                       research_packets=deepcopy(state['research_packets']), goal_pools=deepcopy(pools))
         if 'revision' in math_result:
             feedback = math_result['revision']
+            carried_drafts = deepcopy(staged_directions)
+            carried_biology = {d['direction_id']:deepcopy(d) for d in biology['directions']}
             if discussion == runtime.config.thinker.max_discussions:
                 return {'deferral':{'status':'design_only', 'reason':'Expert discussion budget exhausted', 'revision':feedback}}
             continue

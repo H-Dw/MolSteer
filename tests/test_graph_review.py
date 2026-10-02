@@ -150,10 +150,11 @@ def test_live_mmff_receives_current_graph_not_source_graph():
     from molsteer.molexecutor.expert_reward import ExpertReward
     reward=ExpertReward.__new__(ExpertReward);reward.vocab=load_config();reward.uses_state_view=False
     observed=[]
-    def components(coordinates,molecules):
+    def components(coordinates,molecules,elements):
         observed.append(Chem.MolToSmiles(molecules['prediction']))
+        assert elements['prediction'] == [a.GetSymbol() for a in molecules['prediction'].GetAtoms()]
         return {'strain':coordinates['prediction'].sum()*0}
-    reward.evaluator=SimpleNamespace(mmff={'prediction':object()},
+    reward.evaluator=SimpleNamespace(mmff={'prediction':object()},dynamic_views=set(),
         directions=[{'observables':[{'view':'prediction'}]}],
         packet={'steering':{'coordinate_snapshots':{'prediction':{'atom_ids':[0,1,2]}}}},components=components)
     reward.components(molecule('CCC'));reward.components(molecule('COC'))

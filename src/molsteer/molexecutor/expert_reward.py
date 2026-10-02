@@ -17,13 +17,11 @@ class ExpertReward(MolecularReward):
         self.spec=program
         self.evaluator=ExpertEvaluator(program['expert_spec'],program['source_packet'])
         self.uses_state_view=any(o['view']=='state' for d in self.evaluator.directions for o in d['observables'])
-        self.uses_state_graph='state' in self.evaluator.mmff
+        self.uses_state_graph='state' in self.evaluator.mmff or 'state' in self.evaluator.dynamic_views
         self.control_diagnostics={};self.component_gradients=None
         self.reference_policy=program['expert_spec']['mathematical_design'].get('design_audit', {}).get('graph_policy')
 
     def components(self,pred,state_coords=None,state_graph=None):
-        if getattr(self, 'reference_policy', None) == 'suspend_on_graph_change' and self.graph(pred) != self.graph(self.p0):
-            raise ValueError('reward_reference_graph_changed_guidance_suspended')
         if self.uses_state_view and state_coords is None:
             raise ValueError('Expert expressions require live state-world coordinates')
         coordinates={'prediction':pred['coords'],'state':state_coords}
@@ -31,13 +29,17 @@ class ExpertReward(MolecularReward):
             ids=self.evaluator.packet['steering']['coordinate_snapshots'][view]['atom_ids']
             if coordinates[view].shape!=(len(ids),3):
                 raise ValueError('Expert coordinate slot count changed; explicit mapping required')
-        molecules={}
-        for view in self.evaluator.mmff:
+        molecules={}; elements={}
+        for view in set(self.evaluator.mmff) | self.evaluator.dynamic_views:
             if view=='state' and state_graph is None:
                 raise ValueError('Live state categories are required for MMFF')
             current=pred if view=='prediction' else dict(state_graph,coords=state_coords)
-            molecules[view]=decode_endpoint(current,self.vocab)
-        return self.evaluator.components(coordinates,molecules=molecules)
+            elements[view] = [self.vocab['atomic_tokens'][i] for i in current['atomics'].detach().argmax(-1).cpu().tolist()]
+            try:
+                molecules[view]=decode_endpoint(current,self.vocab)
+            except ValueError:
+                molecules[view]=None
+        return self.evaluator.components(coordinates,molecules=molecules,elements=elements)
 
     def evaluate(self,pred,state_coords=None,state_graph=None):
         values=self.components(pred,state_coords,state_graph)
@@ -45,11 +47,15 @@ class ExpertReward(MolecularReward):
         return reward,{'components':{k:float(v.detach()) for k,v in values.items()},
                        'control_mode':self.evaluator.strategy['mode'],
                        'scalar_is_reporting_only':self.evaluator.strategy['mode']=='common_descent',
-                       'chemical_applicability': self.reference_policy or 'Coordinate expressions evaluated; semantic review belongs to MolMonitor'}
+                       'chemical_applicability': 'Current-chemistry mechanism evaluation; whole-graph identity is not an activation condition',
+                       'reference_bindings':self.evaluator.reference_diagnostics,
+                       'unavailable_directions':self.evaluator.unavailable}
 
     def control_gradient(self,adapter,endpoint,x,mask):
         current=self.state_graph(adapter)
         values=self.components(endpoint,adapter.world_state_coordinates(x) if self.uses_state_view else None,current)
+        self.control_diagnostics={'reference_bindings':self.evaluator.reference_diagnostics,
+                                  'unavailable_directions':self.evaluator.unavailable}
         direction,self.component_gradients,self.control_diagnostics=control_direction(
             self.evaluator.objectives(values),x,mask,self.evaluator.strategy)
         self.potential_gradient=-direction
@@ -57,7 +63,10 @@ class ExpertReward(MolecularReward):
             raise ValueError('Expert control has no feasible nonzero direction: '+self.control_diagnostics['status'])
         value=-aggregate_objectives(self.evaluator.objectives(values),self.evaluator.strategy)
         return direction,value,{'components':{k:float(v.detach()) for k,v in values.items()},
-                                'conflict':self.control_diagnostics}
+                                'conflict':self.control_diagnostics,
+                                'reference_bindings':self.evaluator.reference_diagnostics,
+                                'unavailable_directions':self.evaluator.unavailable,
+                                'priority_weights':self.evaluator.strategy.get('priority_weights',{})}
 
     def proposal_failures(self,adapter,candidate,base,state_coords,base_state,delta):
         failures=[]
@@ -68,10 +77,10 @@ class ExpertReward(MolecularReward):
         coords=adapter.world_state_coordinates(state_coords) if self.uses_state_view else None
         basecoords=adapter.world_state_coordinates(base_state) if self.uses_state_view else None
         values=self.components(candidate,coords,current);baseline=self.components(base,basecoords,current)
-        failures.extend('constraint:'+k for k in self.evaluator.constraints(values))
+        failures.extend('constraint:'+k for k in self.evaluator.constraints(values,baseline))
         if self.evaluator.strategy['mode']=='common_descent':
             failures.extend('objective_regression:'+k for k in self.evaluator.objectives(values)
-                            if float(values[k])>float(baseline[k])+1e-7)
+                            if k in baseline and float(values[k])>float(baseline[k])+1e-7)
         return failures
 
     def state_graph(self,adapter):

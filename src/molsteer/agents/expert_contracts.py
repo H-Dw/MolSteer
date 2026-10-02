@@ -16,7 +16,9 @@ from molsteer.molthinker.expressions import validate_expression, validate_observ
 
 class BiologyDirection(StrictModel):
     direction_id: str = Field(min_length=1, max_length=100)
-    rank: int = Field(ge=1, description='Stable handoff order; scientific priority can be qualitative/conditional and is not a reward coefficient')
+    rank: int = Field(ge=1, description='Value priority: lower ranks deserve earlier/stronger attention after raw trajectory, controllability, dependencies and tradeoffs are considered')
+    value_assessment: dict = Field(default_factory=dict,
+        description='Public rationale: raw trajectory references, persistence/retyping/late repair, plausible benefit, native-evolution risk, controllability, dependency and uncertainty; no invented intervention gains')
     finding_ids: list[str] = Field(description='Diagnostic finding IDs, or [] for a separate measured preservation/task direction')
     evidence_ids: list[str] = Field(min_length=1)
     mechanism: str = Field(min_length=12)
@@ -89,6 +91,7 @@ class MathematicalDirection(StrictModel):
     shape_probes: list[ShapeProbe] = Field(default_factory=list, max_length=12)
     predicate_coverage: list[PredicateCoverage] = Field(default_factory=list, max_length=32,
         description='When audit_required, map every biological repair_clauses ID to actual expression observables. Missing/unsupported clauses require design_only or request_biology_revision. No unstated host gates exist.')
+    constraint_mode: Literal['absolute', 'native_nonincrease'] = 'absolute'
 
 
 class MathematicalDesign(StrictModel):
@@ -142,6 +145,8 @@ def validate_biology(plan, report, packet=None, *, require_audit=False):
             validate_predicate_claims(direction,['directions',direction_index,'repair_clauses'])
         if not clauses:
             direction.pop('repair_clauses')
+        if not direction['value_assessment']:
+            direction.pop('value_assessment')
         covered |= fs
     if covered != set(findings):
         raise ValueError('Every diagnostic finding requires an explicit disposition')
@@ -160,8 +165,10 @@ def _formula_layout(text):
     return re.sub(r'\$[^$]*\$', lambda match: re.sub(r'\s+', '', match.group()), text)
 
 
-def validate_math(design, biology, packet, retrievals, sources, *, report=None, require_audit=False):
+def validate_math(design, biology, packet, retrievals, sources, *, report=None, require_audit=False, rank_decay=0.5):
     value = MathematicalDesign.model_validate(design).model_dump()
+    from .priority import allocate_priorities
+    value = allocate_priorities(value, biology, rank_decay)
     targets = {d['direction_id']: d for d in selected_directions(biology)}
     ids = [d['direction_id'] for d in value['directions']]
     if len(ids) != len(set(ids)) or set(ids) != set(targets):
@@ -217,7 +224,7 @@ def validate_math(design, biology, packet, retrievals, sources, *, report=None, 
             raise ValueError('Deferred designs must explain missing requirements')
     active = [d for d in value['directions'] if targets[d['direction_id']]['disposition'] == 'optimize' and d['status'] == 'executable']
     strategy = value['strategy']
-    if set(strategy) != {'mode', 'aggregation', 'justification'} or len(str(strategy['justification'])) < 12:
+    if set(strategy) - {'mode', 'aggregation', 'justification', 'priority_weights', 'priority_basis'} or not {'mode','aggregation','justification'} <= set(strategy) or len(str(strategy['justification'])) < 12:
         raise ValueError('Strategy needs mode, aggregation and scientific justification')
     if strategy['mode'] == 'design_only':
         if strategy['aggregation'] is not None:
@@ -227,7 +234,7 @@ def validate_math(design, biology, packet, retrievals, sources, *, report=None, 
             raise ValueError('Common descent has no scalarization weights or aggregation')
     elif strategy['mode'] == 'scalar_potential':
         agg = strategy['aggregation']
-        if not isinstance(agg, dict) or agg.get('op') not in ('single', 'maximum', 'lp_norm'):
+        if not isinstance(agg, dict) or agg.get('op') not in ('single', 'maximum', 'lp_norm', 'weighted_sum'):
             raise ValueError('Flat weighted sums are not an expert control strategy')
         if agg['op'] == 'lp_norm':
             if set(agg) != {'op', 'p'} or type(agg['p']) not in (int, float) or not 1 < agg['p'] <= 8:
@@ -246,6 +253,8 @@ def validate_math(design, biology, packet, retrievals, sources, *, report=None, 
         for field in ('source_transform', 'function_basis', 'reference_parameters', 'shape_probes', 'predicate_coverage'):
             if not direction[field]:
                 direction.pop(field)
+        if direction['constraint_mode'] == 'absolute':
+            direction.pop('constraint_mode')
     return value
 
 

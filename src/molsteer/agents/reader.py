@@ -39,6 +39,11 @@ def reader_tools(packet: dict, supplied_report: dict | None = None, *, raw_refer
     validate_packet(packet); frozen = deepcopy(packet); result = {}; observed_paths = set()
     raw_context = bound_raw_context(raw_reference_context, frozen)
     result['raw_reference_context'] = deepcopy(raw_context)
+    result['raw_reference_analysis'] = {
+        'node_diagnostics': deepcopy(raw_context.get('node_diagnostics', [])),
+        'trajectory_index': [{k: deepcopy(t[k]) for k in ('track_id', 'metric_id', 'view', 'atom_ids',
+            'classification', 'current_condition_trajectory') if k in t} for t in raw_context.get('risk_tracks', [])],
+        'interpretation': 'Host-read diagnostics at every configured node; expert interpretations can extend these observations.'}
     def metrics(path):
         observed_paths.add(path)
         groups = {"geometry": {"bond_lengths", "bond_angles", "mmff_local_geometry", "protein_clashes", "intramolecular_clashes"}, "chemistry": {"chemical_validity", "valence", "atom_inventory", "formal_charge", "connectivity", "chemistry_context", "structural_alerts", "mmff_strain", "posebusters"}}

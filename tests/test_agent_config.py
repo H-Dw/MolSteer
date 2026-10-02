@@ -115,9 +115,11 @@ def test_openrouter_recursive_tools_bind_without_missing_refs_or_schema_expansio
         design=schema['properties']['design']
         if 'anyOf' in design:design=next(x for x in design['anyOf'] if x.get('type')=='object')
         expression=design['properties']['directions']['items']['properties']['expression']['anyOf'][0]
-        binary=next(x for x in expression['oneOf'] if 'maximum' in x['properties']['op'].get('enum',[]))
+        binary=next(x for x in expression['oneOf'] if 'divide' in x['properties']['op'].get('enum',[]))
         assert binary['properties']['args']['maxItems']==2
         assert 'constant' in binary['properties']['args']['items']['properties']['op']['enum']
+        associative=next(x for x in expression['oneOf'] if 'maximum' in x['properties']['op'].get('enum',[]))
+        assert associative['properties']['args']['maxItems']==32
         def inspect(node):
             if isinstance(node,dict):
                 assert '$ref' not in node and '$defs' not in node

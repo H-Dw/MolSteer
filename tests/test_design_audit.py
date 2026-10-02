@@ -321,7 +321,7 @@ def test_fake_observed_tolerance_is_rejected(case):
     with pytest.raises(ValueError,match='occur in their cited evidence'):check(value)
 
 
-def test_chemical_reference_requires_an_applicability_guard(case):
+def test_chemical_reference_does_not_require_initial_graph_identity(case):
     value=audited(case)
     value[3]['design_audit']['graph_policy']='graph_independent'
     parameter=value[3]['directions'][0]['reference_parameters'][0]
@@ -329,7 +329,7 @@ def test_chemical_reference_requires_an_applicability_guard(case):
     chemical_evidence=next(e['evidence_id'] for m in packet['observations']
         if m['metric_id']=='bond_lengths' for e in m.get('evidence', []))
     parameter['evidence_ids']=[chemical_evidence]
-    with pytest.raises(ValueError,match='graph-change applicability guard'):check(value)
+    assert check(value)
 
 
 def test_shape_summary_must_match_the_executable_derivative(case):

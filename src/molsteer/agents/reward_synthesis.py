@@ -37,6 +37,7 @@ TRANSFER = {
     'S07': ('discrete_feasibility', 'Preserve checker and population roles. Discrete validity predicates need proposal/search paths, not coordinate derivatives.')}
 
 SHAPES = {
+    'current_reference_quadratic': (['scale'], ['G01', 'G02', 'P01']),
     'interval_linear': (['lower', 'upper', 'scale'], ['G01']),
     'interval_quadratic': (['lower', 'upper', 'scale'], ['G01']),
     'lower_linear': (['lower', 'scale'], ['G01', 'G02']),
@@ -50,7 +51,7 @@ SHAPES = {
     'signed_margin': (['sign', 'margin', 'scale'], ['G05'])}
 
 SYNTHESIS_GUIDE = {
-    'workflow': ['Read the biological scientific goals, preservation and current-state mechanisms.',
+    'workflow': ['Read ranked biological goals, their full configured raw trajectories, preservation and mechanism dependencies.',
         'Inspect source mechanisms, identify what transfers and what must change.',
         'Determine target sets or justified optimization relations and explicit unknown parameters.',
         'Derive local response (direction, active/stopping regions, curvature and coupling) before selecting construction operators.',
@@ -67,7 +68,8 @@ SYNTHESIS_GUIDE = {
         'shape': 'one shape name', 'parameters': 'map from parameter names to records above',
         'clause_ids': 'biological clauses this relation actually implements'},
     'within_direction': 'single / maximum / sum. sum is a derived sum of nonnegative relation deficits with intersection zero set, not fixed competing objective weights. Explain response allocation.',
-    'allocation_tool': 'derive_allocation_operator solves a norm exponent from a desired marginal-pressure ratio at two positive dimensionless deficits; it does not infer importance or choose a default exponent.',
+    'allocation_tool': 'priority_weights carries value ranking into weighted_sum/maximum/lp_norm; common_descent projects the weighted preferred gradient onto common non-ascent directions. Default rank_decay is a configurable ordinal preference, not measured efficacy. derive_allocation_operator can additionally derive a norm exponent from a desired marginal response.',
+    'dynamic_relations': 'Use current_reference_quadratic with bond_length_error, bond_angle_error or typed_steric_overlap. The evaluator resolves current chemistry; only normalization is supplied as a constant. Whole-graph identity is not an activation condition.',
     'construction_scope': 'Host serializes the expert-selected mathematical construction; generated probes describe that construction, not biological calibration.',
     'scope': 'Draft assistance; no automatic objective selection, missing-data substitution or new submission gate.'}
 
@@ -167,7 +169,15 @@ def _build_relation(relation, source):
     scale = c('scale')
     name = obs['observable_id']
     number = lambda key: str(params[key]['value'])
-    if shape.startswith('interval'):
+    if shape == 'current_reference_quadratic':
+        if kind not in ('bond_length_error', 'bond_angle_error', 'typed_steric_overlap'):
+            raise ValueError('current_reference_kind')
+        deficit = _op('divide', z, scale)
+        zero, base = f'{name} = 0 under its current chemical reference', 0.
+        samples = ([params['scale']['value'], 2*params['scale']['value']] if kind == 'typed_steric_overlap'
+                   else [-params['scale']['value'], params['scale']['value']])
+        formula = f'{name}(X,current_chemistry)/{number("scale")}'
+    elif shape.startswith('interval'):
         deficit = _op('divide', _op('add', _op('relu', _op('subtract', c('lower'), z)),
                       _op('relu', _op('subtract', z, c('upper')))), scale)
         zero = f'{params["lower"]["value"]} <= {obs["observable_id"]} <= {params["upper"]["value"]} {unit}'
@@ -250,6 +260,7 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
         'physical_domain': 'Choose attainable target/probe values in the observable domain; negative distances and vacuous one-sided sets cannot demonstrate a meaningful repair.',
         'duplicate_observable': 'Consolidate repeated observables into one relation or use a custom draft to model coupled terms.',
         'operator': 'Choose single for one relation, maximum for worst violation, or sum for intersection deficits and explain allocation.'}
+    hints['current_reference_kind'] = 'Use bond_length_error, bond_angle_error or typed_steric_overlap for current_reference_quadratic.'
     try:
         if not isinstance(relations, list) or not 1 <= len(relations) <= 5:
             return {'status': 'needs_input', 'blocking': False, 'hint': 'Supply 1-5 relations per direction; larger/custom constructions can use the existing expression draft tools.'}
@@ -334,7 +345,7 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
                 decision='selected', reason=x['adaptation'], missing_requirements=[]) for x in lineage],
             reference_parameters=list(parameters.values()), shape_probes=probes,
             predicate_coverage=[dict(clause_id=k, observable_ids=v, implementation='The constructed expression contains these measured relation deficits; review their target sets against the biological clause.') for k, v in coverage.items()])
-        narrative = {'derivation_summary', 'assumptions', 'alternatives', 'normalization', 'marginal_sensitivity', 'failure_mode'}
+        narrative = {'derivation_summary', 'assumptions', 'alternatives', 'normalization', 'marginal_sensitivity', 'failure_mode', 'constraint_mode'}
         if interpretation:
             draft.update({k: deepcopy(v) for k, v in interpretation.items() if k in narrative})
         return {'status': 'draft_only', 'blocking': False, 'validated': False, 'direction': draft,
@@ -369,14 +380,14 @@ def preview_architectures(packet, biology, drafts, dynamics, strategies):
         previews = []
         for strategy in strategies:
             try:
-                if set(strategy) != {'mode', 'aggregation', 'justification'}:
+                if set(strategy) - {'mode', 'aggregation', 'justification', 'priority_weights', 'priority_basis'}:
                     raise ValueError('strategy')
                 if strategy['mode'] not in ('scalar_potential', 'common_descent'):
                     raise ValueError('strategy')
                 agg = strategy['aggregation']
                 if strategy['mode'] == 'common_descent' and agg is not None:
                     raise ValueError('strategy')
-                if strategy['mode'] == 'scalar_potential' and (not isinstance(agg, dict) or agg.get('op') not in ('single', 'maximum', 'lp_norm') or
+                if strategy['mode'] == 'scalar_potential' and (not isinstance(agg, dict) or agg.get('op') not in ('single', 'maximum', 'lp_norm', 'weighted_sum') or
                     (agg.get('op') == 'single' and len(objectives) != 1) or
                     (agg.get('op') == 'lp_norm' and (type(agg.get('p')) not in (int, float) or not 1 < agg['p'] <= 8))):
                     raise ValueError('strategy')

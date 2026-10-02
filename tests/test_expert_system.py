@@ -469,7 +469,7 @@ def test_mmff_observable_envelope_derivative():
     assert float(gradient[2,0])==pytest.approx(float(finite.detach()),abs=.02)
     assert (original==mol.GetConformer().GetPositions()).all()
     assert fn(x-.0001*gradient)<value
-    with pytest.raises(ValueError,match='validated stable graph'):
+    with pytest.raises(ValueError,match='current typed chemistry'):
         observable_value(obs,x,[0,1,2],{})
 
 
@@ -543,15 +543,14 @@ def test_compiled_expert_reward_binds_live_graph_and_formula(case):
     direction,_,_=reward.control_gradient(SimpleNamespace(),live,x,torch.ones_like(x))
     direct=torch.autograd.grad(reward.evaluate(live)[0],x)[0]
     assert torch.allclose(direction,direct)
-    # Pure coordinate expressions remain mathematically evaluable after any
-    # categorical change; semantic review is routed through MolMonitor.
+    # Coordinate expressions do not acquire a whole-graph identity requirement.
     for key in ('atomics','charges','bonds'):
         changed=dict(pred,**{key:pred[key].roll(1,-1)})
         changed_value,_=reward.evaluate(changed)
         assert float(changed_value)==pytest.approx(float(value))
     reward.reference_policy='suspend_on_graph_change'
-    with pytest.raises(ValueError,match='reference_graph_changed'):
-        reward.evaluate(dict(pred,atomics=pred['atomics'].roll(1,-1)))
+    changed_value,_=reward.evaluate(dict(pred,atomics=pred['atomics'].roll(1,-1)))
+    assert float(changed_value)==pytest.approx(float(value))
     reward.reference_policy=None
     with pytest.raises(ValueError,match='slot count'):
         reward.evaluate(dict(pred,coords=pred['coords'][:-1]))

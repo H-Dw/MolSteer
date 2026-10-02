@@ -10,7 +10,7 @@ FACTORS = ('bond_geometry', 'angle_torsion_stereochemistry', 'intramolecular_sta
 
 class RepairClause(StrictModel):
     clause_id: str = Field(min_length=1, max_length=100)
-    observable_kind: Literal['distance', 'receptor_distance', 'angle', 'dihedral',
+    observable_kind: Literal['distance', 'receptor_distance', 'bond_length_error', 'bond_angle_error', 'typed_steric_overlap', 'angle', 'dihedral',
         'signed_volume', 'mmff_strain', 'direction_alignment', 'anchor_offset',
         'whole_clash_screen', 'contact_count', 'contact_fraction', 'burial_sasa',
         'categorical_identity', 'terminal_oracle']
@@ -78,7 +78,8 @@ class ArchitectureCandidate(StrictModel):
 
 class ArchitectureAudit(StrictModel):
     execution_scope: Literal['calibrated_repair', 'bounded_hypothesis_pilot']
-    graph_policy: Literal['suspend_on_graph_change', 'graph_independent']
+    graph_policy: Literal['current_chemistry', 'graph_independent', 'suspend_on_graph_change'] = Field(default='current_chemistry',
+        description='Current chemistry rebinds mechanism parameters. Legacy suspend_on_graph_change is readable but no longer suspends the entire reward.')
     architectures: list[ArchitectureCandidate] = Field(min_length=1, max_length=8)
     selection_reason: str = Field(min_length=12)
     unsupported_claims: list[str]

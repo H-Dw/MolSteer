@@ -261,6 +261,40 @@ def _clearance_covered(metric, refs, evidence):
     return not _atoms(evidence) and bool(values)
 
 
+def _current_condition(metric, refs, evidence, local_flags, chemical, atom_ids):
+    """Interpret a node's own complete screens, without requiring old references.
+
+    Removed relations are inapplicable rather than repaired. Complete valence or
+    probability screens can clear a local alert even when no outlier row remains.
+    """
+    if not metric or metric['status'] not in ('ok', 'partial'):
+        return 'unavailable'
+    if local_flags:
+        return 'flagged'
+    if _clearance_covered(metric, refs, evidence):
+        return 'not_flagged'
+    name, values, atoms = metric['metric_id'], metric['values'], _atoms(evidence)
+    if metric['status'] == 'ok':
+        if name == 'valence' and values.get('sanitized') is True and set(atoms) <= {
+                r['atom_id'] for r in values.get('explicit_bond_order_sum', [])}:
+            return 'not_flagged'
+        if name in ('atom_confidence', 'charge_confidence', 'bond_confidence'):
+            n = len(atom_ids)
+            expected = n*(n-1)//2 if name == 'bond_confidence' else n
+            if (set(atoms) <= set(atom_ids) and values.get('row_count') == expected and
+                    values.get('low_confidence_count') == len(metric.get('evidence', []))):
+                return 'not_flagged'
+    bonded = (name == 'bond_lengths' and len(atoms) == 2 or name == 'mmff_local_geometry'
+              and evidence.get('kind') in ('bond_length', 'bond_angle'))
+    if bonded and chemical.get('status') == 'ok':
+        chem = chemical['values']
+        if set(atoms) <= {a['atom_id'] for a in chem.get('atoms', [])}:
+            edges = {frozenset(b['atom_ids']) for b in chem.get('bonds', []) if b.get('bond_order', 0) > 0}
+            if any(frozenset(pair) not in edges for pair in zip(atoms, atoms[1:])):
+                return 'relation_absent'
+    return 'local_coverage_unavailable'
+
+
 def _value_path(values, path):
     for key in path:
         if not isinstance(values, dict) or key not in values:
@@ -301,7 +335,7 @@ def compare_raw_nodes(packet, nodes, config):
     selected_factors = config.factors or list(FACTOR_METRICS)
     factor_of = {metric: [f for f in selected_factors if metric in FACTOR_METRICS[f]]
                  for metric in set().union(*(FACTOR_METRICS[f] for f in selected_factors))}
-    context.update(nodes=[], reference_index={}, risk_tracks=[], regional_changes=[],
+    context.update(nodes=[], reference_index={}, risk_tracks=[], regional_changes=[], node_diagnostics=[],
                    outcome_trends=[], opportunities=[], factor_coverage={f: [] for f in selected_factors},
                    selection=config.model_dump(mode='json'))
     cache, facts = {}, {}
@@ -334,6 +368,16 @@ def compare_raw_nodes(packet, nodes, config):
                 for factor in factor_of.get(name, []):
                     context['factor_coverage'][factor].append(dict(node_id=node['node_id'], metric_id=name, view=view,
                                                                   status=metric['status'], reference_id=ref_id))
+            # Diagnose each saved node on its OWN chemistry. Origin comparability
+            # below remains separate from whether the later molecule is defective.
+            for view in config.views:
+                for factor in selected_factors:
+                    panel = [m for (name, v), m in metrics.items() if v == view and factor in factor_of.get(name, [])]
+                    context['node_diagnostics'].append(dict(node_id=node['node_id'], time=node['time'],
+                        view=view, factors=[factor], factor=factor,
+                        measured_metrics=[m['metric_id'] for m in panel if m['status'] in ('ok', 'partial')],
+                        unavailable_metrics=[m['metric_id'] for m in panel if m['status'] not in ('ok', 'partial')],
+                        flagged_evidence_count=sum(len(m['evidence']) for m in panel if m['status'] in ('ok', 'partial'))))
         context['nodes'].append(public)
 
     anchor = nodes[0]
@@ -364,6 +408,18 @@ def compare_raw_nodes(packet, nodes, config):
                 status = 'flagged' if flags else ('not_flagged' if _clearance_covered(metric, cached['refs'], evidence) else 'local_coverage_unavailable')
             obs = dict(node_id=node['node_id'], time=node['time'], status=status, observed_flag=bool(flags),
                        reference_ids=[reference(node, e) for e in flags])
+            local_flags = [e for e in (metric or {}).get('evidence', []) if
+                (not atoms or _location(e, name in PLANAR_METRICS) == _location(evidence, name in PLANAR_METRICS))]
+            chemical = cached.get('metrics', {}).get(('chemistry_context', view), {})
+            ids = node['packet']['representations'].get(view, {}).get('original_atom_ids', []) if node['packet'] else []
+            obs['current_condition_status'] = _current_condition(metric, cached.get('refs', {}), evidence, local_flags, chemical, ids)
+            obs['current_condition_reference_ids'] = [reference(node, e) for e in local_flags]
+            obs['current_reference_parameters'] = [{k: deepcopy(r['values'][k]) for k in REFERENCE_FIELDS if k in r['values']}
+                                                   for r in supporting]
+            if node['packet']:
+                chem = cached.get('metrics', {}).get(('chemistry_context', view), {}).get('values', {})
+                obs['current_atom_types'] = [{k: a.get(k) for k in ('atom_id', 'element', 'formal_charge', 'hybridization')}
+                                            for a in chem.get('atoms', []) if a['atom_id'] in atoms]
             if metric:
                 obs['measurement_reference_ids'] = [reference(node, r) for r in supporting]
                 if node['role'] == 'anchor':
@@ -391,6 +447,7 @@ def compare_raw_nodes(packet, nodes, config):
         else:
             classification = 'persistence_observed_in_suffix' if all(s == 'flagged' for s in statuses) else 'unresolved_measurement_or_definition_change'
         track['classification'] = classification
+        track['current_condition_trajectory'] = _condition_trajectory(track['observations'], nodes)
         context['risk_tracks'].append(track)
         if 'persistent_defects' in config.analyses and classification in ('persistent_through_raw_final', 'flagged_at_raw_final_with_gaps_or_recurrence'):
             context['opportunities'].append(_opportunity('additional_repair_assessment', track,
@@ -398,6 +455,10 @@ def compare_raw_nodes(packet, nodes, config):
         if 'late_repair' in config.analyses and statuses[0] == 'flagged' and clear and classification != 'chemical_retyped_or_graph_changed':
             context['opportunities'].append(_opportunity('earlier_repair_assessment', track,
                 'Assess whether earlier intervention helps or disrupts a raw repair already observed. Timing is bracketed by sampled nodes; recurrence and unknown intervals remain visible.'))
+        if classification == 'chemical_retyped_or_graph_changed':
+            context['opportunities'].append(_opportunity('chemical_transition_assessment', track,
+                'The original chemical hypothesis changed. Inspect current_condition_trajectory and typed references: '
+                'does a defect remain in the later chemistry, or would enforcing the old target oppose native evolution?'))
 
     # Global trends: configuration supplies meaning/units of a favorable direction.
     improved_nodes = {}
@@ -488,6 +549,41 @@ def compare_raw_nodes(packet, nodes, config):
     return context
 
 
+def _condition_trajectory(observations, nodes):
+    """Describe actual per-node screens without calling retyping an old-object repair."""
+    states = [o['current_condition_status'] for o in observations]
+    terminal = next((i for i, n in enumerate(nodes) if n['role'] == 'final'), None)
+    clear = next((i for i, s in enumerate(states[1:], 1) if s == 'not_flagged'), None)
+    return dict(anchor_status=states[0], final_status=states[terminal] if terminal is not None else 'not_observed',
+        final_node_id=nodes[terminal]['node_id'] if terminal is not None else None,
+        sampled_flagged_nodes=[o['node_id'] for o in observations if o['current_condition_status'] == 'flagged'],
+        sampled_clear_nodes=[o['node_id'] for o in observations if o['current_condition_status'] == 'not_flagged'],
+        inapplicable_relation_nodes=[o['node_id'] for o in observations if o['current_condition_status'] == 'relation_absent'],
+        first_clear_node_id=nodes[clear]['node_id'] if clear is not None else None,
+        recurrent_after_clearance=bool(clear is not None and 'flagged' in states[clear+1:]),
+        unknown_nodes=[o['node_id'] for o in observations if o['current_condition_status'] not in ('flagged', 'not_flagged', 'relation_absent')],
+        chemical_transition_nodes=[o['node_id'] for o in observations if o['status'] == 'chemical_identity_changed'],
+        interpretation='Node-local diagnosis follows that node chemical interpretation; clearance after retyping is not repair of the original chemical object.')
+
+
+def inspect_goal_trajectory(context, *, atom_ids=None, evidence_ids=None, factor=None, offset=0, limit=8):
+    """Localize all selected times for a proposed mechanism; do not rank by alert count."""
+    atoms, evidence = set(atom_ids or []), set(evidence_ids or [])
+    tracks = [r for r in context.get('risk_tracks', []) if
+        (not atoms or atoms.intersection(r['atom_ids'])) and
+        (not evidence or evidence.intersection(r.get('current_evidence_ids', []) + r.get('current_measurement_ids', []))) and
+        (factor is None or factor in r['factors'])]
+    if type(offset) is not int or offset < 0 or type(limit) is not int or not 1 <= limit <= 32:
+        return dict(status='needs_input', blocking=False, hint='Use a nonnegative offset and a limit between 1 and 32.')
+    return dict(status=context['status'], comparison_id=context.get('comparison_id'),
+        tracks=deepcopy(tracks[offset:offset+limit]), total_count=len(tracks),
+        next_offset=offset+limit if offset+limit < len(tracks) else None,
+        outcome_trends=deepcopy(context.get('outcome_trends', [])),
+        regional_candidate_ids=[r['opportunity_id'] for r in context.get('opportunities', [])
+            if r['category'] == 'regional_enhancement_assessment' and (not atoms or atoms.intersection(r['atom_ids']))],
+        interpretation='Raw outcomes are observed; intervention value is an expert hypothesis requiring mechanism, controllability and tradeoff reasoning.')
+
+
 def _group_regional_opportunities(opportunities):
     """Collate identical atom support for display, without claiming a shared cause."""
     output, regions = [], {}
@@ -533,12 +629,15 @@ def raw_reference_summary(context):
     result['risk_classifications'] = dict(Counter(r['classification'] for r in context.get('risk_tracks', [])))
     result['opportunity_categories'] = dict(Counter(r['category'] for r in context.get('opportunities', [])))
     result['counts'] = {key: len(context.get(key, [])) for key in ('risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities')}
+    result['node_diagnostics'] = deepcopy(context.get('node_diagnostics', []))
+    result['current_final_statuses'] = dict(Counter(r.get('current_condition_trajectory', {}).get('final_status', 'unknown')
+                                                   for r in context.get('risk_tracks', [])))
     from molsteer.agents.design_audit import bounded_values
     result['opportunity_previews'] = {category: [bounded_values(r, 3) for r in context.get('opportunities', []) if r['category'] == category][:3]
                                      for category in result['opportunity_categories']}
     result['preview_scope'] = 'Source-order bounded examples, not a ranking or scientific selection; use the paged tools for full records.'
     result['outcome_trends'] = deepcopy(context.get('outcome_trends', []))
-    result['tools'] = 'inspect_raw_comparison pages facts; read_raw_reference reads exact cross-time evidence. Current measurement IDs remain separate.'
+    result['tools'] = 'inspect_raw_goal_trajectory localizes all configured nodes for a candidate; inspect_raw_comparison pages facts; read_raw_reference reads exact evidence. Current measurement IDs remain separate.'
     return result
 
 
@@ -553,8 +652,8 @@ def bound_raw_context(context, packet):
 def inspect_comparison(context, section='summary', factor=None, view=None, offset=0, limit=8):
     if section == 'summary':
         return raw_reference_summary(context)
-    if section not in ('nodes', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'):
-        return dict(status='needs_input', blocking=False, sections=['summary', 'nodes', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'])
+    if section not in ('nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'):
+        return dict(status='needs_input', blocking=False, sections=['summary', 'nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'])
     if type(offset) is not int or offset < 0 or type(limit) is not int or not 1 <= limit <= 32:
         return dict(status='needs_input', blocking=False, hint='Use nonnegative offset and limit 1-32')
     if section == 'factor_coverage':

@@ -76,8 +76,11 @@ class AgentRuntime:
                        'Inspect geometry, chemistry and uncertainty via their separate tools. When configured raw references '
                        'are available, compare selected views, persistent/current and later-emerging risks, sampled repair '
                        'intervals, local contacts/burial/chemical evolution and configured affinity/SA/stability trends. '
-                       'Use inspect_raw_comparison and read_raw_reference for full facts as useful. Missing coverage is '
-                       'unknown; chemical retyping is not repair; global improvement does not prove a regional contribution. '
+                       'Use inspect_raw_goal_trajectory to trace candidate mechanisms across EVERY configured node, '
+                       'including current_condition_status, current typed references, recurrence and final diagnosis. '
+                       'Use inspect_raw_comparison and read_raw_reference for exact details. Missing coverage is '
+                       'unknown; distinguish retyping of an old object from validity of the later chemistry. An observed '
+                       'raw final is known even when intervention benefit is unknown. Global improvement does not prove regional contribution. '
                        'Optionally record_raw_reference_analysis with public interpretations and gaps. Keep DiagnosticReport '
                        'bound to the current state, then submit_diagnosis. No extra comparison-call gate.',lambda:'report' in result)
         state['diagnostic_report']=result['report']; state['route']='thinker'
