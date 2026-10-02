@@ -125,7 +125,9 @@ class ThinkerConfig(StrictModel):
     rank_decay: float = Field(default=0.5, gt=0, lt=1,
         description='Default preference ratio between ranked executable goals, overridable by expert weights; not estimated efficacy')
     history_max_chars: int = Field(default=32000, ge=2000)
-    history_recent_rounds: int = Field(default=2, ge=0, le=8)
+    # The character budget bounds retained history; larger expert workflows can
+    # explicitly retain more complete rounds without an unrelated count cap.
+    history_recent_rounds: int = Field(default=2, ge=0)
 
 
 class RawOutcomeMetric(StrictModel):

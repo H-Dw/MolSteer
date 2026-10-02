@@ -181,6 +181,28 @@ def test_compact_context_has_one_recovery_candidate_and_drops_full_mutation_argu
                                     include_feedback=False)['feedback']
 
 
+def test_configured_long_history_retains_source_rounds_under_character_budget():
+    cfg = load_config()
+    cfg.thinker.history_recent_rounds = 32
+    cfg.thinker.history_max_chars = 100000
+    messages = [SystemMessage(content='rules'), HumanMessage(content='context')]
+    for index in range(12):
+        call_id = f'source_{index}'
+        messages.extend([
+            AIMessage(content='', tool_calls=[dict(name='inspect_measurement', args={}, id=call_id)]),
+            ToolMessage(content=f'bound evidence {index}', tool_call_id=call_id, name='inspect_measurement'),
+        ])
+    compact = compact_history(messages, {}, max_chars=cfg.thinker.history_max_chars,
+                              recent_rounds=cfg.thinker.history_recent_rounds)
+    assert [m.tool_call_id for m in compact if isinstance(m, ToolMessage)] == [f'source_{i}' for i in range(12)]
+    cfg.thinker.history_max_chars = 2000
+    compact = compact_history(messages, {}, max_chars=cfg.thinker.history_max_chars,
+                              recent_rounds=cfg.thinker.history_recent_rounds)
+    calls = [c['id'] for m in compact for c in getattr(m, 'tool_calls', [])]
+    responses = [m.tool_call_id for m in compact if isinstance(m, ToolMessage)]
+    assert calls == responses and len(responses) < 12
+
+
 def test_mathematical_conflict_revisits_biology_and_invalidates_changed_draft(case):
     packet, report, biology, design, _ = case
     cfg = load_config(); cfg.thinker.require_design_audit = False; cfg.thinker.external_research = False
