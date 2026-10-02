@@ -39,7 +39,7 @@ class IncompleteStreamError(RuntimeError):
 def provider_tool_schema(schema):
     """Inline provider-facing fields with a bounded expression preview.
 
-    Full recursive validation stays in MathematicalDesign. Expanding all six
+    Full recursive validation stays in MathematicalDesign. Expanding all seven
     recursive alternatives creates a large tree; unresolved provider refs also
     caused JSON-encoded object arguments in real GLM tests. Nested expression
     objects advertise the common fields and grammar; their exact operator
@@ -47,7 +47,7 @@ def provider_tool_schema(schema):
     """
     definitions=schema.get('$defs',{})
     expression_names=('ObservableExpression','ConstantExpression','UnaryExpression',
-                      'PowerExpression','BinaryExpression','ReductionExpression')
+                      'PowerExpression','BinaryExpression','AssociativeExpression','ReductionExpression')
     expression_preview=None
     if all(name in definitions for name in expression_names):
         nested={'type':'object','properties':{
@@ -57,7 +57,7 @@ def provider_tool_schema(schema):
             'unit':deepcopy(definitions['ConstantExpression']['properties']['unit']),
             'origin':{'type':'string','minLength':5},'exponent':{'type':'number','minimum':.5,'maximum':8},
             'args':{'type':'array','items':{'type':'object'}}},'required':['op'],
-            'description':'Recursive expression: observable requires id; constant requires value/unit/origin; unary and power take 1 arg (power also exponent); binary takes 2; sum/mean take 1-32. Every nested node is strictly host-validated.'}
+            'description':'Recursive expression: observable requires id; constant requires value/unit/origin; unary and power take 1 arg (power also exponent); subtract/divide/periodic_difference take 2; add/multiply/maximum/minimum take 2-32; sum/mean take 1-32. Every nested node is strictly host-validated.'}
         variants=[deepcopy(definitions[name]) for name in expression_names]
         for variant in variants:
             if 'args' in variant['properties']:

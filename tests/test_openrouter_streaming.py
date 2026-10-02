@@ -102,3 +102,19 @@ def test_repeated_terminal_metadata_is_emitted_once(monkeypatch,async_mode,finis
     message=asyncio.run(model.ainvoke('test')) if async_mode else model.invoke('test')
     assert message.response_metadata['finish_reason']==finish
     assert message.response_metadata['model_name']=='z-ai/glm-5.3'
+
+
+def test_provider_schema_advertises_associative_operators_without_recursive_refs():
+    from molsteer.agents.expert_contracts import MathematicalDirection
+    from molsteer.agents.openrouter_transport import provider_tool_schema
+    schema=provider_tool_schema(MathematicalDirection.model_json_schema())
+    def nodes(value):
+        if isinstance(value,dict):
+            yield value
+            for item in value.values():yield from nodes(item)
+        elif isinstance(value,list):
+            for item in value:yield from nodes(item)
+    all_nodes=list(nodes(schema))
+    assert all('$ref' not in node for node in all_nodes)
+    variants=[node for node in all_nodes if set(node.get('properties',{}).get('op',{}).get('enum',[]))=={'add','multiply','maximum','minimum'}]
+    assert variants and all(node['properties']['args']['minItems']==2 and node['properties']['args']['maxItems']==32 for node in variants)
