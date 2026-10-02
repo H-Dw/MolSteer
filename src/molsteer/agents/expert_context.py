@@ -71,9 +71,6 @@ def compact_history(messages, memory, *, max_chars, recent_rounds):
     history = messages[2:]
     starts = [i for i, m in enumerate(history) if getattr(m, 'type', None) == 'ai']
     groups = [history[a:b] for a, b in zip(starts, starts[1:]+[len(history)])]
-    mutations = {'stage_mathematical_direction', 'construct_direction_potential', 'test_mathematical_design',
-                 'test_staged_mathematical_design', 'patch_and_test_mathematical_design'}
-    groups = [g for g in groups if not any(c.get('name') in mutations for c in getattr(g[0], 'tool_calls', []))]
     kept = groups[-recent_rounds:] if recent_rounds else []
     def size(groups):
         return sum(len(json.dumps(m.model_dump(), ensure_ascii=False, default=str)) for g in groups for m in g)

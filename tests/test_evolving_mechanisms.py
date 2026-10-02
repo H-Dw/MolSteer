@@ -149,7 +149,7 @@ def test_current_reference_shape_passes_existing_audit_without_graph_freeze(case
     assert trial['numerical_gradient']['passed']
 
 
-def test_compact_context_has_one_recovery_candidate_and_drops_full_mutation_arguments():
+def test_compact_context_has_one_recovery_candidate_and_drops_oversized_mutation_round():
     candidate = {'directions': [{'direction_id': 'a', 'formula': 'obsolete_expression'*1000}]}
     event = {'kind': 'recovery', 'recovery': {'previous_attempt': 3,
         'mathematical_direction_candidates': {'a': {'formula': 'older_expression'}}, 'full_model_authored_candidate': candidate}}
@@ -201,6 +201,26 @@ def test_configured_long_history_retains_source_rounds_under_character_budget():
     calls = [c['id'] for m in compact for c in getattr(m, 'tool_calls', [])]
     responses = [m.tool_call_id for m in compact if isinstance(m, ToolMessage)]
     assert calls == responses and len(responses) < 12
+
+
+def test_recent_draft_and_validation_rounds_survive_compaction_within_budget():
+    prefix = [SystemMessage(content='rules'), HumanMessage(content='context')]
+    staged = AIMessage(content='', tool_calls=[dict(name='stage_mathematical_direction',
+        args={'direction': {'direction_id': 'local', 'formula': 'current candidate'}}, id='stage')],
+        additional_kwargs={'reasoning_details': [{'type': 'reasoning.encrypted', 'data': 'provider_signature'}]})
+    tested = AIMessage(content='', tool_calls=[dict(name='test_staged_mathematical_design',
+        args={'strategy': {'mode': 'single'}}, id='test')])
+    messages = [*prefix, staged,
+        ToolMessage(content='draft_only; saved, not tested', tool_call_id='stage'),
+        tested, ToolMessage(content='specific numerical feedback', tool_call_id='test')]
+    compact = compact_history(messages, {'draft_index': {'local': 'current'}},
+                              max_chars=10000, recent_rounds=2)
+    assert compact[3] is staged and compact[5] is tested
+    assert [m.tool_call_id for m in compact if isinstance(m, ToolMessage)] == ['stage', 'test']
+    assert 'current candidate' in json.dumps([m.model_dump() for m in compact])
+    # A later budget reduction removes whole pairs; it never retains orphan replies.
+    compact = compact_history(compact, {}, max_chars=1, recent_rounds=2)
+    assert len(compact) == 3
 
 
 def test_mathematical_conflict_revisits_biology_and_invalidates_changed_draft(case):
