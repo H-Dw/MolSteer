@@ -31,8 +31,13 @@ class PowerExpression(StrictModel):
 
 
 class BinaryExpression(StrictModel):
-    op: Literal['add','subtract','multiply','divide','maximum','minimum','periodic_difference']
+    op: Literal['subtract','divide','periodic_difference']
     args: list['Expression'] = Field(min_length=2,max_length=2)
+
+
+class AssociativeExpression(StrictModel):
+    op: Literal['add','multiply','maximum','minimum']
+    args: list['Expression'] = Field(min_length=2,max_length=32)
 
 
 class ReductionExpression(StrictModel):
@@ -41,6 +46,6 @@ class ReductionExpression(StrictModel):
 
 
 Expression = Annotated[ObservableExpression | ConstantExpression | UnaryExpression |
-    PowerExpression | BinaryExpression | ReductionExpression, Field(discriminator='op')]
-for model in (UnaryExpression, PowerExpression, BinaryExpression, ReductionExpression):
+    PowerExpression | BinaryExpression | AssociativeExpression | ReductionExpression, Field(discriminator='op')]
+for model in (UnaryExpression, PowerExpression, BinaryExpression, AssociativeExpression, ReductionExpression):
     model.model_rebuild(_types_namespace={'Expression':Expression})

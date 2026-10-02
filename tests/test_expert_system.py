@@ -155,6 +155,34 @@ def test_required_deferred_direction_is_not_executable(case):
     assert spec is None and deferred['blocked_directions']==['repair']
 
 
+def test_derivative_failure_reports_component_and_cannot_be_submitted(case):
+    from molsteer.agents.executor import validate_and_test_reward,executor_tools,Executor
+    p,r,b,d,ret=copy.deepcopy(case)
+    obs=d['directions'][0]['observables'][0]
+    snapshot=p['steering']['coordinate_snapshots'][obs['view']]
+    coordinates=torch.tensor(snapshot['coords_angstrom'],dtype=torch.float64)
+    indices={ident:i for i,ident in enumerate(snapshot['atom_ids'])}
+    a,z=[coordinates[indices[ident]] for ident in obs['atom_ids']]
+    bound=float((a-z).norm())
+    d['directions'][0]['expression']=op('relu',op('divide',
+        op('subtract',const(bound,'angstrom'),{'op':'observable','id':obs['observable_id']}),const(1,'angstrom')))
+    spec,_=compile_expert_spec(p,r,b,d,[ret],ModelDynamicsContext().model_dump(),{})
+    validation=validate_and_test_reward(p,spec,r)
+    assert validation['passed'] is False and validation['status']=='needs_revision'
+    check=validation['trials'][0]['numerical_gradient']['components']['repair']
+    assert check['passed'] is False and check['maximum_absolute_error']>.1
+    tools,result=executor_tools(p,spec,r)
+    registry={tool.name:tool for tool in tools}
+    assert registry['test_reward_program'].invoke({})['passed'] is False
+    with pytest.raises(ValueError,match='must succeed'):
+        registry['submit_tested_program'].invoke({})
+    assert not result
+    called=[]
+    executor=Executor(inference_adapter=lambda **kwargs:called.append(kwargs),approve_inference=True)
+    assert executor.run(p,spec,report=r,request={'formal_inference':True})['passed'] is False
+    assert not called
+
+
 def test_explicit_coordinate_pilot_retains_unresolved_full_goals(case):
     p,r,b,d,ret=copy.deepcopy(case)
     unfinished=copy.deepcopy(b['directions'][0])

@@ -153,7 +153,11 @@ def run_expert_trial(packet, spec, iterations=3, strength=1.):
     initial = components(original)
     checks = {key:gradient_check(lambda x,k=key:components(x)[k], original) for key in initial}
     if not all(c['passed'] for c in checks.values()):
-        raise ValueError('Expert expression failed finite differences')
+        return {'numerical_gradient':{'passed':False,'components':checks},
+                'fixed_atoms_unchanged':True,'input_snapshot_unchanged':True,
+                'live_gradient':'not_run','full_sampler_ablation':'not_run',
+                'scope':'Failed coordinate-copy derivative check; no displacement attempted',
+                'revision_hint':'Inspect the failed components and their active/stopping regions. A linear hinge exactly at its reference has no classical derivative. Review target feasibility with biology; do not loosen numerical tolerances or claim live validation.'}
     current = original.clone(); rows = []
     for _ in range(iterations):
         variable = current.detach().requires_grad_(True)

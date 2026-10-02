@@ -104,6 +104,13 @@ def stage_direction_draft(staged, direction, selected_ids):
             'next_step': 'Stage all selected directions, then test_staged_mathematical_design. Nothing is executable before the complete design passes every check.'}
 
 
+def retain_proposed_directions(staged, design, selected_ids):
+    """Keep model edits through reassembly; draft retention never approves them."""
+    for direction in design.get('directions', []):
+        if isinstance(direction,dict) and direction.get('direction_id') in selected_ids:
+            staged[direction['direction_id']]=deepcopy(direction)
+
+
 def assemble_direction_drafts(staged, biology, metadata):
     if set(metadata) != {'strategy', 'conflict_assessment', 'independent_evaluation', 'design_audit'}:
         raise ValueError('Staged design metadata must contain only the four global design fields')

@@ -62,6 +62,21 @@ def test_audited_function_has_actual_zero_set_and_derivative_signs(case):
     assert result['design_audit']['execution_scope']=='bounded_hypothesis_pilot'
 
 
+def test_corrected_retrieval_survives_direction_reassembly(case):
+    from molsteer.agents.design_audit import stage_direction_draft,assemble_direction_drafts,retain_proposed_directions
+    p,r,b,d,ret=audited(case)
+    original=copy.deepcopy(d['directions'][0]);original['retrieval_ids']=['stale_retrieval']
+    staged={};stage_direction_draft(staged,original,{'repair'})
+    metadata={key:d[key] for key in ('strategy','conflict_assessment','independent_evaluation','design_audit')}
+    proposed=assemble_direction_drafts(staged,b,metadata)
+    edited=replace_draft_fields(proposed,[{'path':['directions',0,'retrieval_ids'],'value':[ret['retrieval_id']]}])
+    retain_proposed_directions(staged,edited,{'repair'})
+    rebuilt=assemble_direction_drafts(staged,b,metadata)
+    assert validate_math(rebuilt,b,p,[ret],{},report=r,require_audit=True)
+    assert original['retrieval_ids']==['stale_retrieval']
+    assert staged['repair'] is not edited['directions'][0]
+
+
 def test_clause_allows_additional_observable_evidence_without_losing_its_binding(case):
     value=audited(case)
     obs=value[3]['directions'][0]['observables'][0]
@@ -187,16 +202,52 @@ def test_model_tool_schema_has_recursive_operator_arity_and_constant_units():
     binary=defs['BinaryExpression']['properties']['args']
     assert binary['minItems']==binary['maxItems']==2
     assert defs['ConstantExpression']['properties']['unit']['enum']==['dimensionless','angstrom','angstrom^3','radian','degree','kcal/mol']
-    assert 'maximum' in defs['BinaryExpression']['properties']['op']['enum']
+    associative=defs['AssociativeExpression']['properties']['args']
+    assert associative['minItems']==2 and associative['maxItems']==32
+    assert 'maximum' in defs['AssociativeExpression']['properties']['op']['enum']
 
 
 def test_recursive_schema_error_path_is_a_real_json_path_for_draft_repair(case):
     from molsteer.agents.expert_contracts import MathematicalDesign
     design=copy.deepcopy(case[3]);node={'op':'constant','value':1,'unit':'dimensionless','origin':'test origin'}
-    design['directions'][0]['expression']={'op':'maximum','args':[node,node,node]}
+    design['directions'][0]['expression']={'op':'divide','args':[node,node,node]}
     with pytest.raises(ValueError) as error:MathematicalDesign.model_validate(design)
     assert _validation_feedback(error.value)['validation_errors']==[
         {'path':['directions',0,'expression','args'],'rule':'too_long'}]
+
+
+@pytest.mark.parametrize('operator,expected,derivatives',[
+    ('add',10.,[1.,1.,1.]),('multiply',30.,[15.,10.,6.]),
+    ('maximum',5.,[0.,0.,1.]),('minimum',2.,[1.,0.,0.])])
+def test_associative_expression_retains_every_operand_and_its_derivative(operator,expected,derivatives):
+    import torch
+    from pydantic import TypeAdapter
+    from molsteer.agents.expression_contracts import Expression
+    from molsteer.molthinker.expressions import validate_expression,evaluate_expression
+    nodes=[{'op':'observable','id':ident} for ident in ('a','b','c')]
+    expr=TypeAdapter(Expression).validate_python({'op':operator,'args':nodes}).model_dump()
+    validate_expression(expr,{ident:'dimensionless' for ident in ('a','b','c')})
+    values={ident:torch.tensor(v,dtype=torch.float64,requires_grad=True) for ident,v in zip(('a','b','c'),(2.,3.,5.))}
+    result=evaluate_expression(expr,values)
+    assert float(result.detach())==pytest.approx(expected)
+    assert [float(g) for g in torch.autograd.grad(result,tuple(values.values()))]==pytest.approx(derivatives)
+    with pytest.raises(ValueError,match='different physical dimensions'):
+        validate_expression({'op':'add','args':nodes},{'a':'angstrom','b':'angstrom','c':'dimensionless'})
+
+
+def test_associative_product_dimensions_and_extremum_tie_subgradient():
+    import torch
+    from molsteer.molthinker.expressions import validate_expression,evaluate_expression
+    nodes=[{'op':'observable','id':ident} for ident in ('a','b','c')]
+    normalized={'op':'divide','args':[{'op':'multiply','args':nodes},
+        {'op':'constant','value':2.,'unit':'angstrom^3','origin':'Synthetic volume normalization'}]}
+    validate_expression(normalized,{ident:'angstrom' for ident in ('a','b','c')})
+    values={ident:torch.tensor(v,dtype=torch.float64,requires_grad=True) for ident,v in zip(('a','b','c'),(2.,3.,5.))}
+    result=evaluate_expression(normalized,values)
+    assert float(result.detach())==pytest.approx(15.)
+    equal={ident:torch.tensor(2.,dtype=torch.float64,requires_grad=True) for ident in ('a','b','c')}
+    extremum=evaluate_expression({'op':'maximum','args':nodes},equal)
+    assert [float(g) for g in torch.autograd.grad(extremum,tuple(equal.values()))]==pytest.approx([1/3]*3)
 
 
 def test_nonalert_measurement_can_support_a_preservation_direction(case):

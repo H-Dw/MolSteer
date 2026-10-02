@@ -118,9 +118,10 @@ def validate_expression(tree, units):
                 raise ValueError('Constants need a finite value, unit and provenance')
             return UNITS[node['unit']]
         unary = {'relu', 'abs', 'sqrt', 'sin', 'cos', 'power'}
-        binary = {'add', 'subtract', 'multiply', 'divide', 'maximum', 'minimum', 'periodic_difference'}
+        binary = {'subtract', 'divide', 'periodic_difference'}
+        associative = {'add', 'multiply', 'maximum', 'minimum'}
         reduce = {'sum', 'mean'}
-        if op not in unary | binary | reduce:
+        if op not in unary | binary | associative | reduce:
             raise ValueError('Unsupported expression operator')
         required = {'op', 'args', 'exponent'} if op == 'power' else {'op', 'args'}
         args = node.get('args')
@@ -128,13 +129,15 @@ def validate_expression(tree, units):
             raise ValueError('Invalid operator fields or arguments')
         if op in unary and len(args) != 1 or op in binary and len(args) != 2:
             raise ValueError('Invalid operator arity')
+        if op in associative and len(args) < 2:
+            raise ValueError('Invalid operator arity')
         dims = [visit(a, depth+1) for a in args]
         if op in {'add', 'subtract', 'maximum', 'minimum', 'sum', 'mean'}:
             if any(d != dims[0] for d in dims):
                 raise ValueError('Cannot combine different physical dimensions')
             return dims[0]
         if op == 'multiply':
-            return tuple(a+b for a, b in zip(*dims))
+            return tuple(sum(axis) for axis in zip(*dims))
         if op == 'divide':
             return tuple(a-b for a, b in zip(*dims))
         if op in {'sin', 'cos', 'periodic_difference'}:
@@ -165,9 +168,9 @@ def evaluate_expression(tree, values):
             return template.new_tensor(value)
         args = [evaluate(x) for x in node['args']]
         x = args[0]
-        if op == 'add': result = x+args[1]
+        if op == 'add': result = torch.stack(args).sum()
         elif op == 'subtract': result = x-args[1]
-        elif op == 'multiply': result = x*args[1]
+        elif op == 'multiply': result = torch.stack(args).prod()
         elif op == 'divide':
             if abs(float(args[1].detach())) < 1e-12:
                 raise ValueError('Expression denominator is zero')
@@ -182,8 +185,8 @@ def evaluate_expression(tree, values):
         elif op == 'sin': result = x.sin()
         elif op == 'cos': result = x.cos()
         elif op == 'periodic_difference': result = torch.atan2((x-args[1]).sin(), (x-args[1]).cos())
-        elif op == 'maximum': result = torch.maximum(x, args[1])
-        elif op == 'minimum': result = torch.minimum(x, args[1])
+        elif op == 'maximum': result = torch.stack(args).amax()
+        elif op == 'minimum': result = torch.stack(args).amin()
         elif op == 'sum': result = torch.stack(args).sum()
         elif op == 'mean': result = torch.stack(args).mean()
         else: raise ValueError('Unsupported expression operator')

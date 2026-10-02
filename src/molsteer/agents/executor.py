@@ -16,6 +16,10 @@ def validate_and_test_reward(packet, spec, report=None, *, iterations=3, strengt
     if spec.get('schema_version')=='2.0.0':
         from molsteer.molexecutor.expert_control import run_expert_trial
         trial=run_expert_trial(packet,spec,iterations,strength)
+        if not trial['numerical_gradient']['passed']:
+            return dict(kind='RewardValidation',passed=False,reward_id=spec['reward_id'],
+                        trials=[trial],status='needs_revision',
+                        limitation='Coordinate-copy derivative failed; execution is not authorized')
         if not trial['fixed_atoms_unchanged'] or not trial['input_snapshot_unchanged']:
             raise ValueError('Expert control violated coordinate-copy boundaries')
         return dict(kind='RewardValidation',passed=True,reward_id=spec['reward_id'],trials=[trial],status='tested',
@@ -52,7 +56,10 @@ def executor_tools(packet,spec,report,*,strength=1.):
     def test_reward_program(iterations:int=3) -> dict:
         """Compile/evaluate the fixed specification and test finite-difference gradients, descent and immutability on coordinate copies."""
         validation=validate_and_test_reward(packet,spec,report,iterations=iterations,strength=strength)
-        tested['validation']=validation
+        if validation['passed']:
+            tested['validation']=validation
+        else:
+            tested.pop('validation',None)
         return validation
     @tool
     def submit_tested_program() -> dict:
@@ -77,6 +84,8 @@ class Executor:
             validation = result
         else:
             validation=validate_and_test_reward(packet,spec,report)
+        if not validation.get('passed'):
+            return validation
         if request.get('formal_inference'):
             if not self.approve_inference or not callable(self.inference_adapter): raise RuntimeError('approved inference adapter required')
             return self.inference_adapter(packet=deepcopy(packet),reward_spec=deepcopy(spec),execution_result=validation,request=deepcopy(request))

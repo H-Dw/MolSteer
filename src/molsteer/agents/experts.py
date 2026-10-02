@@ -10,7 +10,8 @@ from .loop import run_tools
 from .trace import append_trace
 from .audit_contracts import FACTORS, DraftReplacement, ArchitectureAudit
 from .design_audit import (biophysical_context, _evidence, inspect_bound_measurements, measurement_catalog,
-                          replace_draft_fields, bounded_values, stage_direction_draft, assemble_direction_drafts)
+                          replace_draft_fields, bounded_values, stage_direction_draft, assemble_direction_drafts,
+                          retain_proposed_directions)
 from molsteer.common import digest
 from .decision_workspace import (BIOLOGY_GUIDE, MATH_GUIDE, current_state_context,
     new_workspace, update_workspace, selected_directions, goal_pools)
@@ -282,7 +283,8 @@ def run_experts(runtime, state):
                                   'constant':{'op':'constant','value':1.0,'unit':'angstrom','origin':'evidence or declared scale origin'},
                                   'operator':{'op':'subtract','args':['expression','expression']},
                                   'unary':['relu','abs','sqrt','sin','cos','power'],
-                                  'binary':['add','subtract','multiply','divide','maximum','minimum','periodic_difference'],
+                                  'binary':['subtract','divide','periodic_difference'],
+                                  'associative':['add','multiply','maximum','minimum'],
                                   'reduce':['sum','mean'], 'power_extra_field':'exponent in [0.5,8]',
                                   'units':list(UNITS), 'limits':'128 nodes, depth 12; scalar nonnegative dimensionless output'},
                     'strategy_examples':[{'mode':'scalar_potential','aggregation':{'op':'single'},'justification':'Case-specific reason required'},
@@ -399,6 +401,7 @@ def run_experts(runtime, state):
             if not isinstance(design,(dict,MathematicalDesign)):
                 raise ValueError('Propose a complete mathematical draft before patching')
             proposed_draft['design']=deepcopy(design.model_dump() if isinstance(design,MathematicalDesign) else design)
+            retain_proposed_directions(staged_directions,proposed_draft['design'],targets)
             checked=validate_math(design,biology,packet,state['retrieval_records'],service.sources(), report=report,
                 require_audit=runtime.config.thinker.require_design_audit)
             spec,deferred=compile_expert_spec(packet,report,biology,checked,state['retrieval_records'],state['model_dynamics'],service.sources())

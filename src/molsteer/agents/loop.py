@@ -107,7 +107,7 @@ def _validation_feedback(exc):
             for error in exc.errors(include_input=False,include_context=False,include_url=False)[:24]]
         result={'validation_errors':errors}
         if any('expression' in error['path'] for error in errors):
-            result['validation_hint']='Replace the indicated expression node with a JSON object containing op. observable needs id; constant needs value/unit/origin; unary and power take one argument (power also exponent); binary operators take two; sum/mean take 1-32. Every args element must itself be an expression node, never an extra argument-array wrapper.'
+            result['validation_hint']='Replace the indicated expression node with a JSON object containing op. observable needs id; constant needs value/unit/origin; unary and power take one argument (power also exponent); subtract/divide/periodic_difference take two; add/multiply/maximum/minimum take 2-32; sum/mean take 1-32. Every args element must itself be an expression node, never an extra argument-array wrapper.'
         elif any(error['rule']=='model_type' for error in errors):
             result['validation_hint']='Nested plan/design arguments must be JSON objects, not JSON-encoded strings or lists.'
         return result
@@ -166,7 +166,7 @@ def _validation_feedback(exc):
         if str(exc) == 'Function lineage must identify an inspected source location':
             feedback['validation_hint'] = 'Use exactly source_id,locator,original_formula,adaptation; locator must be an inspected chunk/observation in this direction retrievals. Patch the identified entry after actual retrieval.'
         if str(exc) == 'Invalid operator arity':
-            feedback['validation_hint'] = 'maximum/minimum/add/subtract/multiply/divide/periodic_difference require TWO args. Nest maximum/minimum for >2 terms. Unary ops need one; sum/mean permit n-ary. Patch the expression and retest.'
+            feedback['validation_hint'] = 'subtract/divide/periodic_difference require TWO args; add/multiply/maximum/minimum accept 2-32. Unary ops need one; sum/mean accept 1-32. Patch the expression and retest.'
         if str(exc) == 'Global repair guarantees must have explicit matching repair clauses':
             feedback['validation_hint'] = 'The predicate claims a global whole-clash/contact-count/fraction/burial guarantee that is absent from repair_clauses. Declare it with the correct unsupported kind, or revise the pilot to explicitly measured local predicates and retain the global outcome as independent monitor/deferred evaluation. Do not invent host gates.'
         return feedback
