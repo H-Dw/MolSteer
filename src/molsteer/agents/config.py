@@ -121,6 +121,7 @@ class ThinkerConfig(StrictModel):
     external_research: bool = True
     # Legacy handoffs remain readable; the shipped API config opts into audits.
     require_design_audit: bool = False
+    execution_scope: Literal['complete_goal_set', 'bounded_coordinate_pilot'] = 'complete_goal_set'
 
 
 class RawOutcomeMetric(StrictModel):

@@ -155,6 +155,32 @@ def test_required_deferred_direction_is_not_executable(case):
     assert spec is None and deferred['blocked_directions']==['repair']
 
 
+def test_explicit_coordinate_pilot_retains_unresolved_full_goals(case):
+    p,r,b,d,ret=copy.deepcopy(case)
+    unfinished=copy.deepcopy(b['directions'][0])
+    unfinished.update(direction_id='unfinished',rank=len(b['directions'])+1,
+                      finding_ids=[],disposition='deferred',required=True)
+    b['directions'].append(unfinished)
+    pending=copy.deepcopy(d['directions'][0])
+    pending.update(direction_id='unfinished',status='design_only',expression=None,
+                   missing_requirements=['An independent full-goal channel is unavailable.'],retrieval_ids=['ret_pending'])
+    d['directions'].append(pending)
+    extra=copy.deepcopy(ret);extra.update(direction_id='unfinished',retrieval_id='ret_pending')
+    retrievals=[ret,extra]
+    spec,deferred=compile_expert_spec(p,r,b,d,retrievals,ModelDynamicsContext().model_dump(),{})
+    assert spec is None and deferred['blocked_directions']==['unfinished']
+    dynamics=ModelDynamicsContext(execution_scope='bounded_coordinate_pilot').model_dump()
+    spec,deferred=compile_expert_spec(p,r,b,d,retrievals,dynamics,{})
+    assert deferred is None and validate_expert_spec(spec,p,r)
+    assert spec['partial_execution']['complete_goal_set_resolved'] is False
+    assert spec['partial_execution']['unresolved_required_direction_ids']==['unfinished']
+    assert spec['biology_plan']['directions'][-1]['required'] is True
+    assert spec['mathematical_design']['directions'][-1]['status']=='design_only'
+    unfinished['disposition']='constraint'
+    spec,deferred=compile_expert_spec(p,r,b,d,retrievals,dynamics,{})
+    assert spec is None and deferred['blocked_directions']==['unfinished']
+
+
 def test_corpus_formula_provenance_zero_hits_and_change(tmp_path):
     corpus=MarkdownCorpus(ROOT/'knowledge')
     rows=corpus.search('flat-bottom local_geometry')['records']

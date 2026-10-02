@@ -279,6 +279,7 @@ class AgentRuntime:
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
         state['model_dynamics']=deepcopy(self.model_dynamics)
+        state['model_dynamics']['execution_scope']=self.config.thinker.execution_scope
         if self.config.thinker.architecture=='dual_expert':
             state['workflow_materials']=load_workflow_materials(self.config.skill_path)
             state['workflow_reference_digests']={ident:row['sha256'] for ident,row in state['workflow_materials'].items()}

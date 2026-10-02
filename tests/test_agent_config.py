@@ -50,6 +50,7 @@ def test_default_config_selects_openrouter_glm_without_secrets(monkeypatch, tmp_
     assert config.runtime.max_agent_steps == 24
     assert config.runtime.max_repairs == 8 and config.runtime.max_replans == 2
     assert config.thinker.require_design_audit is True
+    assert config.thinker.execution_scope == 'complete_goal_set'
     assert config.models['default'].api_transport == 'openai_compatible'
     assert config.models['default'].reasoning_effort == 'low'
     assert config.runtime.max_segments == 20

@@ -62,6 +62,22 @@ def test_audited_function_has_actual_zero_set_and_derivative_signs(case):
     assert result['design_audit']['execution_scope']=='bounded_hypothesis_pilot'
 
 
+def test_clause_allows_additional_observable_evidence_without_losing_its_binding(case):
+    value=audited(case)
+    obs=value[3]['directions'][0]['observables'][0]
+    extra=next(ident for ident,ref in measurement_references(value[0]).items()
+               if ref['view']==obs['view'] and not set(ref['atom_ids']) & set(obs['atom_ids']))
+    repair=next(d for d in value[2]['directions'] if d['direction_id']=='repair')
+    repair['evidence_ids'].append(extra)
+    obs['evidence_ids'].append(extra)
+    assert check(value)['directions'][0]['status']=='executable'
+    # An overlapping citation alone is insufficient when it does not localize
+    # the clause's actual atoms, even though other observable evidence does.
+    repair['repair_clauses'][0]['evidence_ids']=[extra]
+    with pytest.raises(ValueError,match='no implicit host gates'):
+        check(value)
+
+
 def test_missing_factors_cannot_hide_unconsidered_biology(case):
     value=audited(case);value[2]['factor_assessment'].pop()
     with pytest.raises(ValueError,match='every biophysical factor'):check(value)

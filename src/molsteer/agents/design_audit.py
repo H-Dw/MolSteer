@@ -252,10 +252,20 @@ def validate_design_audit(design, biology, packet, report, passages, required=Fa
         for item in coverage:
             clause=clause_map[item['clause_id']]
             if (not set(item['observable_ids']) <= set(observables) or
-                any(observables[ident]['kind']!=clause['observable_kind'] or
-                    not set(observables[ident]['evidence_ids']) <= set(clause['evidence_ids'])
+                any(observables[ident]['kind']!=clause['observable_kind']
                     for ident in item['observable_ids'])):
                 raise ContractValidationError('A repair clause needs its actual observable and bound evidence; no implicit host gates',path)
+            # An observable can also cite corroborating measurements used by
+            # another clause. This clause's own shared evidence must independently
+            # localize the observable; unrelated extra citations cannot satisfy it.
+            from molsteer.molthinker.expressions import validate_observables
+            for ident in item['observable_ids']:
+                bound=deepcopy(observables[ident])
+                bound['evidence_ids']=sorted(set(bound['evidence_ids']) & set(clause['evidence_ids']))
+                try:
+                    validate_observables([bound],packet,set(clause['evidence_ids']))
+                except ValueError:
+                    raise ContractValidationError('A repair clause needs its actual observable and bound evidence; no implicit host gates',path) from None
     for factor in biology.get('factor_assessment', []):
         if factor['disposition'] not in ('optimize', 'constraint'):
             continue

@@ -55,6 +55,7 @@ class ModelDynamicsContext(StrictModel):
     live_derivative: Literal['available', 'unavailable', 'not_run'] = 'unavailable'
     injection_convention: str = 'unknown'
     source: str = 'No live adapter supplied; coordinate-copy validation only'
+    execution_scope: Literal['complete_goal_set', 'bounded_coordinate_pilot'] = 'complete_goal_set'
 
     @field_validator('editable_atom_ids')
     @classmethod
@@ -261,7 +262,14 @@ def compile_expert_spec(packet, report, biology, design, retrievals, dynamics, s
                 d['disposition'] in ('optimize', 'constraint') and by_id[d['direction_id']]['status'] != 'executable')]
     active = [d['direction_id'] for d in biology['directions'] if d['disposition'] == 'optimize'
               and by_id[d['direction_id']]['status'] == 'executable']
-    if blocked or not active or design['strategy']['mode'] == 'design_only':
+    dependencies={ident for direction in biology['directions']
+                  if direction['disposition'] in ('optimize','constraint')
+                  for ident in direction['preservation_conditions']}
+    blocked_constraints=[d['direction_id'] for d in biology['directions']
+                         if d['disposition']=='constraint' and by_id[d['direction_id']]['status']!='executable']
+    partial=(dynamics['execution_scope']=='bounded_coordinate_pilot' and blocked
+             and not blocked_constraints and not set(blocked)&dependencies)
+    if (blocked and not partial) or not active or design['strategy']['mode'] == 'design_only':
         return None, dict(status='design_only', blocked_directions=blocked,
                           reason='Required directions or controller are unresolved, or no executable optimization remains')
     spec = dict(kind='RewardSpec', schema_version='2.0.0', packet_id=packet['packet_id'], identity=packet['identity'],
@@ -272,6 +280,10 @@ def compile_expert_spec(packet, report, biology, design, retrievals, dynamics, s
                 runtime_execution={'status':'requires_live_validation', 'live_gradient':'not_run'},
                 required_validation=['units_and_domains', 'finite_difference', 'fixed_variables',
                                      'live_pullback', 'post_injection_direction', 'proposal_constraints'])
+    if partial:
+        spec['partial_execution']={'scope':'bounded_coordinate_pilot','complete_goal_set_resolved':False,
+            'unresolved_required_direction_ids':blocked,
+            'statement':'Only executable coordinate goals are tested. Required deferred goals remain unresolved; no full molecular-quality repair is claimed.'}
     spec['reward_id'] = 'rw_'+digest(spec)[:24]
     return spec, None
 
