@@ -113,6 +113,26 @@ def test_constructed_interval_passes_existing_full_audit_and_keeps_packet_unchan
     assert p == before
 
 
+def test_shared_physical_constant_keeps_corroboration_without_changing_the_potential(case):
+    p,r,b,d,_=audited(case)
+    bio=next(x for x in b['directions'] if x['direction_id']=='repair')
+    first=relation(case);second=copy.deepcopy(first)
+    second['observable']['observable_id']='second_distance'
+    second['parameters']['upper']['derivation']='The same synthetic upper bound also applies to the second test relation.'
+    ret=retrieval(case)
+    result=construct_direction(bio,[first,second],'sum',[ret],p)
+    assert result['status']=='draft_only'
+    shared=[x for x in result['direction']['reference_parameters'] if x['origin']==first['parameters']['upper']['origin']]
+    assert len(shared)==1 and second['parameters']['upper']['derivation'] in shared[0]['derivation']
+    vals={name:torch.tensor(1.8,dtype=torch.float64,requires_grad=True) for name in ('distance','second_distance')}
+    loss=evaluate_expression(result['direction']['expression'],vals)
+    assert float(loss.detach())==pytest.approx(1.)
+    second['parameters']['upper']['provenance']='calibration'
+    conflict=construct_direction(bio,[first,second],'sum',[ret],p)
+    assert conflict['status']=='needs_input' and conflict['conflicting_fields']==['provenance']
+    assert first['parameters']['upper']['derivation'] not in second['parameters']['upper']['derivation']
+
+
 def test_circular_specialization_respects_wrap_and_source_role(case):
     ret = retrieval(case, 'G05'); source = ret['records'][0]
     spec = {'observable': {'observable_id': 'torsion', 'kind': 'dihedral'}, 'shape': 'periodic_cosine',

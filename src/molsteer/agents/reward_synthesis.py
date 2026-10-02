@@ -281,7 +281,20 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
             for param in part['parameters']:
                 key = (param['origin'], param['unit'], param['value'])
                 if key in parameters and parameters[key] != param:
-                    return {'status': 'needs_input', 'blocking': False, 'hint': 'The same constant has conflicting provenance. Reconcile its record.'}
+                    previous=parameters[key]
+                    if any(previous[field] != param[field] for field in ('role','provenance')):
+                        return {'status': 'needs_input', 'blocking': False,
+                            'parameter_origin':param['origin'],
+                            'conflicting_fields':[field for field in ('role','provenance') if previous[field]!=param[field]],
+                            'hint': 'The same constant has conflicting provenance or roles. Reconcile these records; do not infer calibration.'}
+                    # The same source constant can support several relations.
+                    # Retain all corroboration rather than rejecting distinct
+                    # explanations of an otherwise identical physical input.
+                    for field in ('evidence_ids','source_locators'):
+                        previous[field]=list(dict.fromkeys(previous[field]+param[field]))
+                    if param['derivation'] != previous['derivation']:
+                        previous['derivation']+='; '+param['derivation']
+                    continue
                 parameters[key] = param
         baseline = {o['observable_id']: p['baseline'] for o, p in zip(obs, parts)}
         probe_values = [baseline]
