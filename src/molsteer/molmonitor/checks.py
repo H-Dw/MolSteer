@@ -5,17 +5,45 @@ from molsteer.common import observation
 
 
 def gradient_check(fn, coords, epsilon=1e-6):
+    """Verify the derivative by refinement, including both one-sided limits.
+
+    A squared hinge is differentiable at its boundary, but central differences
+    there have O(h) truncation error. Keep the tolerances fixed and require two
+    consecutive passing scales; one-sided limits still reject a linear kink.
+    """
+    if not np.isfinite(epsilon) or epsilon <= 0:
+        raise ValueError('Finite-difference epsilon must be positive and finite')
     x = coords.detach().clone().double().requires_grad_(True)
-    analytic = torch.autograd.grad(fn(x), x)[0]
-    numeric = torch.zeros_like(x)
-    for i in range(x.numel()):
-        plus, minus = x.detach().clone(), x.detach().clone()
-        plus.reshape(-1)[i] += epsilon
-        minus.reshape(-1)[i] -= epsilon
-        numeric.reshape(-1)[i] = (fn(plus)-fn(minus))/(2*epsilon)
-    error = float((numeric-analytic).abs().max())
-    passed = bool(torch.allclose(numeric, analytic, rtol=1e-4, atol=1e-7))
-    return dict(passed=passed, maximum_absolute_error=error, finite_difference_epsilon_angstrom=epsilon,
+    value = fn(x)
+    analytic = torch.autograd.grad(value, x)[0]
+    base = value.detach()
+    refinements = []
+    consecutive = 0
+    for level in range(5):
+        step = epsilon / (4**level)
+        forward, backward = torch.zeros_like(x), torch.zeros_like(x)
+        with torch.no_grad():
+            for i in range(x.numel()):
+                plus, minus = x.detach().clone(), x.detach().clone()
+                plus.reshape(-1)[i] += step
+                minus.reshape(-1)[i] -= step
+                forward.reshape(-1)[i] = (fn(plus)-base)/step
+                backward.reshape(-1)[i] = (base-fn(minus))/step
+        numeric = (forward+backward)/2
+        error = float((numeric-analytic).abs().max())
+        one_sided_error = max(float((side-analytic).abs().max()) for side in (forward,backward))
+        passed_scale = bool(torch.isfinite(analytic).all() and all(
+            torch.allclose(side, analytic, rtol=1e-4, atol=1e-7)
+            for side in (numeric,forward,backward)))
+        refinements.append(dict(epsilon_angstrom=step, maximum_absolute_error=error,
+                                maximum_one_sided_error=one_sided_error, passed=passed_scale))
+        consecutive = consecutive+1 if passed_scale else 0
+        if consecutive >= 2:
+            break
+    passed = consecutive >= 2
+    return dict(passed=passed, maximum_absolute_error=error, finite_difference_epsilon_angstrom=step,
+                initial_epsilon_angstrom=epsilon, maximum_one_sided_error=one_sided_error,
+                refinement_checks=refinements, tolerances=dict(rtol=1e-4,atol=1e-7),
                 analytic_gradient_l2=float(analytic.norm()), checked_coordinates=x.numel(),
                 scope='Coordinate derivative on a detached copy; no generator Jacobian tested')
 
