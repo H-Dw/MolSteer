@@ -102,6 +102,10 @@ def observed_api_runtime(config, dynamics, receipt_path):
                                   ('input_tokens','output_tokens','total_tokens') if key in metadata})
                     reasoning_tokens=metadata.get('output_token_details',{}).get('reasoning')
                     if reasoning_tokens is not None:usage[-1]['reasoning_tokens']=reasoning_tokens
+                    cached_tokens=metadata.get('input_token_details',{}).get('cache_read')
+                    if cached_tokens is not None:usage[-1]['cached_tokens']=cached_tokens
+                    receipt=(getattr(generation.message,'additional_kwargs',None) or {}).get('_openrouter_receipt',{})
+                    if receipt:usage[-1]['provider_receipt']=receipt
                     finish_reasons.append((getattr(generation.message,'response_metadata',None) or {}).get('finish_reason'))
                     served_models.append((getattr(generation.message,'response_metadata',None) or {}).get('model_name'))
             self.record(dict(event='request_completed', request_id=str(run_id), usage=usage,

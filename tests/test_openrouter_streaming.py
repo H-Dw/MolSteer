@@ -5,6 +5,35 @@ import pytest
 from langchain_core.messages import AIMessageChunk
 from langchain_openai import ChatOpenAI
 from molsteer.agents.openrouter_transport import OpenRouterChat
+
+
+def test_billing_receipts_preserve_native_usage_without_private_text():
+    from molsteer.agents.openrouter_transport import usage_receipt
+    payload={'id':'gen-receipt','model':'z-ai/glm-5.3','provider':'fixture',
+        'choices':[{'message':{'content':'private','reasoning':'private'}}],
+        'usage':{'prompt_tokens':100,'completion_tokens':30,'total_tokens':130,'cost':.01,
+                 'prompt_tokens_details':{'cached_tokens':80,'private_text':'omit'},
+                 'completion_tokens_details':{'reasoning_tokens':20},'private_text':'omit'}}
+    receipt=usage_receipt(payload)
+    assert receipt['usage']['cost']==.01
+    assert receipt['usage']['prompt_tokens_details']=={'cached_tokens':80}
+    assert receipt['usage']['completion_tokens_details']=={'reasoning_tokens':20}
+    assert 'private' not in str(receipt)
+    assert receipt['id']=='gen-receipt'
+
+
+def test_billing_receipts_survive_stream_and_nonstream_conversion():
+    from langchain_core.messages import AIMessageChunk
+    model=OpenRouterChat(model='fixture',api_key='test-only',base_url='https://example.invalid/v1')
+    payload={'id':'gen-fixture','model':'fixture','object':'chat.completion','created':0,
+        'choices':[{'index':0,'message':{'role':'assistant','content':'OK'},'finish_reason':'stop'}],
+        'usage':{'prompt_tokens':5,'completion_tokens':2,'total_tokens':7,'cost':.02}}
+    result=model._create_chat_result(payload)
+    assert result.generations[0].message.additional_kwargs['_openrouter_receipt']['usage']['cost']==.02
+    payload['choices']=[];payload['object']='chat.completion.chunk'
+    chunk=model._convert_chunk_to_generation_chunk(payload,AIMessageChunk,None)
+    assert chunk.message.additional_kwargs['_openrouter_receipt']['id']=='gen-fixture'
+    assert chunk.message.additional_kwargs['_openrouter_receipt']['usage']['total_tokens']==7
 from molsteer.agents.trace import _redact
 
 

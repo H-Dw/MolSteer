@@ -11,6 +11,23 @@ from copy import deepcopy
 import json
 
 
+def usage_receipt(payload):
+    """Retain billing facts only; provider text and reasoning stay ephemeral."""
+    fields=('prompt_tokens','completion_tokens','total_tokens','cost','is_byok')
+    source=payload.get('usage') or {}
+    usage={key:source[key] for key in fields if isinstance(source.get(key),(int,float))}
+    for key, allowed in {
+        'prompt_tokens_details':('cached_tokens','cache_write_tokens','audio_tokens'),
+        'completion_tokens_details':('reasoning_tokens','audio_tokens'),
+        'cost_details':('upstream_inference_cost',),
+    }.items():
+        if isinstance(source.get(key),dict):
+            usage[key]={name:source[key][name] for name in allowed
+                        if isinstance(source[key].get(name),(int,float))}
+    return {**{key:payload[key] for key in ('id','model','provider') if key in payload},
+            'usage':usage}
+
+
 class IncompleteStreamError(RuntimeError):
     """Safe receipt metadata only, never partial argument or reasoning content."""
     def __init__(self, arguments):
@@ -83,6 +100,8 @@ class OpenRouterChat(ChatOpenAI):
 
     def _convert_chunk_to_generation_chunk(self, chunk, default_chunk_class, base_generation_info):
         result=super()._convert_chunk_to_generation_chunk(chunk,default_chunk_class,base_generation_info)
+        if result is not None and chunk.get('usage'):
+            result.message.additional_kwargs['_openrouter_receipt']=usage_receipt(chunk)
         choices=chunk.get('choices',[])
         if result is not None and choices:
             delta=choices[0].get('delta') or {}
@@ -148,6 +167,7 @@ class OpenRouterChat(ChatOpenAI):
         result = super()._create_chat_result(response, generation_info)
         payload = response if isinstance(response, dict) else response.model_dump()
         for generation, choice in zip(result.generations, payload.get('choices', [])):
+            generation.message.additional_kwargs['_openrouter_receipt']=usage_receipt(payload)
             details = choice.get('message', {}).get('reasoning_details')
             if details is not None:
                 generation.message.additional_kwargs['reasoning_details'] = details
