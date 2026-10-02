@@ -461,6 +461,7 @@ def run_experts(runtime, state):
             math_tools.append(test_mathematical_design)
         invoke('mathematics', math_tools,
                {'biology_plan':biology, 'report':bounded_values(report), 'model_dynamics':state['model_dynamics'],
+                'task_context':deepcopy(state.get('monitor_event', {})),
                 'current_state':current, 'goal_pools':pools,
                 'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'synthesis_workspace':SYNTHESIS_GUIDE,

@@ -1,5 +1,18 @@
 """Forward design assistance, numerical transfer, and non-gating integration."""
 import copy
+
+
+def test_constructive_pair_errors_identify_correctable_evidence_fields():
+    from molsteer.agents.loop import _validation_feedback
+    from molsteer.agents.contract_errors import ContractValidationError
+    feedback=_validation_feedback(ContractValidationError(
+        'Receptor pair must be localized by cited clash evidence',['directions',0,'observables']))
+    assert feedback['validation_path']==['directions',0,'observables']
+    assert 'receptor_serial' in feedback['validation_hint']
+    assert 'matching row' in feedback['validation_hint']
+    monitor=_validation_feedback(ContractValidationError(
+        'Stage a direction selected by the biological plan',['direction','direction_id']))
+    assert 'Monitoring-only' in monitor['validation_hint']
 import json
 import math
 from pathlib import Path

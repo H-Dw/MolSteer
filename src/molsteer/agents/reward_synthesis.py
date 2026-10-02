@@ -254,6 +254,10 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
         if not isinstance(relations, list) or not 1 <= len(relations) <= 5:
             return {'status': 'needs_input', 'blocking': False, 'hint': 'Supply 1-5 relations per direction; larger/custom constructions can use the existing expression draft tools.'}
         obs = [r['observable'] for r in relations]
+        if any(not isinstance(o, dict) for o in obs):
+            return {'status':'needs_input','blocking':False,
+                    'hint':'relation.observable must be a JSON object, not an ID or prose. Use the bound observable schema from get_expert_contract.',
+                    'observable_fields':['observable_id','kind','view','atom_ids','evidence_ids','parameters']}
         if len({o['observable_id'] for o in obs}) != len(obs):
             raise ValueError('duplicate_observable')
         units = validate_observables(obs, packet, set(biology_direction['evidence_ids']))

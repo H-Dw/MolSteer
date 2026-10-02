@@ -42,6 +42,8 @@ _PUBLIC_RULES = {
     'Observable must cite its direction diagnostic evidence',
     'Observable and evidence must use the same representation',
     'Observable support is not localized by its evidence',
+    'Receptor pair must be localized by cited clash evidence',
+    'Stage a direction selected by the biological plan',
     'Unexpected or missing observable parameters',
     'MMFF strain requires the complete ordered molecular graph',
     'MMFF needs validated graph, protonation and force-field applicability',
@@ -117,6 +119,10 @@ def _validation_feedback(exc):
             feedback['validation_hint'] = 'original_formula must be an exact substring of the inspected source formula or excerpt, including LaTeX delimiters, punctuation and Unicode; only math-span whitespace is ignored. Put your specialized formula in formula/adaptation.'
         if str(exc) == 'Unexpected or missing observable parameters':
             feedback['validation_hint'] = 'Use the exact parameter keys from get_expert_contract. Distance/angle/dihedral/MMFF observables take parameters={}; put bounds, tolerances and normalizations in expression constants, not observable parameters.'
+        if str(exc) == 'Receptor pair must be localized by cited clash evidence':
+            feedback['validation_hint'] = 'Each receptor_distance must cite a measured row with the exact receptor_serial, residue_id and ligand atom. A global contact summary or a different contact pair cannot bind this observable. Page list_measurement_references, inspect the matching row and include it in the biological direction evidence before use; request a biology revision if needed.'
+        if str(exc) == 'Stage a direction selected by the biological plan':
+            feedback['validation_hint'] = 'Stage only selected optimize/constraint directions and required deferred directions. Monitoring-only outcomes remain in independent_evaluation; they are not additional mathematical directions.'
         if str(exc) == 'Active factors need measured evidence and matching controllable directions':
             feedback['validation_hint'] = 'Optimize/constraint factors require nonempty direction_ids and evidence_ids, missing_requirements=[], and all listed directions with the SAME disposition. A scientifically necessary goal with unresolved inputs stays required=true and deferred for mathematics; monitoring describes nonselected outcomes. Do not erase gaps. Future live certification stays not_run in dynamics/evaluation.'
         if str(exc) == 'Evidence does not belong to the direction findings':
