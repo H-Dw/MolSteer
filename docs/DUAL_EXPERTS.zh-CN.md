@@ -1,5 +1,7 @@
 # MolThinker 双专家
 
+当前直接执行契约见[剩余需求与标量注入](RESIDUAL_NATIVE_SCALAR.zh-CN.md)。下文涉及预算、提议拒绝、分段控制或共同下降的内容为历史适配器记录，不适用于当前 MolThinker → FLOWR.ROOT 路径。
+
 新默认配置使用 `dual_expert`。MolReader 仍只诊断风险；MolThinker 内部依次运行生物专家和数学专家，各自有独立的 ReAct 对话及可调度的 Researcher。MolExecutor 验证并执行声明式产物，MolMonitor 保留观测、调力和要求修订的职责。
 
 ## 生物判断与数学设计

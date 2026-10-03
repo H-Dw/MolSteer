@@ -1,4 +1,4 @@
-"""Four independent API-default agents driven by a bounded LangGraph workflow."""
+"""Reader and Thinker agents followed by deterministic scalar execution."""
 from __future__ import annotations
 from copy import deepcopy
 import hashlib
@@ -26,8 +26,8 @@ class AgentRuntime:
 
     ``inference_adapter`` is a host-approved callable invoked with keyword args
     packet, reward_spec, execution_result (validation), request. It must return
-    {done: bool, metrics: dict[str,float], ...}. It owns sampler state/masks and
-    consumes request.strength. No live generator is bundled with this workflow.
+    {done: True, metrics: dict[str,float], ...} after the full native suffix.
+    It owns sampler state/masks and consumes request.guidance_weight exactly once.
     """
     def __init__(self, config: AgentSystemConfig | None=None, *, models=None,
                  knowledge_path=None, search_fn=None, compute_fn=None,
@@ -54,14 +54,23 @@ class AgentRuntime:
         return self.models[name]
 
     def _loop(self,state,node,tools,context,instructions,completed):
+        from .host_workspace import HostWorkspace
         run_tools(self._model('mol'+node),tools,instructions=instructions,context=context,state=state,node=node,
-                  max_steps=self.config.runtime.max_agent_steps,max_repairs=self.config.runtime.max_repairs,completed=completed)
+                  max_steps=self.config.runtime.max_agent_steps,max_repairs=self.config.runtime.max_repairs,completed=completed,
+                  host_workspace=HostWorkspace(state,node,self.config.runtime.no_progress_actions))
 
     def reader(self,state):
         raw_context=load_raw_reference(state['packet'],self.config.reader.raw_reference,self.config.repo_root)
         tools,result=reader_tools(state['packet'],state.get('diagnostic_report') or None,
                                   raw_reference_context=raw_context)
         state['raw_reference_context']=raw_context
+        from .measurement_supplements import MeasurementSupplements
+        self.measurement_supplements=MeasurementSupplements(state['packet'],raw_context,state,self.config.repo_root,
+            self.config.trace_dir / (state['run_id']+'_evidence'), self.config.reader.measurement_stage_paths)
+        tools.extend(self.measurement_supplements.tools())
+        reader_materials=load_workflow_materials(self.config.repo_root/'skills/molreader-diagnose/SKILL.md')
+        reader_skill=reader_materials['SKILL.md']['text']
+        state['reader_guidance_sources']={k:r['sha256'] for k,r in reader_materials.items()}
         if raw_context['status']!='disabled':
             append_trace(state,node='reader',kind='observation',summary='Saved raw suffix comparison bound to current checkpoint',
                          output=raw_reference_summary(raw_context))
@@ -73,7 +82,7 @@ class AgentRuntime:
         else:
             self._loop(state,'reader',tools,{'packet_id':state['packet']['packet_id'],
                        'raw_reference':raw_reference_summary(raw_context)},
-                       'Inspect geometry, chemistry and uncertainty via their separate tools. When configured raw references '
+                       reader_skill+'\nStart with residual_needs from the raw comparison, then trace current precursors. When configured raw references '
                        'are available, compare selected views, persistent/current and later-emerging risks, sampled repair '
                        'intervals, local contacts/burial/chemical evolution and configured affinity/SA/stability trends. '
                        'Use inspect_raw_goal_trajectory to trace candidate mechanisms across EVERY configured node, '
@@ -135,7 +144,7 @@ class AgentRuntime:
                        'task_plan':result.get('task_plan',{'status':'not_provided'}),
                        'objective_terms':[{'term_id':t['term_id'],'evidence_id':t['reference_evidence_id'],'weight':t['weight'],'scale':t['scale']} for t in result['spec']['terms']],
                        'constraints':['fixed input packet','frozen graph tests only','host adapter required for inference'],
-                       'continuation':{'strength':state['strength'],'max_segments':self.config.runtime.max_segments},
+                       'continuation':{'strength':state['strength'],'guidance_weight':state['strength'],'execution_semantics':'native_scalar_gradient'},
                        'retrieval':result['spec']['retrieval'],'checks':result['spec']['required_validation'],
                        'reward_design':result['spec'].get('design'),
                        'summary':('Selected evidence-bound core targets and a declarative objective architecture'
@@ -168,47 +177,44 @@ class AgentRuntime:
         state['plan']={'kind':'ControlPlan','reward_id':spec['reward_id'],
                        'biology_plan':spec['biology_plan'],'mathematical_design':spec['mathematical_design'],
                        'retrieval':spec['retrieval'],'checks':spec['required_validation'],
-                       'continuation':{'strength':state['strength'],'max_segments':self.config.runtime.max_segments},
+                       'continuation':{'strength':state['strength'],'guidance_weight':state['strength'],'execution_semantics':'native_scalar_gradient'},
                        'summary':'Biology-ranked directions and evidence-derived executable mathematical controls'}
-        state.update(validation={},validation_key=[],route='executor')
+        validation=result.get('validation') or {}
+        state.update(validation=validation,
+            validation_key=[spec['reward_id'],state['strength']] if validation.get('passed') and validation.get('reward_id')==spec['reward_id'] else [],
+            route='executor')
         return state
 
     def executor(self,state):
-        # Compile/test once per plan or strength change, not on every live segment.
+        # Deterministic loading/testing; no executor model or tuning round.
         key=(state['reward_spec']['reward_id'],state['strength'])
         if state.get('validation_key')!=list(key):
-            tools,result=executor_tools(state['packet'],state['reward_spec'],state['diagnostic_report'],strength=state['strength'])
-            if self.config.mode=='offline':
-                result['validation']=validate_and_test_reward(state['packet'],state['reward_spec'],state['diagnostic_report'],strength=state['strength'])
-                append_trace(state,node='executor',kind='tool',summary='Validated numerical reward program',tool_name='test_reward_program',output=result['validation'])
-            else:
-                self._loop(state,'executor',tools,{'reward_id':key[0],'strength':key[1]},
-                           'Inspect the declarative reward program; test_reward_program and repair invalid bounded test settings if needed. submit_tested_program only after success. No arbitrary code execution.',lambda:'validation' in result)
-            state['validation']=result['validation']; state['validation_key']=list(key)
+            validation=validate_and_test_reward(state['packet'],state['reward_spec'],state['diagnostic_report'])
+            state['validation']=validation; state['validation_key']=list(key)
+            if not validation.get('passed'):
+                raise ValueError('Scalar reward numerical validation failed')
+            append_trace(state,node='executor',kind='tool',summary='Deterministic scalar reward validation',
+                         tool_name='test_reward_program',output=validation)
         if state['execute']:
-            if not self.approve_inference or not callable(self.inference_adapter): raise RuntimeError('approved inference adapter required')
-            if state['reward_spec'].get('schema_version')=='2.0.0':
-                capabilities=getattr(self.inference_adapter,'capabilities',{})
-                if '2.0.0' not in capabilities.get('reward_versions',[]) or not capabilities.get('live_preflight'):
-                    raise RuntimeError('Expert controls require a version-2 adapter with live preflight')
-            request={'segment':state['segments'],'strength':state['strength'],'run_id':state['run_id'],
-                     'monitor_event':deepcopy(state.get('monitor_event',{}))}
-            result=self.inference_adapter(packet=deepcopy(state['packet']),reward_spec=deepcopy(state['reward_spec']),execution_result=deepcopy(state['validation']),request=request)
-            if not isinstance(result,dict) or type(result.get('done')) is not bool or not isinstance(result.get('metrics'),dict): raise ValueError('adapter must return done boolean and metrics object')
+            if not self.approve_inference or not callable(self.inference_adapter):
+                raise RuntimeError('approved inference adapter required')
+            request={'guidance_weight':state['strength'], 'strength':state['strength'],
+                     'run_id':state['run_id'], 'execution_semantics':'native_scalar_gradient',
+                     'continuation':'all_remaining_native_steps'}
+            result=self.inference_adapter(packet=deepcopy(state['packet']),reward_spec=deepcopy(state['reward_spec']),
+                execution_result=deepcopy(state['validation']),request=request)
+            if not isinstance(result,dict) or result.get('done') is not True or not isinstance(result.get('metrics'),dict):
+                raise ValueError('Direct adapter must complete the remaining native trajectory or report a calculation failure')
             state['execution_result']=deepcopy(result)
         else:
             trials=state['validation']['trials']
-            state['execution_result']={'done':True,'mode':'validation_only','metrics':{'penalty_after':sum(t['penalty_after'] for t in trials)},'validation':state['validation']}
-        state['segments']+=1; state['route']='monitor'
-        if not self.config.agents['molmonitor'].enabled:
-            if state['execution_result']['done']:
-                state['status']='completed' if state['execute'] else 'validated'
-                state['route']='done'
-            elif state['segments']>=self.config.runtime.max_segments:
-                state['status']='segment_limit';state['route']='done'
-            else:
-                state['route']='executor'
-        append_trace(state,node='executor',kind='observation',summary='Live adapter segment' if state['execute'] else 'Numerical tests only; inference not run',output=state['execution_result'])
+            state['execution_result']={'done':True,'mode':'validation_only',
+                'metrics':{'penalty_after':sum(t['penalty_after'] for t in trials)},'validation':state['validation']}
+        state['segments']+=1
+        state['status']='completed' if state['execute'] else 'validated'
+        state['route']='done'
+        append_trace(state,node='executor',kind='observation',summary='Full native continuation' if state['execute'] else
+            'Numerical tests only; inference not run',output=state['execution_result'])
         return state
 
     def monitoring(self,state):
@@ -278,7 +284,7 @@ class AgentRuntime:
             reference=self.config.skill_path.parent/'references'/'core-target-and-shape.md'
             skill+='\n\n# Required core-target and mathematical-shape reference\n'+reference.read_text(encoding='utf-8')
         state=initial_state(run_id=run_id,packet=deepcopy(packet),diagnostic_report=deepcopy(diagnostic_report))
-        state.update(execute=execute,segments=0,strength=self.config.monitoring.max_strength,skill_text=skill,
+        state.update(execute=execute,segments=0,strength=self.config.runtime.guidance_weight,skill_text=skill,
                      config=self.config.model_dump(mode='json'),skill_sha256=hashlib.sha256(skill.encode()).hexdigest(),
                      config_sha256=hashlib.sha256(self.config.model_dump_json().encode()).hexdigest(),plan={},validation={},validation_key=[])
         state['model_dynamics']=deepcopy(self.model_dynamics)
@@ -287,11 +293,11 @@ class AgentRuntime:
             state['workflow_materials']=load_workflow_materials(self.config.skill_path)
             state['workflow_reference_digests']={ident:row['sha256'] for ident,row in state['workflow_materials'].items()}
         if feedback is not None:state['monitor_event']=deepcopy(feedback)
-        self.monitor=RobustMonitor(self.config.monitoring) if self.config.agents['molmonitor'].enabled else None
+        self.monitor=None  # Independent opt-in monitor is not part of direct execution.
         try:
             if self.config.mode=='api':
                 for name in AGENT_NAMES:
-                    if not self.config.agents[name].enabled:continue
+                    if not self.config.agents[name].enabled or name in ('molexecutor','molmonitor'):continue
                     if name!='molthinker' or self.config.thinker.architecture=='single': self._model(name)
             from .workflow import build_workflow
             state=build_workflow(self).invoke(state,{'recursion_limit':4*self.config.runtime.max_segments+4*self.config.runtime.max_replans+10})

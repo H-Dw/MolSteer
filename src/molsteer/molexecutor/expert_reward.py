@@ -3,7 +3,7 @@ import torch
 from molsteer.common import digest
 from molsteer.agents.expert_contracts import validate_expert_spec
 from .program import MolecularReward
-from .expert_control import ExpertEvaluator, control_direction, check_displacement
+from .expert_control import ExpertEvaluator
 from .chemistry import decode_endpoint
 from molsteer.molthinker.expressions import aggregate_objectives
 
@@ -13,7 +13,13 @@ class ExpertReward(MolecularReward):
         if program.get('program_id')!='rp_'+digest({k:v for k,v in program.items() if k!='program_id'})[:24]:
             raise ValueError('Expert program digest mismatch')
         validate_expert_spec(program['expert_spec'],program['source_packet'],program['source_report'])
-        super().__init__({**program,'mode':'selection'},baseline,receptor,vocabulary)
+        design = program['expert_spec']['mathematical_design']
+        if design['strategy']['mode'] != 'scalar_potential' or any(
+                d['disposition'] == 'constraint' for d in program['expert_spec']['biology_plan']['directions']):
+            raise ValueError('Legacy controller or proposal constraint needs scalar redesign')
+        # The expert expression owns its physical scales. Historical MolecularReward
+        # guard templates have no meaning in this scalar evaluator.
+        self.vocab, self.receptor = vocabulary, receptor
         self.spec=program
         self.evaluator=ExpertEvaluator(program['expert_spec'],program['source_packet'])
         self.uses_state_view=any(o['view']=='state' for d in self.evaluator.directions for o in d['observables'])
@@ -46,42 +52,11 @@ class ExpertReward(MolecularReward):
         reward=-aggregate_objectives(self.evaluator.objectives(values),self.evaluator.strategy)
         return reward,{'components':{k:float(v.detach()) for k,v in values.items()},
                        'control_mode':self.evaluator.strategy['mode'],
-                       'scalar_is_reporting_only':self.evaluator.strategy['mode']=='common_descent',
+                       'scalar_is_reporting_only':False,
                        'chemical_applicability': 'Current-chemistry mechanism evaluation; whole-graph identity is not an activation condition',
                        'reference_bindings':self.evaluator.reference_diagnostics,
-                       'unavailable_directions':self.evaluator.unavailable}
-
-    def control_gradient(self,adapter,endpoint,x,mask):
-        current=self.state_graph(adapter)
-        values=self.components(endpoint,adapter.world_state_coordinates(x) if self.uses_state_view else None,current)
-        self.control_diagnostics={'reference_bindings':self.evaluator.reference_diagnostics,
-                                  'unavailable_directions':self.evaluator.unavailable}
-        direction,self.component_gradients,self.control_diagnostics=control_direction(
-            self.evaluator.objectives(values),x,mask,self.evaluator.strategy)
-        self.potential_gradient=-direction
-        if float(direction.norm())==0:
-            raise ValueError('Expert control has no feasible nonzero direction: '+self.control_diagnostics['status'])
-        value=-aggregate_objectives(self.evaluator.objectives(values),self.evaluator.strategy)
-        return direction,value,{'components':{k:float(v.detach()) for k,v in values.items()},
-                                'conflict':self.control_diagnostics,
-                                'reference_bindings':self.evaluator.reference_diagnostics,
-                                'unavailable_directions':self.evaluator.unavailable,
-                                'priority_weights':self.evaluator.strategy.get('priority_weights',{})}
-
-    def proposal_failures(self,adapter,candidate,base,state_coords,base_state,delta):
-        failures=[]
-        current=self.state_graph(adapter)
-        ok,derivatives=check_displacement(delta,self.component_gradients,self.evaluator.strategy,scalar_gradient=self.potential_gradient)
-        self.control_diagnostics['post_injection_directional_derivatives']=derivatives
-        if not ok: failures.append('post_injection_direction_not_feasible')
-        coords=adapter.world_state_coordinates(state_coords) if self.uses_state_view else None
-        basecoords=adapter.world_state_coordinates(base_state) if self.uses_state_view else None
-        values=self.components(candidate,coords,current);baseline=self.components(base,basecoords,current)
-        failures.extend('constraint:'+k for k in self.evaluator.constraints(values,baseline))
-        if self.evaluator.strategy['mode']=='common_descent':
-            failures.extend('objective_regression:'+k for k in self.evaluator.objectives(values)
-                            if k in baseline and float(values[k])>float(baseline[k])+1e-7)
-        return failures
+                       'unavailable_directions':self.evaluator.unavailable,
+                       'priority_weights':self.evaluator.strategy.get('priority_weights', {})}
 
     def state_graph(self,adapter):
         if not self.uses_state_graph:return None

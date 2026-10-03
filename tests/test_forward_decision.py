@@ -110,8 +110,10 @@ def test_real_role_inputs_receive_current_state_and_references_without_forecast_
     assert math_context['goal_index']['optimize']==['repair']
     assert 'goal_pools' not in math_context and 'raw_reference' not in math_context['current_state']
     physics=math_context['function_derivation']['conditional_physics']
-    assert 'E_geom,S^q' in physics['family_to_reason_about'] and 'not a preset' in physics['family_to_reason_about']
-    assert 'CURRENT path' in physics['contacts']
+    assert 'family_to_reason_about' not in physics
+    assert 'scalar terms or independent evaluation' in physics['contacts']
+    assert 'remaining intervention needs' in seen['mathematics'][0]
+    assert 'guidance_weight * dt * gradient(R)' in seen['mathematics'][0]
     assert math_context['biology_decisions']=={}  # Optional helpers did not invent a biological decision.
     assert state['expert_guidance_sources']['mathematics']['reference_id']=='references/knowledge-guided-composition.md'
     assert 'workflow_materials' not in state

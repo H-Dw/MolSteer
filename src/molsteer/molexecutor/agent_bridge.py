@@ -26,12 +26,12 @@ _TERM_FIELDS = (
 )
 
 
-def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
+def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict | None = None):
     """Return (program, strength, editable IDs, audit snapshot).
 
     A checked Agent reward is not automatically a live program. This compiler
     accepts only the fixed coordinate families and preserves their declared
-    state/prediction views; the caller must bind a real FLOWR runtime and budget.
+    state/prediction views; the caller binds a native FLOWR runtime and one weight.
     """
     checkpoint = load_checkpoint(path)
     artifacts = checkpoint.get('artifacts') or {}
@@ -55,13 +55,13 @@ def compile_validated_agent_checkpoint(path: str | Path, guard_template: dict):
     validate_spec(spec,packet,report)
     strength = artifacts.get('strength')
     if (type(strength) not in (int,float) or not math.isfinite(strength)
-            or not 0 < strength <= 1
+            or strength < 0
             or plan.get('continuation',{}).get('strength') != strength):
         raise ValueError('Agent continuation strength is invalid or inconsistent')
-    if not isinstance(guard_template,dict) or any(k not in guard_template for k in _GUARD_FIELDS):
-        raise ValueError('A complete reviewed FLOWR guard template is required')
     if spec.get('schema_version')=='2.0.0':
         return _compile_expert(spec,packet,report,checkpoint,guard_template,strength)
+    if not isinstance(guard_template,dict) or any(k not in guard_template for k in _GUARD_FIELDS):
+        raise ValueError('Legacy non-expert evaluator requires its explicit physical parameter template')
     terms = spec.get('terms') or []
     if not terms or any(term.get('view') not in ('state','prediction') for term in terms):
         raise ValueError('Only state and prediction coordinate terms can run live')
@@ -119,7 +119,7 @@ def _compile_expert(spec,packet,report,checkpoint,guard_template,strength):
                 or not rep['transform'].get('verified')
                 or rep['original_atom_ids']!=list(range(len(rep['original_atom_ids'])))):
             raise ValueError('Expert FLOWR views require verified world transforms and native slot mapping')
-    editable=sorted({a for o in observables for a in o['atom_ids']})
+    editable=list(packet['representations']['prediction']['original_atom_ids'])
     declared=spec['model_dynamics']['editable_atom_ids']
     if declared is not None: editable=sorted(set(editable)&set(declared))
     if not editable: raise ValueError('No editable expert coordinates')
@@ -127,12 +127,11 @@ def _compile_expert(spec,packet,report,checkpoint,guard_template,strength):
                  packet_id=packet['packet_id'],identity=deepcopy(packet['identity']),
                  source_reward_id=spec['reward_id'],agent_run_id=checkpoint['run_id'],
                  expert_spec=deepcopy(spec),source_packet=deepcopy(packet),source_report=deepcopy(report),
-                 region_atom_ids=editable,active_objectives=[],weights=[],lambda_graph=0.,
+                 region_atom_ids=editable,
                  knowledge_source={'corpus':'knowledge/','retrieval':deepcopy(spec['retrieval'])},
-                 graph_policy=spec['mathematical_design'].get('design_audit',{}).get('graph_policy',
-                     'allow_changes; MolMonitor reviews current chemical roles'),
-                 constraints=['current slot mapping','editable mask','live component derivative preflight','post-injection direction','explicit constraint predicates'],
-                 inactive_compatibility_fields=['tau','rho','weights','lambda_graph'])
-    program.update({k:deepcopy(guard_template[k]) for k in _GUARD_FIELDS})
+                 graph_policy='Interpret declared mechanisms using current chemistry; no initial whole-graph activation check',
+                 execution_semantics='native_scalar_gradient', guidance_weight=float(strength),
+                 fixed_atom_ids=sorted(set(packet['representations']['prediction']['original_atom_ids'])-set(editable)),
+                 ignored_legacy_fields=sorted(guard_template or {}))
     program['program_id']='rp_'+digest(program)[:24]
     return program,float(strength),editable,checkpoint

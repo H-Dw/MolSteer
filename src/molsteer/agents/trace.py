@@ -53,6 +53,7 @@ def _payload(state: dict[str, Any]) -> dict[str, Any]:
     return {"schema_version": "1.1.0", "run_id": run_id, "status": state.get("status"),
             "route": state.get("route"), "step": int(state.get("step", 0)),
             "trace": _redact(state.get("trace", [])),
+            "api_usage": _redact(state.get("api_usage", [])),
             "errors": [str(e)[:500] for e in state.get("errors", [])][:100],
             "packet_id": state.get("packet", {}).get("packet_id"),
             "reward_id": state.get("reward_spec", {}).get("reward_id"),
@@ -88,7 +89,8 @@ def save_checkpoint(state: dict[str, Any], trace_dir: str | Path) -> Path:
         "execution_result", "config", "segments", "strength", "replans",
         "biology_plan", "mathematical_design", "model_dynamics", "expert_history", "expert_workspace_history",
         "retrieval_records", "research_packets", "reward_design_deferral", "expert_prompt_digests",
-        "expert_guidance_sources", "workflow_reference_digests", "raw_reference_context", "raw_reference_analysis")})
+        "expert_guidance_sources", "workflow_reference_digests", "raw_reference_context", "raw_reference_analysis",
+        "host_workspaces", "api_usage", "evidence_supplements", "reader_guidance_sources")})
     payload["artifacts_digest"] = digest(payload["artifacts"])
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     temporary.replace(target)

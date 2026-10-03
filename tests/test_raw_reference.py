@@ -408,13 +408,15 @@ def test_actual_reader_and_both_expert_loops_receive_temporal_context_and_public
     for role in originals:
         assert seen[role][1]['raw_reference']['comparison_id'] == comparison['comparison_id']
         assert {'inspect_raw_comparison', 'read_raw_reference', 'inspect_raw_goal_trajectory'} <= models[role].tools
-        assert {d['time'] for d in seen[role][1]['raw_reference']['node_diagnostics']} == {n['time'] for n in comparison['nodes']}
+        assert {d['time'] for d in seen[role][1]['raw_reference']['nodes']} == {n['time'] for n in comparison['nodes']}
     assert any(e.get('tool_name') == 'inspect_raw_goal_trajectory' and e['output']['tracks'] for e in state['trace'])
     math_context = seen['molthinker.mathematics'][1]
     assert math_context['biology_decisions']['raw_reference_review']['comparison_id'] == comparison['comparison_id']
     assert math_context['raw_reference_analysis']['temporal_observation']
     assert state['diagnostic_report'] == report
-    assert 'current observable evidence' in seen['molthinker.mathematics'][0]
+    assert 'current numeric evidence' in seen['molthinker.mathematics'][0]
+    assert 'residual_needs' in seen['molthinker.biology'][0]
+    assert state['reader_guidance_sources']['SKILL.md']
     checkpoint = json.loads(Path(state['checkpoint_path']).read_text(encoding='utf-8'))
     assert checkpoint['artifacts']['raw_reference_context'] == comparison
     assert checkpoint['artifacts']['expert_workspace_history'][0]['raw_reference_binding']['comparison_id'] == comparison['comparison_id']

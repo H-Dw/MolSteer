@@ -8,8 +8,11 @@ from copy import deepcopy
 
 
 BIOLOGY_GUIDE = {
-    'starting_point': 'The current generation state, its contemporaneous prediction and MolReader evidence, plus an observed raw reference suffix only when configured. Guided outcomes remain unobserved.',
+    'starting_point': 'Native continuation residual needs first, then current controllable precursors and counterevidence. Missing final stays unknown; guided outcomes are unobserved.',
     'questions': [
+        'What remains at the explicit raw final?',
+        'Through which current coordinate mechanism could intervention improve it?',
+        'What independent necessary need does adding this goal cover?',
         'Which measurements describe the same hypothesized mechanism, and which defects are independent?',
         'What does each goal directly repair, what independent defects does it cover, and what local feasibility can it improve?',
         'Which chemical hypotheses, editable variables and coupled risks qualify that potential repair benefit?',
@@ -25,7 +28,7 @@ BIOLOGY_GUIDE = {
         'raw_reference_review': 'Trace mechanisms through every configured raw node and current_condition_trajectory. Separate old-object comparability from later-molecule validity. Record references, persistence, native clearance/retyping, recurrence, useful regions and tradeoffs.',
         'value_ranking': 'Rank potential intervention value using persistence under current chemistry, severity, native repair timing, controllability, independent coverage, dependency and disruption of useful evolution. Explain pairwise priorities without invented intervention gains.',
         'revision': 'Respond to mathematical mechanism conflicts: accept, modify or reject proposed hypothesis/target/priority changes with reasons. Earlier biological assumptions are revisable.'},
-    'handoff': 'Optimize directions are selected repairs; constraint directions are preservation. A scientifically necessary goal with missing execution inputs stays required=true, disposition=deferred, and proceeds to mathematics.',
+    'handoff': 'Optimize directions implement scalar repair or preservation terms; monitoring remains independent evaluation. Legacy proposal constraints require scalar redesign. A scientifically necessary goal with missing execution inputs stays required=true, disposition=deferred, and proceeds to mathematics.',
     'scope': 'Editable evidence-linked decisions. The expert owns value ranking; raw counts are not utility scores. No fabricated outcome probabilities or additional eligibility gate.'}
 
 MATH_GUIDE = {
@@ -37,14 +40,13 @@ MATH_GUIDE = {
     'stages': {
         'source_transfer': 'Record inspected locators, native objects/roles, prerequisites, transferable parts and proposed changes.',
         'target_sets': 'Record observables, conditional chemical references, target relations and scale origins. A reference value does not determine a tolerance.',
-        'local_response': 'Describe the desired derivative or constrained direction across relevant regimes before choosing a shape or aggregate.',
+        'local_response': 'Describe the desired scalar derivative across relevant regimes before choosing a shape or aggregate.',
         'candidates': 'Record source-retained and newly derived parts, alternatives, local measurements and unresolved evaluator needs.'},
     'conditional_physics': {
         'construction': 'For each supported current chemical hypothesis q, construct normalized local geometry energy plus typed exclusion and justified native-contact preservation. Use only diagnosed coupled mechanisms.',
-        'family_to_reason_about': 'Optional family: e_q=(E_geom,S^q-E_ref,S^q)/E_scale + lambda_s*sum(relu((d_min,ia^q-d_ia)/sigma_s)^2) + lambda_c*relu((C_native,S,t-C_S^q-delta_C)/sigma_C)^2. Retain only selected, evidenced mechanisms with evaluable observables; this is a reasoning example, not a preset objective or coefficient choice.',
         'geometry': 'Use current typed bond/angle references or a ready physical energy; bond_length_error and bond_angle_error rebind MMFF references at runtime. A local surrogate is not the entire MMFF energy.',
         'sterics': 'typed_steric_overlap uses current element radii and an explicit buffer; a current nearest distance is not an exclusion radius.',
-        'contacts': 'Retain meaningful same-stage native contacts. native_nonincrease compares with the same-time unperturbed proposal on the CURRENT path, not the stored independent raw trajectory. A historical raw contact baseline needs an explicit evaluator; typed direction/area claims need actual observables.',
+        'contacts': 'Preserve meaningful contacts with explicit measurable scalar terms or independent evaluation. Historical raw baselines require binding, applicability and a declared evaluator; no same-step proposal rejection is available.',
         'scales': 'Explain energy reference, normalization, buffers and allowed losses. Values are sourced or calibrated inputs, never invented from rank.',
         'hypotheses': 'Chemical transitions update interpretation. Do not freeze the initial graph or average incompatible reference bond lengths. Multiple-hypothesis mixtures need validated hypotheses and a suitable evaluator.',
         'collaboration': 'When physical references or local responses contradict biology, request_biology_revision with evidence and a concrete alternative before repairing the old formula.'},

@@ -5,7 +5,13 @@ description: Produce localized, evidence-linked, risk-only DiagnosticReports fro
 
 # MolReader Diagnosis
 
-Locate defects and organize evidence. Report current risks, measurements and interpretation limits. Exclude molecular edits, reward design, repair directions and future intervention plans. Chinese instructions: [SKILL.zh-CN.md](SKILL.zh-CN.md).
+Locate defects and organize evidence. Report current risks, measurements and interpretation limits. Keep molecular edits and reward selection out of DiagnosticReport. Record cross-time precursor hypotheses in a separate evidence artifact. Chinese instructions: [SKILL.zh-CN.md](SKILL.zh-CN.md).
+
+## Native residual needs first
+
+When raw references are configured, begin with inspect_raw_comparison(section="residual_needs"): explicit final remainder, then current controllable precursor. Inspect all selected nodes using their own chemistry, relation applicability, measurements, references and deviations. Persistent, recurrent, late-emergent, naturally resolved, absent relation and missing observation remain distinct. Chemistry changes do not erase defects under the new type. Without an explicit raw final, terminal status is unknown.
+
+Record candidate coordinate mechanisms, useful contact/conformation changes to preserve, correlations, competing explanations and missing local measurements in the separate temporal analysis. Host initializes the evidence index and current diagnosis; there is no mandatory tool-read order. Use existing calculators through measure_evidence_gap and read_measurement_supplement. Supplements have source, coordinate and configuration bindings and never replace original packet/data. Report missing capability or inputs explicitly. Future evidence cannot authorize a current numerical reference. Biology chooses and ranks interventions.
 
 ## Ground the report
 

@@ -89,6 +89,8 @@ class AgentConfig(StrictModel):
 
 
 class RuntimeConfig(StrictModel):
+    guidance_weight: float = Field(default=1.0, ge=0)
+    no_progress_actions: int = Field(default=3, ge=1)
     max_agent_steps: int = Field(default=12, ge=1)
     max_repairs: int = Field(default=2, ge=0)
     max_replans: int = Field(default=2, ge=0)
@@ -187,6 +189,15 @@ class RawReferenceConfig(StrictModel):
 
 class ReaderConfig(StrictModel):
     raw_reference: RawReferenceConfig = Field(default_factory=RawReferenceConfig)
+    measurement_stage_paths: dict[str, str] = Field(default_factory=dict,
+        description='Node ID to saved stage directory within the repository, for existing read-only calculators')
+
+    @field_validator('measurement_stage_paths')
+    @classmethod
+    def local_measurement_stages(cls, value):
+        for path in value.values():
+            RuntimeConfig.paths_are_relative(path)
+        return value
 
 
 class MonitoringConfig(StrictModel):
@@ -236,6 +247,8 @@ class AgentSystemConfig(StrictModel):
             if profile.reasoning_effort is not None and not profile.reasoning_enabled:
                 raise ValueError('reasoning_effort requires reasoning_enabled=true')
         for name, profile in self.agents.items():
+            if name == 'molmonitor' and 'enabled' not in profile.model_fields_set:
+                profile.enabled = False
             if profile.model not in self.models:
                 raise ValueError(f"agent profile {name!r} references unknown model {profile.model!r}")
         if set(self.thinker.experts) - set(EXPERT_NAMES):

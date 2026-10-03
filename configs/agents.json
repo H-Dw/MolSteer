@@ -57,11 +57,12 @@
     },
     "molexecutor": {
       "model": "default",
-      "description": "Execution proposal agent"
+      "description": "Deterministic scalar loading and native gradient injection"
     },
     "molmonitor": {
       "model": "default",
-      "description": "Monitoring and retuning agent"
+      "description": "Independent optional monitoring",
+      "enabled": false
     }
   },
   "reader": {
@@ -99,6 +100,8 @@
     "require_design_audit": true
   },
   "runtime": {
+    "guidance_weight": 1.0,
+    "no_progress_actions": 3,
     "max_agent_steps": 24,
     "max_repairs": 8,
     "max_replans": 2,

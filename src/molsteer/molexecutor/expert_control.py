@@ -24,6 +24,60 @@ def probe_predict(adapter, **kwargs):
         restore_rng(saved_rng)
 
 
+def probe_live_scalar_response(adapter, packet, biology, drafts, strategy):
+    """Optional read-only component pullbacks into one native coordinate tensor."""
+    required = ('predict', 'endpoint', 'world_state_coordinates', 'curr', 'index')
+    if adapter is None or not all(hasattr(adapter, key) for key in required):
+        return dict(status='not_run', scope='live_current_coordinates', reason='No live sampling adapter available')
+    try:
+        if strategy.get('mode') != 'scalar_potential':
+            return dict(status='not_run', reason='A scalar candidate is required')
+        evaluator = ExpertEvaluator(dict(mathematical_design=dict(directions=list(drafts.values()), strategy=strategy),
+                                         biology_plan=biology), packet)
+        x = adapter.curr['coords'].detach().clone().requires_grad_(True)
+        pred, _ = probe_predict(adapter, coordinates=x)
+        endpoint = adapter.endpoint(pred)
+        coordinates = dict(prediction=endpoint['coords'], state=adapter.world_state_coordinates(x))
+        molecules, elements = {}, {}
+        if evaluator.dynamic_views or evaluator.mmff:
+            from molreader.io import load_config
+            from .chemistry import decode_endpoint
+            vocabulary = load_config()
+            for view in evaluator.dynamic_views | set(evaluator.mmff):
+                current = endpoint if view == 'prediction' else dict(coords=coordinates['state'],
+                    **{k:adapter.curr[k][adapter.index] for k in ('atomics', 'charges', 'bonds')})
+                elements[view] = [vocabulary['atomic_tokens'][i] for i in current['atomics'].argmax(-1).tolist()]
+                molecules[view] = decode_endpoint(current, vocabulary)
+        values = evaluator.components(coordinates, molecules=molecules, elements=elements)
+        objectives = evaluator.objectives(values)
+        mask = torch.zeros_like(adapter.curr['mask'], dtype=torch.bool)
+        editable = adapter.config.get('editable_atom_ids')
+        if editable is None:
+            mask[adapter.index] = adapter.curr['mask'][adapter.index].bool()
+        else:
+            mask[adapter.index, editable] = True
+        mask[adapter.index, adapter.config.get('fixed_atom_ids', [])] = False
+        total = -aggregate_objectives(objectives, strategy)
+        grad, = torch.autograd.grad(total + x.sum()*0, x, retain_graph=True)
+        grad = grad * mask.unsqueeze(-1)
+        rows, gradients = [], []
+        for key, value in objectives.items():
+            component, = torch.autograd.grad(value + x.sum()*0, x, retain_graph=True)
+            component = component * mask.unsqueeze(-1)
+            gradients.append(component)
+            rows.append(dict(direction_id=key, value=float(value.detach()),
+                rank_coefficient=strategy.get('priority_weights', {}).get(key, 1.), gradient_norm=float(component.norm()),
+                derivative_along_scalar_reward=float((component*grad).sum())))
+        flat = torch.stack(gradients).reshape(len(gradients), -1)
+        norm = flat.norm(dim=-1)
+        cosine = (flat @ flat.T) / (norm[:, None]*norm[None, :]).clamp(min=1e-30)
+        return dict(status='measured', scope='live_current_coordinates', components=rows,
+            gradient_cosines=cosine.detach().tolist(), scalar_gradient_norm=float(grad.norm()),
+            reference_bindings=evaluator.reference_diagnostics, terminal_benefit='not_run')
+    except (ValueError, RuntimeError, KeyError, TypeError) as exc:
+        return dict(status='unavailable', scope='live_current_coordinates', reason=str(exc), blocking=False)
+
+
 def packet_molecule(packet, view):
     from molreader.io import decode
     context = observation(packet, 'chemistry_context', view)
@@ -94,7 +148,7 @@ class ExpertEvaluator:
                         self.mmff.get(view), molecules.get(view), elements.get(view), bindings)
             except ChemicalReferenceUnavailable as exc:
                 self.unavailable[direction['direction_id']] = str(exc)
-                continue
+                raise ValueError('Reward component unavailable: '+direction['direction_id']+': '+str(exc)) from exc
             finally:
                 if bindings:
                     self.reference_diagnostics[direction['direction_id']] = bindings
@@ -102,8 +156,10 @@ class ExpertEvaluator:
         return values
 
     def objectives(self, values):
-        return {k:v for k,v in values.items() if self.roles[k]=='optimize' and
-                all(c in values for c in self.dependencies.get(k, []))}
+        expected = {d['direction_id'] for d in self.directions if self.roles[d['direction_id']] == 'optimize'}
+        if expected - set(values):
+            raise ValueError('Reward components missing: '+', '.join(sorted(expected-set(values))))
+        return {k:v for k,v in values.items() if self.roles[k]=='optimize'}
 
     def constraints(self, values, baseline=None):
         return [k for k,v in values.items() if self.roles[k]=='constraint' and
@@ -171,65 +227,49 @@ def check_displacement(delta, gradients, strategy, tolerance=1e-10, scalar_gradi
 
 
 def run_expert_trial(packet, spec, iterations=3, strength=1.):
+    """Derivative and response measurements on copies; no runtime acceptance policy."""
     from molsteer.molmonitor.checks import gradient_check
-    evaluator = ExpertEvaluator(spec,packet)
+    evaluator = ExpertEvaluator(spec, packet)
+    if evaluator.strategy['mode'] != 'scalar_potential' or any(r == 'constraint' for r in evaluator.roles.values()):
+        raise ValueError('Legacy controller or proposal constraints require scalar redesign')
     views = sorted({o['view'] for d in evaluator.directions for o in d['observables']})
     snapshots = packet['steering']['coordinate_snapshots']
     lengths = [len(snapshots[v]['atom_ids']) for v in views]
-    original = torch.cat([torch.tensor(snapshots[v]['coords_angstrom'],dtype=torch.float64) for v in views])
-    supports = {v:{a for d in evaluator.directions for o in d['observables'] if o['view']==v for a in o['atom_ids']} for v in views}
+    original = torch.cat([torch.tensor(snapshots[v]['coords_angstrom'], dtype=torch.float64) for v in views])
     declared = spec['model_dynamics']['editable_atom_ids']
-    mask = torch.tensor([a in supports[v] and (declared is None or a in declared)
-                         for v in views for a in snapshots[v]['atom_ids']],dtype=original.dtype)[:,None].expand_as(original)
+    mask = torch.tensor([declared is None or a in declared for v in views for a in snapshots[v]['atom_ids']],
+                        dtype=original.dtype)[:, None].expand_as(original)
     def components(x):
-        return evaluator.components(dict(zip(views,torch.split(x,lengths))))
+        return evaluator.components(dict(zip(views, torch.split(x, lengths))))
     initial = components(original)
-    if not evaluator.objectives(initial):
-        return {'numerical_gradient':{'passed':False, 'components':{}},
-                'unavailable_directions':dict(evaluator.unavailable),
-                'reference_bindings':dict(evaluator.reference_diagnostics),
-                'fixed_atoms_unchanged':True, 'input_snapshot_unchanged':True,
-                'live_gradient':'not_run', 'full_sampler_ablation':'not_run',
-                'scope':'No currently applicable optimization mechanism on the coordinate copy',
-                'revision_hint':'Inspect missing current chemical references and preservation dependencies; revise the mechanism or retain it as unresolved.'}
-    checks = {key:gradient_check(lambda x,k=key:components(x)[k], original) for key in initial}
-    if not all(c['passed'] for c in checks.values()):
-        return {'numerical_gradient':{'passed':False,'components':checks},
-                'fixed_atoms_unchanged':True,'input_snapshot_unchanged':True,
-                'live_gradient':'not_run','full_sampler_ablation':'not_run',
-                'scope':'Failed coordinate-copy derivative check; no displacement attempted',
-                'revision_hint':'Inspect the failed components and their active/stopping regions. A linear hinge exactly at its reference has no classical derivative. Review target feasibility with biology; do not loosen numerical tolerances or claim live validation.'}
-    current = original.clone(); rows = []
-    for _ in range(iterations):
-        variable = current.detach().requires_grad_(True)
-        values = components(variable)
-        objectives = evaluator.objectives(values)
-        direction, gradients, diagnostic = control_direction(objectives,variable,mask,evaluator.strategy)
-        delta = .25*strength*direction
-        delta *= (.03/delta.norm(dim=-1,keepdim=True).clamp(min=1e-30)).clamp(max=1)
-        accepted = False; reasons=[]
-        for attempt in range(12):
-            candidate = current+delta*(.5**attempt)
-            offset = candidate-original
-            candidate = original+offset*(.20/offset.norm(dim=-1,keepdim=True).clamp(min=1e-30)).clamp(max=1)
-            ok, derivatives = check_displacement(candidate-current, gradients, evaluator.strategy,scalar_gradient=-direction)
-            after = components(candidate)
-            reasons = evaluator.constraints(after, values)
-            if evaluator.strategy['mode']=='common_descent':
-                regression = any(float(after[k])>float(values[k])+1e-10 for k in objectives)
-            else:
-                regression = bool(aggregate_objectives(evaluator.objectives(after),evaluator.strategy) >
-                                  aggregate_objectives(objectives,evaluator.strategy)+1e-10)
-            if ok and not reasons and not regression:
-                current=candidate.detach(); accepted=True; break
-        rows.append(dict(accepted=accepted,conflict=diagnostic,post_clip_directional_derivatives=derivatives,
-                         constraint_failures=reasons))
-        if not accepted or float(direction.norm())==0: break
-    final = components(current)
-    return {'numerical_gradient':{'passed':True,'components':checks}, 'fixed_atoms_unchanged':bool(torch.equal(current[mask==0],original[mask==0])),
-            'input_snapshot_unchanged':all(digest(snapshots[v]['coords_angstrom'])==spec['coordinate_hashes'][v] for v in views),
-            'penalty_before':float(aggregate_objectives(evaluator.objectives(initial),evaluator.strategy)),
-            'penalty_after':float(aggregate_objectives(evaluator.objectives(final),evaluator.strategy)),
-            'components_before':{k:float(v) for k,v in initial.items()},'components_after':{k:float(v) for k,v in final.items()},
-            'control_trials':rows,'live_gradient':'not_run','full_sampler_ablation':'not_run',
-            'scope':'Independent frozen coordinate views; no claim about live conflicts or terminal outcomes'}
+    checks = {key: gradient_check(lambda x, k=key: components(x)[k], original) for key in initial}
+    variable = original.clone().requires_grad_(True)
+    values = components(variable)
+    objectives = evaluator.objectives(values)
+    potential = aggregate_objectives(objectives, evaluator.strategy)
+    gradient, = torch.autograd.grad(potential + variable.sum()*0, variable, retain_graph=True)
+    rows, gradients = [], []
+    weights = evaluator.strategy.get('priority_weights', {})
+    by_id = {d['direction_id']: d for d in evaluator.directions}
+    for key, value in objectives.items():
+        local, = torch.autograd.grad(value + variable.sum()*0, variable, retain_graph=True)
+        local = local * mask
+        gradients.append(local)
+        rows.append(dict(direction_id=key, value=float(value.detach()), rank_coefficient=weights.get(key, 1.),
+            gradient_norm=float(local.norm()), directional_derivative=float((local*(-gradient*mask)).sum()),
+            physical_scales=by_id[key].get('reference_parameters', [])))
+    flat = torch.stack(gradients).reshape(len(gradients), -1)
+    norms = flat.norm(dim=-1)
+    cosines = (flat @ flat.T) / (norms[:, None]*norms[None, :]).clamp(min=1e-30)
+    # This small displacement is a declared numerical response probe, never a sampler step.
+    probe_step = 1e-4
+    probe = original - probe_step * strength * gradient.detach() * mask
+    after = components(probe)
+    return dict(numerical_gradient=dict(passed=all(c['passed'] for c in checks.values()), components=checks),
+        fixed_atoms_unchanged=bool(torch.equal(probe[mask == 0], original[mask == 0])),
+        input_snapshot_unchanged=all(digest(snapshots[v]['coords_angstrom']) == spec['coordinate_hashes'][v] for v in views),
+        penalty_before=float(potential.detach()), penalty_after=float(aggregate_objectives(evaluator.objectives(after), evaluator.strategy)),
+        components_before={k:float(v) for k,v in initial.items()}, components_after={k:float(v) for k,v in after.items()},
+        component_response=rows, gradient_cosines=cosines.detach().tolist(), scalar_gradient_norm=float((gradient*mask).norm()),
+        probe_step=probe_step, probe_weight=strength, live_gradient='not_run', full_sampler_ablation='not_run',
+        scope='Coordinate-copy response in separate declared views; same-view gradients are comparable. Mixed-view cosines are not a live shared pullback. No terminal benefit established.')

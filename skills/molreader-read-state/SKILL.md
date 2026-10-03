@@ -20,8 +20,8 @@ When adapting unfamiliar inputs, consult the [evidence input contract](reference
 - Measure valence conflicts, connectivity, local geometry, severe overlaps, chemistry screening alerts and interface observations. Retain evaluated denominators, numerical references, units, assumptions and source identifiers.
 - Attach category alternatives and chemically comparable stage changes to local evidence. Keep routine descriptors and affinity predictions available without inventing target ranges.
 - Record coordinate availability, frame alignment, graph validity, formal-charge completeness, protonation validation, partial charges and receptor preparation separately.
-- Record endpoint availability, live derivative access, editable degrees of freedom, masks, active particle population and evaluation budget only when supported by supplied evidence or explicit runtime declarations.
-- Keep unknown objectives, anchors, shape references, off-target scores and intervention feedback unknown. An active-slot mask is not permission to move atoms; saved candidates do not establish a live weighted population.
+- Record endpoint availability, live derivative access, editable degrees of freedom, masks, active particle population and native integration context only when supported by supplied evidence or explicit runtime declarations.
+- Keep unknown objectives, anchors, shape references, off-target scores and intervention feedback unknown. The runtime differentiates all native active target coordinates unless explicitly fixed; saved candidates do not establish a live weighted population.
 
 ## Preserve measurement meaning
 
@@ -34,3 +34,7 @@ Keep protein-coordinate overlap screens separate from prepared interaction typin
 Validate target, ligand, stage, original atom IDs, source hashes and coordinate provenance. Enrichment creates a new packet identity linked to its parent. Preserve all existing observations and evidence links.
 
 Return the StatePacket, measured representations and consolidated coverage limitations. If diagnosis is requested, produce a separate risk-only DiagnosticReport. Reward design belongs to MolThinker.
+
+## Configured continuation evidence
+
+Reference nodes are selected by configuration, never by fixed times in this skill. Build a separate terminal-first residual index across all selected nodes; missing final is unknown. Keep type transitions separate from current-type defects, and relation absence separate from measurement absence or resolution. Additional measurements use existing calculators on bound copies and produce separate supplements with source, coordinate and config hashes. Preserve original packet and data.

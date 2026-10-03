@@ -277,6 +277,6 @@ def _make_reward(program,baseline,receptor,vocabulary,control=None):
 
 
 def make_reward(program,baseline,receptor,vocabulary,control=None):
-    from .weighted_reward import WeightedReward
-    reward=_make_reward(program,baseline,receptor,vocabulary,control)
-    return WeightedReward(reward,program['reward_weight']) if 'reward_weight' in program else reward
+    # Legacy reward_weight is readable provenance, not a second runtime multiplier.
+    # The continuation's guidance_weight is applied exactly once by the engine.
+    return _make_reward(program,baseline,receptor,vocabulary,control)

@@ -1,10 +1,13 @@
 # MolSteer
 
+当前实现见[剩余需求决策、Host 工作区与原生全程标量注入](docs/RESIDUAL_NATIVE_SCALAR.zh-CN.md)。
+
+
 默认 MolThinker 现采用[生物专家与数学专家](docs/DUAL_EXPERTS.zh-CN.md)：按需调度 Researcher，逐方向检索并推导公式，通过版本化表达和实际梯度冲突检查接入执行。旧单专家配置及显式离线模式继续可用。
 
-MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 [LangChain/LangGraph Agent 系统](docs/AGENT_SYSTEM.zh-CN.md)默认通过 API 调用 LLM，四个 Agent 可独立选择服务与模型，统一配置见 [configs/README.md](configs/README.md)。新 Agent 默认启用[基于证据的创造性奖励 Skill](skills/molthinker-reward-creativity/SKILL.zh-CN.md)；确需约束式多目标求解时可参考[冲突感知控制 Skill](skills/molthinker-conflict-aware-control/SKILL.zh-CN.md)。原有确定性 creativity/selection 命令仍可用于复现，但 `think` 现在要求显式选择模式；FLOWR.ROOT 实时梯度引导、恢复和通用 flow/diffusion 回调接口保留。
+MolSteer 分为 MolReader、MolThinker、MolExecutor 和 MolMonitor。新增的 [LangChain/LangGraph Agent 系统](docs/AGENT_SYSTEM.zh-CN.md)默认通过 API 调用 LLM，Reader 与 Thinker 专家可独立选择服务与模型，Executor 使用确定性计算，独立 MolMonitor 默认关闭，统一配置见 [configs/README.md](configs/README.md)。新 Agent 默认启用[基于证据的创造性奖励 Skill](skills/molthinker-reward-creativity/SKILL.zh-CN.md)；[冲突感知控制 Skill](skills/molthinker-conflict-aware-control/SKILL.zh-CN.md)保留为历史分析参考，不是当前标量执行契约。原有确定性 creativity/selection 命令仍可用于复现，但 `think` 现在要求显式选择模式；FLOWR.ROOT 实时梯度引导、恢复和通用 flow/diffusion 回调接口保留。
 
-四个 Agent 默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。
+Reader 与 Thinker 模型配置默认经 OpenRouter 调用 `z-ai/glm-5.3`；API 凭据由宿主环境变量 `OPENROUTER_API_KEY` 注入。
 
 默认双专家从生成中间态整合多因素证据、选择最小充分目标，再检索知识、推导局部响应和构造候选；科学目标与执行能力分开，辅助工作区可选。改动和验证边界见[前向流程实施说明](docs/MOLTHINKER_FORWARD_IMPLEMENTATION.zh-CN.md)，此前调用配置和奖励问题的追溯见 [GLM-5.3 与专家设计审计](docs/GLM53_EXPERT_DESIGN_AUDIT.zh-CN.md)。
 
@@ -14,8 +17,8 @@ SCNet 的 DTK 26.04 异构加速卡 Notebook 使用单独的 [推理 Conda 环�
 
 - MolReader：43 个独立指标、多视图 StatePacket、只报告风险的中英文 DiagnosticReport。
 - MolThinker：知识检索、适用性检查、奖励选择或组合，以及可执行 RewardProgram。
-- MolExecutor：可微奖励、明确的梯度注入、模型适配、自动启动脚本和完整运行检查点。
-- MolMonitor：匹配原生参考、局部时序异常识别、动态力度搜索、独立质量检查，以及向 MolThinker 发送可恢复的函数修订请求。
+- MolExecutor：确定性加载标量奖励，每个剩余原生步骤按固定权重注入梯度，保存逐步记录与可恢复检查点。
+- MolMonitor：独立可选的监测与图复核模块，默认关闭，直接标量注入路径不调用。
 
 当前实际接入并验证的模型是 FLOWR.ROOT，通用 diffusion 接口已通过数值测试，其他预训练模型仍需对应适配。奖励组合器支持已实现的基元，不能自动实现任意知识库公式。
 

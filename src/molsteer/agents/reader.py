@@ -37,6 +37,9 @@ class Reader:
 
 def reader_tools(packet: dict, supplied_report: dict | None = None, *, raw_reference_context: dict | None = None):
     validate_packet(packet); frozen = deepcopy(packet); result = {}; observed_paths = set()
+    from molreader.localized_report import make_localized_report
+    prepared_report = deepcopy(supplied_report) if supplied_report is not None else make_localized_report(frozen)
+    validate_report(prepared_report, frozen)
     raw_context = bound_raw_context(raw_reference_context, frozen)
     result['raw_reference_context'] = deepcopy(raw_context)
     result['raw_reference_analysis'] = {
@@ -79,18 +82,14 @@ def reader_tools(packet: dict, supplied_report: dict | None = None, *, raw_refer
         from .trace import _redact
         result.setdefault('raw_reference_analysis', {}).update(_redact(deepcopy(record)))
         return {'status': 'recorded', 'blocking': False,
-                'analysis': deepcopy(result['raw_reference_analysis']),
+                'updated_fields': sorted(record),
                 'limit': 'Temporal associations are descriptive; intervention selection belongs to MolThinker.'}
     @tool
     def submit_diagnosis() -> dict:
-        """Build and validate DiagnosticReport after inspecting all metric paths."""
-        if observed_paths != {"geometry", "chemistry", "uncertainty"}: raise ValueError("all three metric paths are required")
-        if supplied_report is not None: report = deepcopy(supplied_report)
-        else:
-            from molreader.localized_report import make_localized_report
-            report = make_localized_report(frozen)
+        """Submit the host-prepared current-state diagnosis, independent of tool read order."""
+        report = deepcopy(prepared_report)
         validate_report(report, frozen); result["report"] = report
-        return {"status": "accepted", "packet_id": frozen["packet_id"], "report": report}
+        return {"status": "accepted", "packet_id": frozen["packet_id"], "finding_count": len(report.get('findings', []))}
     return [make_statepack_tool(frozen), inspect_geometry, inspect_chemistry, inspect_uncertainty,
             inspect_metric, *raw_reference_tools(raw_context, frozen), record_raw_reference_analysis, submit_diagnosis], result
 

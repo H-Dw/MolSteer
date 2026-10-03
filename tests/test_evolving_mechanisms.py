@@ -80,7 +80,7 @@ def test_rank_coefficients_change_actual_gradient_and_explicit_allocation_is_pre
     assert allocate_priorities(design, biology)['strategy']['priority_weights'] == {'a': .7, 'b': 1.}
 
 
-def test_native_preservation_compares_same_stage_and_unavailable_dependency_is_local():
+def test_legacy_constraint_analysis_cannot_suspend_scalar_objectives():
     evaluator = object.__new__(ExpertEvaluator)
     evaluator.roles = {'repair': 'optimize', 'independent': 'optimize', 'preserve': 'constraint'}
     evaluator.dependencies = {'repair': ['preserve'], 'independent': []}
@@ -90,7 +90,10 @@ def test_native_preservation_compares_same_stage_and_unavailable_dependency_is_l
     assert evaluator.constraints({'preserve': torch.tensor(.21)}, baseline) == ['preserve']
     evaluator.constraint_modes['preserve'] = 'absolute'
     assert evaluator.constraints({'preserve': torch.tensor(.15)}, baseline) == ['preserve']
-    assert set(evaluator.objectives({'repair': torch.tensor(1.), 'independent': torch.tensor(2.)})) == {'independent'}
+    evaluator.directions=[{'direction_id':'repair'},{'direction_id':'independent'}]
+    assert set(evaluator.objectives({'repair':torch.tensor(1.),'independent':torch.tensor(2.)}))=={'repair','independent'}
+    with pytest.raises(ValueError,match='components missing'):
+        evaluator.objectives({'independent':torch.tensor(2.)})
 
 
 def test_common_descent_preserves_rank_preference_and_resolves_first_order_conflict():
@@ -108,7 +111,7 @@ def test_common_descent_preserves_rank_preference_and_resolves_first_order_confl
     assert blocked['status'] == 'pareto_stationary_or_inactive'
 
 
-def test_one_unavailable_typed_term_keeps_independent_coordinate_mechanism(case):
+def test_missing_typed_component_fails_instead_of_silently_shrinking_reward(case):
     packet = case[0]
     distance = copy.deepcopy(case[3]['directions'][0]['observables'][0])
     typed = dict(distance, kind='bond_length_error', observable_id='typed')
@@ -122,10 +125,9 @@ def test_one_unavailable_typed_term_keeps_independent_coordinate_mechanism(case)
     evaluator = ExpertEvaluator(spec, packet)
     view = distance['view']
     coords = {view: torch.tensor(packet['steering']['coordinate_snapshots'][view]['coords_angstrom'], requires_grad=True)}
-    values = evaluator.components(coords, molecules={view: None})
-    assert set(values) == {'plain'} and set(evaluator.unavailable) == {'typed'}
-    direction, _, _ = control_direction(evaluator.objectives(values), coords[view], torch.ones_like(coords[view]), evaluator.strategy)
-    assert torch.isfinite(direction).all() and direction.norm() > 0
+    with pytest.raises(ValueError,match='Reward component unavailable: typed'):
+        evaluator.components(coords, molecules={view: None})
+    assert set(evaluator.unavailable)=={'typed'}
 
 
 def test_current_reference_shape_passes_existing_audit_without_graph_freeze(case):

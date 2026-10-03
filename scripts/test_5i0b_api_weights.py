@@ -249,7 +249,7 @@ def live_adapter(root, output):
         target_id=bundle['target']['target_id'],ligand_index=0,gpu=0,output=str(output),
         saved_stage=str(output/'capture'/bundle['target']['target_id']/'ligand_000/t_0.50'),
         monitor={'enabled':False,'graph_review':{'enabled':False}},
-        guidance_interval=[.5,1.],record_tensor_trace=True)
+        record_tensor_trace=True)
     return a,bundle
 
 
@@ -261,8 +261,6 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
     from molsteer.molexecutor.program import make_reward
     from molsteer.molexecutor.runner import run
     from molsteer.molexecutor.engine import run_suffix
-    from molsteer.molexecutor.interfaces import GuidanceBudget
-    from molsteer.molmonitor.live_gradient import check_live_gradient
     from molreader.io import load_stage,load_config,parse_pdb
     from molreader.packet import build_packet
     from molreader.localized_report import make_localized_report
@@ -293,7 +291,7 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
     gradient,=torch.autograd.grad(probe,x)
     derivative_ok=bool(torch.isfinite(gradient).all()) and float(gradient[adapter.index].norm())>0
     write(output/'AdapterDerivativeProbe.json',dict(passed=derivative_ok,
-        scope='Live endpoint squared-coordinate sum; every final reward requires its own preflight'))
+        scope='Live endpoint squared-coordinate sum; read-only development probe; runtime uses the scalar without per-step approval'))
     if not derivative_ok:raise ValueError('Live endpoint derivative is unavailable')
     dynamics=adapter.describe_dynamics()
     dynamics.update(live_derivative='available',editable_atom_ids=list(range(len(contexts[0].atom_ids))))
@@ -307,7 +305,7 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
             'task':'Test one 5i0b molecule from the copied t=0.50 checkpoint: design and validate a real coordinate reward, then run live gradient guidance at weights '+', '.join(map(str,weights))+'.',
             'monitor_enabled':False,'graph_review_enabled':False,
             'scope':'A controlled mechanism experiment under the current prediction hypothesis; native categorical sampling continues. Independently evaluate final molecules, including changed graph applicability. Do not claim terminal repair from an intermediate reward decrease.',
-            'comparison':'Same checkpoint, self-conditioning, RNG, execution strength and displacement budgets for every arm.'})
+            'comparison':'Same checkpoint, self-conditioning, RNG, native integration grid for every arm; external guidance_weight distinguishes guided arms.'})
     write(output/'api_status.json',dict(status=result['status'],errors=result.get('errors',[]),
         checkpoint_path=result['checkpoint_path'],mode=config.mode,
         monitor_enabled=False,trace_nodes=sorted({e['node'] for e in result['trace']})))
@@ -326,9 +324,8 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
     receptor,_=parse_pdb(adapter.config['receptor'])
     for atom in receptor:atom['vdw_radius']=Chem.GetPeriodicTable().GetRvdw(atom['atomic_number'])
     vocabulary=load_config()
-    budget=GuidanceBudget(strength=strength,max_step_angstrom=.02,max_path_angstrom=.5)
     adapter.restore(initial)
-    native=run_suffix(adapter,make_reward(program,baseline,receptor,vocabulary),output/'unguided',budget,'unguided')
+    native=run_suffix(adapter,make_reward(program,baseline,receptor,vocabulary),output/'unguided',arm='unguided',guidance_weight=0.)
     # A single molecule is edited; keep the original batch for sampler randomness.
     for key in ('curr','cond','times'):
         assert_equal(getattr(adapter,key),bundle['checkpoints']['1.00'][key],'native.'+key)
@@ -339,26 +336,22 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
     write(output/'native_replay_verification.json',{'passed':True,'scope':'All batch state, SC, RNG and final head'})
     matrix=[]
     for weight in weights:
-        weighted=deepcopy(program);weighted['reward_weight']=weight
+        weighted=deepcopy(program)
         weighted['program_id']='rp_'+digest({k:v for k,v in weighted.items() if k!='program_id'})[:24]
         armout=output/f'weight_{weight}';armout.mkdir()
         write(armout/'RewardProgram.json',weighted)
         adapter.restore(initial)
         reward=make_reward(weighted,baseline,receptor,vocabulary)
-        check=check_live_gradient(adapter,reward)
-        write(armout/'gradient_preflight.json',check)
-        if not check['passed']:raise ValueError('Reward-specific live gradient check failed at weight '+str(weight))
-        adapter.restore(initial)
-        execution=run_suffix(adapter,reward,armout/'run',budget,'agent')
+        execution=run_suffix(adapter,reward,armout/'run',arm='agent',guidance_weight=weight)
         rows=[json.loads(line) for line in (armout/'run/guidance_trace.jsonl').read_text().splitlines()]
         item=dict(weight=weight,**execution,
-            effective_steps=sum(r.get('accepted_guidance_l2_angstrom',0)>1e-12 for r in rows),
+            effective_steps=sum(r.get('actual_injection_l2_angstrom',0)>1e-12 for r in rows),
             initial_gradient_norm=next((r['gradient_norm'] for r in rows if 'gradient_norm' in r),None),
             maximum_injected_angstrom=max((r.get('injected_max_angstrom',0) for r in rows),default=0))
         matrix.append(item)
         write(output/'weight_summary.json',dict(status='in_progress',native=native,weights=matrix))
     write(output/'weight_summary.json',dict(status='completed',native=native,weights=matrix,
-        monitor_enabled=False,graph_review_enabled=False,weight_definition='Rw=wR; expert final direction is also multiplied by w'))
+        monitor_enabled=False,graph_review_enabled=False,weight_definition='Native step + guidance_weight * dt * gradient(R); one fixed external multiplier'))
     print(json.dumps({'status':'completed','output':str(output),'weights':list(weights)}),flush=True)
 
 

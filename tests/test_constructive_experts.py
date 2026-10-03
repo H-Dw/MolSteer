@@ -181,7 +181,7 @@ def test_preview_measures_allocation_instead_of_selecting_a_fixed_aggregator(cas
     p, _, b, _, _ = case; bio = next(x for x in b['directions'] if x['direction_id'] == 'repair')
     result = construct_direction(bio, [relation(case)], 'single', [retrieval(case)], p)
     strategies = [dict(mode='scalar_potential', aggregation={'op': 'single'}, justification='One independently sufficient local test target.'),
-                  dict(mode='common_descent', aggregation=None, justification='Compare the real projected copy gradient direction.')]
+                  dict(mode='scalar_potential', aggregation={'op':'weighted_sum'}, justification='Compare the real projected copy gradient direction.')]
     before = copy.deepcopy(p)
     preview = preview_architectures(p, b, {'repair': result['direction']}, {'editable_atom_ids': None}, strategies)
     assert preview['scope'] == 'coordinate_copy_same_view' and preview['selected_strategy'] is None
@@ -209,9 +209,9 @@ def test_preview_exposes_maximum_starvation_and_opposing_copy_gradients(case):
     result = preview_architectures(p, b, {'large_gap': one_draft, 'small_gap': two_draft}, {}, [maximum])
     assert result['previews'][0]['marginal_allocation'] == {'large_gap': 1., 'small_gap': 0.}
     two, two_draft = make('opposite', distance+.4); b['directions'] = [one, two]
-    common = dict(mode='common_descent', aggregation=None, justification='Inspect whether the same copy variable admits a common repair direction.')
+    common = dict(mode='scalar_potential', aggregation={'op':'weighted_sum'}, justification='Inspect whether the same copy variable admits a common repair direction.')
     result = preview_architectures(p, b, {'large_gap': one_draft, 'opposite': two_draft}, {}, [common])
-    assert result['previews'][0]['status'] == 'pareto_stationary_or_inactive'
+    assert result['previews'][0]['status'] == 'stationary'
     assert result['previews'][0]['copy_gradient_cosines'][0][1] == pytest.approx(-1)
     assert result['selected_strategy'] is None
 

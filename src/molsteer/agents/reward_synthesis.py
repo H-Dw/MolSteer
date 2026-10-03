@@ -68,7 +68,7 @@ SYNTHESIS_GUIDE = {
         'shape': 'one shape name', 'parameters': 'map from parameter names to records above',
         'clause_ids': 'biological clauses this relation actually implements'},
     'within_direction': 'single / maximum / sum. sum is a derived sum of nonnegative relation deficits with intersection zero set, not fixed competing objective weights. Explain response allocation.',
-    'allocation_tool': 'priority_weights carries value ranking into weighted_sum/maximum/lp_norm; common_descent projects the weighted preferred gradient onto common non-ascent directions. Default rank_decay is a configurable ordinal preference, not measured efficacy. derive_allocation_operator can additionally derive a norm exponent from a desired marginal response.',
+    'allocation_tool': 'priority_weights carries value ranking into the actual scalar weighted_sum/maximum/lp_norm. Preservation belongs in the scalar or independent evaluation. Default rank_decay is a configurable ordinal preference, not measured efficacy. derive_allocation_operator can additionally derive a norm exponent from a desired marginal response.',
     'dynamic_relations': 'Use current_reference_quadratic with bond_length_error, bond_angle_error or typed_steric_overlap. The evaluator resolves current chemistry; only normalization is supplied as a constant. Whole-graph identity is not an activation condition.',
     'construction_scope': 'Host serializes the expert-selected mathematical construction; generated probes describe that construction, not biological calibration.',
     'scope': 'Draft assistance; no automatic objective selection, missing-data substitution or new submission gate.'}
@@ -376,17 +376,15 @@ def preview_architectures(packet, biology, drafts, dynamics, strategies):
             return {'status': 'advisory', 'blocking': False, 'hint': 'Preservation alone does not define a soft repair objective.'}
         editable = dynamics.get('editable_atom_ids')
         support = {a for d in directions for o in d['observables'] for a in o['atom_ids']}
-        mask = variable.new_tensor([a in support and (editable is None or a in editable) for a in snapshot['atom_ids']])[:, None].expand_as(variable)
+        mask = variable.new_tensor([editable is None or a in editable for a in snapshot['atom_ids']])[:, None].expand_as(variable)
         previews = []
         for strategy in strategies:
             try:
                 if set(strategy) - {'mode', 'aggregation', 'justification', 'priority_weights', 'priority_basis'}:
                     raise ValueError('strategy')
-                if strategy['mode'] not in ('scalar_potential', 'common_descent'):
+                if strategy['mode'] != 'scalar_potential':
                     raise ValueError('strategy')
                 agg = strategy['aggregation']
-                if strategy['mode'] == 'common_descent' and agg is not None:
-                    raise ValueError('strategy')
                 if strategy['mode'] == 'scalar_potential' and (not isinstance(agg, dict) or agg.get('op') not in ('single', 'maximum', 'lp_norm', 'weighted_sum') or
                     (agg.get('op') == 'single' and len(objectives) != 1) or
                     (agg.get('op') == 'lp_norm' and (type(agg.get('p')) not in (int, float) or not 1 < agg['p'] <= 8))):

@@ -31,17 +31,10 @@ def run(config):
     adapter=ADAPTERS[config['adapter']](config)
     if config.get('resume_checkpoint'):
         checkpoint=torch.load(config['resume_checkpoint'],map_location='cpu',weights_only=True)
-        if config.get('reward_revision_response'):
-            from molsteer.molthinker.feedback import apply_revision_response
-            response=json.loads(Path(config['reward_revision_response']).read_text())
-            checkpoint,new_program=apply_revision_response(checkpoint,response)
-            path=output/'revised_program.json';path.write_text(json.dumps(new_program,indent=2),encoding='utf-8')
-            config['reward_programs']={'creativity':str(path)}
-            config['arms']=['creativity'];config['gradient_preflight']=response.get('resolution')!='stop_guidance'
         adapter.restore(checkpoint)
         replay=dict(restored_checkpoint=config['resume_checkpoint'],step_index=adapter.step_index)
     else:
-        replay=adapter.replay_to(config.get('start_step',50))
+        replay=adapter.replay_to(config['start_step'])
         checkpoint=adapter.checkpoint()
     torch.save(checkpoint,output/'resume_start.pt')
     (output/'resume_verification.json').write_text(json.dumps(replay,indent=2),encoding='utf-8')
@@ -56,42 +49,14 @@ def run(config):
     saved_baseline=torch.load(Path(config.get('reward_reference_stage',config['saved_stage']))/'world_prediction.pt',weights_only=True,map_location=adapter.device)
     baseline={k:v[0] for k,v in saved_baseline.items() if torch.is_tensor(v)}
     controls=json.loads(Path(config['control_trajectory']).read_text()) if config.get('control_trajectory') else {}
-    review_state=checkpoint.get('guidance_state',{}).get('graph_review',{})
-    resumed_program=review_state.get('program')
-    initial_editable=deepcopy(review_state.get('editable_atom_ids',config.get('editable_atom_ids')))
-    if initial_editable is not None:adapter.config['editable_atom_ids']=initial_editable
+    initial_editable=deepcopy(config.get('editable_atom_ids'))
     def load_program(path):
-        program=json.loads(Path(path).read_text(encoding='utf-8'))
-        if resumed_program is not None:
-            from molsteer.common import digest
-            if (resumed_program['program_id']!=checkpoint['guidance_state']['program_id'] or
-                    resumed_program['program_id']!='rp_'+digest({k:v for k,v in resumed_program.items() if k!='program_id'})[:24]):
-                raise ValueError('Resumed graph review program provenance mismatch')
-            program=deepcopy(resumed_program)
-        return program
+        return json.loads(Path(path).read_text(encoding='utf-8'))
     def evaluator(program):
         return make_reward(program,baseline,receptor,vocabulary,controls.get(program.get('affinity_head')))
-    if not config.get('gradient_preflight',True):
-        for path in config['reward_programs'].values():
-            if load_program(path).get('evaluator')=='agent_expert':
-                raise ValueError('Expert live programs require component-gradient preflight')
-    if config.get('gradient_preflight',True):
-        from molsteer.molmonitor.live_gradient import check_live_gradient
-        preflight={}
-        for mode in config['reward_programs']:
-            program=load_program(config['reward_programs'][mode])
-            reward=evaluator(program)
-            if (program.get('evaluator')=='augmented_lagrangian' and adapter.guidance_state
-                    and adapter.guidance_state.get('augmented_lagrangian')):
-                reward.restore_controller(adapter.guidance_state['augmented_lagrangian'])
-            if hasattr(reward,'set_time'):reward.set_time(float(adapter.times[0][0]))
-            preflight[mode]=check_live_gradient(adapter,reward)
-        (output/'gradient_preflight.json').write_text(json.dumps(preflight,indent=2),encoding='utf-8')
-        if not all(r['passed'] for r in preflight.values()):raise ValueError('Live gradient preflight failed; see gradient_preflight.json')
-        print('GRADIENT_PREFLIGHT_PASSED',flush=True)
     summaries=[]
     RDLogger.DisableLog('rdApp.warning')
-    for arm in config.get('arms',['unguided','selection','creativity']):
+    for arm in config.get('arms',list(config['reward_programs'])):
         adapter.restore(checkpoint)
         if initial_editable is None:adapter.config.pop('editable_atom_ids',None)
         else:adapter.config['editable_atom_ids']=deepcopy(initial_editable)
@@ -102,11 +67,11 @@ def run(config):
         armout.mkdir(parents=True,exist_ok=True)
         # Let MolReader recover receptor provenance using the original input layout.
         shutil.copytree(Path(config['saved_stage']).parents[2]/'inputs',armout/'inputs',dirs_exist_ok=True)
-        summary=run_suffix(adapter,reward,armout,GuidanceBudget(**config.get('budget',{})),arm)
+        summary=run_suffix(adapter,reward,armout,arm=arm,guidance_weight=config.get('guidance_weight',1.0))
         summaries.append(summary)
     source_hashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(config['stage_runner'])]}
     report=dict(replay=replay,executions=summaries,source_hashes=source_hashes,
-        discrete_graph_preference='Frozen categorical marginal ranking regularizer; zero coordinate derivative; used in proposal acceptance',
+        execution_semantics='native_scalar_gradient',
         uncalibrated_parameters=True)
     (output/'experiment_summary.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     return report

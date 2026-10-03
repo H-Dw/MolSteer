@@ -35,7 +35,7 @@ def test_offline_graph_and_input_immutability(config, inputs):
     assert packet == original
     assert state['validation']['passed']
     assert Path(state['checkpoint_path']).is_file()
-    assert {e['node'] for e in state['trace']} == {'reader','thinker','executor','monitor'}
+    assert {e['node'] for e in state['trace']} == {'reader','thinker','executor'}
 
 
 def test_disabled_monitor_is_skipped_and_validation_finishes(config,inputs,monkeypatch):
@@ -48,15 +48,15 @@ def test_disabled_monitor_is_skipped_and_validation_finishes(config,inputs,monke
     assert {e['node'] for e in state['trace']}=={'reader','thinker','executor'}
 
 
-def test_disabled_monitor_continues_segments_without_retuning(config,inputs):
+def test_direct_execution_requests_complete_native_suffix_once(config,inputs):
     config.agents['molmonitor'].enabled=False
     requests=[]
     def adapter(**kwargs):
         requests.append(kwargs['request'])
-        return {'done':len(requests)==3,'metrics':{'movement':float('nan')}}
+        return {'done':True,'metrics':{'movement':0.2}}
     state=AgentRuntime(config,inference_adapter=adapter,approve_inference=True).run(*inputs,execute=True)
-    assert state['status']=='completed' and len(requests)==3
-    assert all(r['strength']==1. for r in requests)
+    assert state['status']=='completed' and len(requests)==1
+    assert requests[0]['guidance_weight']==1. and requests[0]['continuation']=='all_remaining_native_steps'
     assert not any(e['node']=='monitor' for e in state['trace'])
 
 
@@ -72,21 +72,25 @@ def test_monitor_persistence_and_escalation():
     assert monitor.observe({'x':float('nan')})['route'] == 'stop'
 
 
-def test_adapter_receives_retunes_before_replan(config, inputs):
-    config.monitoring.warmup = 2
-    config.monitoring.persistence = 1
-    config.monitoring.cooldown = 0
-    config.runtime.max_replans = 1
-    config.runtime.max_segments = 8
+def test_direct_execution_does_not_retune_or_replan_even_if_legacy_monitor_enabled(config, inputs):
+    config.agents['molmonitor'].enabled = True
+    config.monitoring.max_strength = .1
+    config.runtime.guidance_weight = 100.
+    config.runtime.max_segments = 1
     requests = []
     def adapter(**kwargs):
         requests.append(kwargs['request'])
-        return {'done':False,'metrics':{'movement':1. if len(requests)<=2 else 20.}}
-    state = AgentRuntime(config,inference_adapter=adapter,approve_inference=True).run(*inputs,execute=True)
-    assert state['status'] == 'replan_limit'
-    assert [r['strength'] for r in requests[:5]] == [1.,1.,1.,.5,.25]
-    actions = [e['summary'] for e in state['trace'] if e['node']=='monitor']
-    assert actions.index('Monitor retune_strength') < actions.index('Monitor revise_reward')
+        return {'done': True, 'metrics': {'movement': 20.}}
+    state = AgentRuntime(config, inference_adapter=adapter, approve_inference=True).run(*inputs, execute=True)
+    assert state['status'] == 'completed' and len(requests) == 1
+    assert requests[0]['guidance_weight'] == 100.
+    assert not any(e['node'] == 'monitor' for e in state['trace'])
+
+
+def test_incomplete_adapter_result_is_failure_without_silent_segment_loop(config, inputs):
+    state = AgentRuntime(config, inference_adapter=lambda **k: {'done':False, 'metrics':{}},
+                         approve_inference=True).run(*inputs, execute=True)
+    assert state['status'] == 'failed'
 
 
 def test_inference_requires_host_approval(config, inputs):
@@ -107,7 +111,7 @@ class ScriptModel:
             {'name':name,'args':args,'id':f'call_{self.invocations}_{i}'} for i,(name,args) in enumerate(self.calls)])
 
 
-def test_all_four_api_agents_use_actual_tool_calls(config, inputs):
+def test_reader_thinker_api_and_deterministic_executor(config, inputs):
     config.mode = 'api'
     base = derive(*inputs, ROOT/'knowledge/Molecular_Generation_Control_Functions_Representative_Table_2026-09-19.md')
     term_ids=[base['terms'][i]['term_id'] for i in (0,2)]
@@ -150,7 +154,8 @@ def test_all_four_api_agents_use_actual_tool_calls(config, inputs):
     assert program['mode']=='agent_design'
     assert program['design']['objective_tree']['op']=='lp_norm'
     assert editable==sorted({a for t in state['reward_spec']['terms'] for a in t['atom_ids']})
-    assert all(m.invocations == 1 for m in models.values())
+    assert models['molreader'].invocations == models['molthinker'].invocations == 1
+    assert models['molexecutor'].invocations == models['molmonitor'].invocations == 0
     assert 'PRIVATE_PROVIDER_REASONING' not in json.dumps(state)
     assert 'PRIVATE_PROVIDER_REASONING' not in Path(state['trace_path']).read_text(encoding='utf-8')
 

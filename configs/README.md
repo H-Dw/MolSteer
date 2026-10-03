@@ -9,7 +9,7 @@ deterministic algorithm and does not claim expert LLM calls.
 
 MolSteer now has a provider-neutral orchestration layer under `src/molsteer/agents`. It uses LangChain chat-model adapters and LangGraph state transitions while retaining the established evidence contracts and numerical domain modules.
 
-- **API-first**: the four profiles (`molreader`, `molthinker`, `molexecutor`, `molmonitor`) each reference an independent model profile and provider profile. The configured mode is `api`; `offline` must be selected explicitly.
+- **Profiles**: the four compatibility profiles (`molreader`, `molthinker`, `molexecutor`, `molmonitor`) each reference an independent model profile and provider profile. Reader and Thinker use the configured API; Executor is deterministic and MolMonitor is independent/default off. `offline` must be selected explicitly.
 - **No implicit fallback**: an unavailable API, missing credential, unsupported model, or unavailable tool is reported as a failed/unavailable state rather than silently substituted with a local LLM or fabricated evidence.
 - **Credentials**: copy the placeholder structure in `configs/secrets.local.json` only into a local secret store, or inject the referenced environment variables. The runtime resolves environment variables before the local JSON file. Never place secrets in prompts, StatePackets, traces, logs or uploaded artifacts.
 - **Security**: the local secret file is excluded by repository, Docker and Claude ignore rules. These are not OS ACLs or a data-loss-prevention guarantee; the runtime must be able to read credentials. Use an OS secret manager/isolated service account for production.
@@ -50,3 +50,9 @@ On Windows, run with UTF-8 enabled because legacy fixtures contain non-ASCII JSO
 ```
 
 The test suite does not make live API calls. The default model ID is configured, but a live API/inference run still requires an OpenRouter credential and a host-approved generator adapter.
+
+## Native scalar execution and host progress
+
+`runtime.guidance_weight` is the one fixed external multiplier; it is independent of `monitoring.max_strength`. `runtime.no_progress_actions` defaults to 3 and only adds an advisory to the next normal request. `reader.raw_reference.reference_times`, `include_final`, views and factors determine temporal evidence dynamically. `reader.measurement_stage_paths` optionally maps configured node IDs (including `anchor`) to repository-relative saved stage directories for existing read-only calculators. Missing inputs produce an evidence gap.
+
+The emitted FLOWR execution JSON uses `guidance_weight` and optionally explicit `fixed_atom_ids`/`editable_atom_ids`. The default derivative support is every native active target coordinate. Budget, time-window, monitor, proposal and controller fields from old execution configurations are recorded as inactive. The direct path never reinstalls those controls. Legacy common-descent/proposal-constraint rewards require scalar redesign. See [migration and verification](../docs/RESIDUAL_NATIVE_SCALAR.md).

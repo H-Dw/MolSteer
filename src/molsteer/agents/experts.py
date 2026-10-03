@@ -22,6 +22,7 @@ from .reward_synthesis import (SYNTHESIS_GUIDE, function_card, construct_directi
                                preview_architectures, derive_allocation_response)
 from .expert_context import task_context, recovery_candidate, recovery_support, goal_index, public_raw_analysis, draft_index
 from .priority import allocate_priorities
+from .host_workspace import HostWorkspace, computational_content
 
 def mathematical_draft_tool_schema(direction_only=False) -> dict:
     """Expose the full typed contract while allowing invalid drafts to be retained.
@@ -37,141 +38,63 @@ def mathematical_draft_tool_schema(direction_only=False) -> dict:
     return {'type':'object', 'properties':{field:schema}, 'required':[field],
             'additionalProperties':False, '$defs':definitions}
 
-BIOLOGY_INSTRUCTIONS = '''You are MolThinker's biology expert. Select the smallest sufficient
-scientific repair-goal set from the current generator checkpoint and MolReader diagnosis. Produce
-public evidence-linked decisions, not private thought traces. State, contemporaneous prediction
-and an observed final result are different objects. No paired intervention outcomes are supplied;
-do not invent terminal gains or probabilities of persistence, success or retention.
+BIOLOGY_INSTRUCTIONS = """You are MolThinker's biology expert. Publish concise evidence-linked decisions, not private reasoning.
+Start with the configured raw continuation's residual_needs index and counterevidence, then trace those needs to the current checkpoint.
+For each candidate answer: What remains at the explicit raw final? Through which current coordinate mechanism could intervention help?
+What independent necessary need would adding this goal cover? Inspect every configured node relevant to the mechanism, using current
+chemistry, relation applicability, measured values, reference values and remaining deviations. Persistent, recurrent, late-emergent,
+naturally resolved, relation-absent and unobserved conditions are different. Chemical identity change is an independent fact; it cannot
+hide a defect under the new chemistry. Without an explicit final observation, terminal status is unknown.
+Consider geometry, angles/torsions, strain, sterics, contact geometry and burial, identity, affinity and SA evidence where available.
+Global co-evolution is correlation, not a local causal attribution or a measured intervention benefit. State competing explanations,
+missing measurements and falsifiers. Use targeted existing measurements for decision-changing gaps. Future raw measurements do not
+become current numeric evidence. Keep current DiagnosticReport semantics separate from temporal evidence.
+Define the minimum sufficient goal set over remaining intervention needs. Compare independent needs before merging related measurements.
+Shared atoms or an easy distance formula do not establish that one goal covers all needs. Deprioritize native-resolved defects; retaining
+earlier intervention requires an explicit additional-value hypothesis and native-evolution interference analysis. Preserve beneficial
+contacts and conformation changes. Zero, one or multiple optimization goals are legitimate; necessary unsupported goals stay deferred,
+not replaced with an easy proxy. Record need IDs, precursor mechanism, independent coverage, counterevidence, useful evolution,
+pairwise rank reasons and uncertainty in value_assessment and record_biology_decision. Rank is ordinal, not an invented gain probability.
+Preservation that will influence guidance must be a selected optimize direction in the scalar reward, or a clause of one; independent
+evaluation stays monitor. Legacy constraint directions are readable but require redesign, as there is no proposal acceptance controller.
+Keep preservation_conditions empty for the scalar handoff; explain relationships in the decision records. Do not freeze initial chemistry.
+When mathematics identifies a mechanism conflict, revisit assumptions, goals, preservation terms and ranks using its specific evidence.
+Accept, modify or reject the suggested revision explicitly; retain unaffected goals. Use deferred for scientifically necessary missing
+inputs, with clear reasons. Contracts are available by section on demand; partial decision records and tool read order are not gates.
+Submit evidence-linked BiologyPlan with explicit finding dispositions. Do not infer future guided outcomes from raw continuation.
+"""
 
-When raw_reference is available or partial, a configured suffix of the SAME raw path has already
-been observed. Read its comparison overview and inspect_raw_comparison/read_raw_reference when
-details matter. Compare persistent defects, sampled clearance intervals, recurrence and later risks;
-compare contact/burial, conformational and chemical evolution with configured affinity, SA and
-stability trends. Integrate these candidates with the current diagnosis, not as a separate formula
-list. For raw persistent risks ask what native continuation failed to resolve. For later clearance
-ask whether earlier repair is locally controllable and would conflict with useful native rearrangement.
-For region enhancement require a plausible mechanism and present control channel; a global score
-change alone cannot assign causal benefit to that region. Changed elements, charge or topology are
-chemical transitions, not successful movement of the old chemical object. Coordinate gradients
-cannot promise categorical groups or improved synthesis feasibility. These raw outcomes are valid
-reference observations, while guided outcomes and the benefit of acting earlier remain unobserved.
-No risk/score ranking or intervention is selected by the comparison helper. Keep unknowns and
-counter-explanations and choose the smallest sufficient current goal set, including preservation.
-Optionally record raw_reference_review with comparison_id/locators and selection/omission reasons;
-this editable public decision is passed to mathematics and never becomes an additional gate.
-
-Integrate the problem before selecting a formula:
-1. Read current_state and inspect_biophysical_context. Keep representations and chemical hypotheses
-separate. Assess bond geometry, angle/torsion/stereochemistry, intramolecular stability, sterics,
-target contacts, surface/burial, identity/functional groups and task relevance. Consolidate related
-observations into mechanisms with competing explanations. Shared atoms or one Reader group alone
-do not prove a common cause; a stretched bond does not explain all conformational strain.
-2. Consider independent candidate goals by potential repair benefit supported by current evidence:
-direct repair, independent defect coverage, local feasibility, controllability and coupled risks.
-Distinguish observations, mechanistic hypotheses and missing facts. Qualitative/conditional priorities
-are valid. Severity, alert count and implementation convenience do not determine scientific value.
-3. Select sufficient coverage without redundant goals. Ask what necessary mechanism remains
-unhandled after removing each goal, and whether a proxy could improve while its defect persists.
-Keep necessary preservation and decision-changing unknowns separate. One goal can suffice; several
-independent defects may need several. Do not freeze the whole intermediate pose or chemical slots.
-4. Use record_biology_decision for editable integration, candidate and selection summaries when
-helpful. Its coverage review only inspects your declared mechanism sets; it does not prove chemistry,
-choose goals or rank benefits. Partial records and omitted helper calls do not block submission.
-5. Submit BiologyPlan using summary/priority_reason for the integration, repair rationale, removal
-reasons and uncertainty. Optimize means selected repair; constraint means necessary preservation.
-A selected scientific goal lacking current execution inputs remains required=true, disposition=deferred
-with its actual missing facts. Mathematics can research it. Do not discard it to fit a distance backend.
-rank expresses intervention-value priority. Trace candidates through ALL configured raw nodes with
-inspect_raw_goal_trajectory, including current chemical references and final diagnosis. Rank by
-plausible benefit, persistent unmet need, native repair timing, controllability, chemical dependencies,
-independent coverage and interference with useful evolution. Explain pairwise priorities in
-value_assessment/priority_reason. Coordinate implementation convenience does not determine value.
-The mathematical allocation must reflect these priorities. Rank is ordinal, not a gain probability.
-Do not call an observed raw final unknown: only the intervention outcome remains unobserved.
-When mathematics reports a mechanism conflict, revisit hypotheses, target sets, preservation bounds
-and rank. Earlier decisions are revisable proposals. Explain accepted, modified or rejected changes
-in the revision workspace and retain unaffected goals.
-
-The existing schema is available on demand. Record all finding dispositions and factor assessments.
-Use exact localized measurement IDs, including finding_ids=[] for independently measured context.
-repair_clauses cover the declared predicates; their observable kinds may name an unsupported design
-need. State the biological relation first; mathematics determines evidenced numerical target sets.
-Screening cutoffs are not calibrated tolerances. Coordinate control alone cannot induce a functional
-group or verify an entire contact network from two pairs. Use request_research for a decision-changing
-current evidence gap. Unrun live or terminal evaluation remains unknown. On revision, change the
-smallest necessary goal/scope using the returned mathematical evidence; on graph change reconsider
-chemical roles and references under the original task. Generic background references are design
-material, not additional submission gates or prior outcome information.'''
-
-MATH_INSTRUCTIONS = '''You are MolThinker's mathematics expert. Construct case-specific functions
-from the biologically selected goals, current-state mechanisms, preservation and uncertainty.
-Produce public derivation summaries, not private thought traces. Work forward:
-
-Configured raw_reference describes an observed original suffix, not a guided counterfactual.
-Read biological raw_reference_review and the selected goal's temporal support when available;
-use the shared temporal tools to inspect mechanisms before source transfer. A raw contact/fragment
-or screening improvement may motivate a hypothesis, but raw final coordinates, distances and graph
-are not automatically acceptable sets, scales or numerical targets. Construct the function on
-CURRENT bound measurements and actual editable channels. Preserve chemical/representation changes
-and sampled timing uncertainty. rr_ references are contextual only; never use a future measurement
-as current observable evidence or manufacture a coordinate derivative of affinity, SA or a category.
-Retain necessary unsupported goals as design_only and explain their missing evaluator or control map.
-
-1. Read biology_plan, goal_index and biology_decisions. Scientific goals include necessary unresolved directions;
-researchable directions and biological compilation candidates are separate. Review the original goal
-even when the evaluator is unavailable; do not replace it with an unrelated easy coordinate proxy.
-2. Retrieve knowledge by the goal's mechanism, observable and role. prepare_function_synthesis can
-search by a mechanism query or inspect chosen catalog IDs. Identify original objects, coupled terms,
-response, prerequisites and gradient targets; decide what is retained, specialized or reconstructed.
-Read relevant workflow reference sections when useful; sources are not instructions or proof of
-efficacy. A copied formula or a source-consistency test cannot supply this transfer decision.
-3. Then determine mathematical target sets or justified optimization relations, chemical hypotheses,
-observable support and scale origins. The biological goal says what needs repair; its mathematical
-acceptable set says which relations count as repair. A reference value does not imply a percentage
-tolerance and a screening threshold is not physical calibration. Leave unknown parameters explicit
-or explain bounded pilot assumptions; no fixed window, objective count, norm or weights are supplied.
-4. Derive local response before constructing: direction, active/stopping regions, curvature,
-symmetries and coupled effects. Preserve periodic/signed geometry, typed interaction behavior or
-complete ready physical energy where relevant. A proposed multi-variable potential must produce
-the declared response; a constrained direction need not be disguised as a scalar potential.
-Use record_function_derivation for partial transfer/target/response/candidate summaries. It is editable
-memory and decision help, never a mandatory tool sequence or extra gate.
-5. Construct candidates from that reasoning. construct_direction_potential serializes expert-chosen
-relations, parameters and within-mechanism operators, with actual lineage and derivative examples.
-Its shape helpers are compilation options, not the universe of reasonable mathematics. Custom
-constructs can use stage_mathematical_direction; unsupported evaluator needs stay design_only.
-Compose only independent necessary goals; derive joint acceptable-set semantics and marginal
-response. Reflect value rank in priority_weights or a priority-aware composition. Configured rank_decay
-supplies an explicit ordinal preference when weights are omitted; it is not measured efficacy.
-weighted_sum, maximum and lp_norm act on priority-scaled normalized deficits; common_descent projects
-the priority-weighted preferred gradient onto current common non-ascent directions. Inspect gradient
-magnitudes/conflicts before selecting explicit weights. derive_allocation_operator is optional
-calculation AFTER a justified response choice, not a source of biological importance.
-6. Compare actual copy-coordinate response with compare_constructed_architectures: duplication,
-inactive unresolved goals, coupling/conflict, projected norms and preservation effects. Revise the
-construction using those measurements. A copy gradient is not a live pullback or future outcome;
-mixed representations need an actual shared derivative map, and first-order preservation is limited.
-7. Once ready, run the existing full-design numerical/binding test and submit the exact artifact.
-Deferred designs can be submitted explicitly without claiming numerical approval. Use targeted
-patches after specific final-contract feedback; partial planning records do not consume repair budget.
-
-Keep every selected scientific goal and preservation direction represented. Missing force-field,
-surface, charge, categorical or oracle inputs remain explicit. Research may justify request_biology_revision
-with concrete evidence/scope changes; it cannot silently activate a deferred biological goal or omit
-one. A whole energy, area or field cannot be attributed to a pair-distance proxy. Population weights
-and black-box scores retain their roles unless a verified estimator enables another path. Record new
-function/aggregation derivations separately from original source formulas. Exact schema/grammar are
-available on demand; generic background reference eligibility rules concern actual execution, not
-selection of scientific goals. Bind mechanisms to CURRENT chemistry: bond_length_error and
-bond_angle_error subtract current MMFF references; typed_steric_overlap uses current radii.
-Do not bake one initial bond type into a universal constraint or suspend all guidance on graph change.
-Use native_nonincrease when preservation means not worsening the same-stage native baseline.
-A disappeared bond is no longer an active bond relation, not proof of successful intervention.
-Follow function_derivation.conditional_physics to retain/specialize/reconstruct local geometry,
-exclusion and contact terms. If mechanisms conflict with biology, call request_biology_revision with
-evidence and a concrete alternative; you may challenge assumptions rather than repair their syntax.
-No additional workflow gate is introduced. Guidance strength remains
-external; unrun live/terminal validation stays not_run rather than a claimed acceptance condition.'''
+MATH_INSTRUCTIONS = """You are MolThinker's mathematics expert. Publish derivations and evidence references, not private reasoning.
+Deliver one differentiable scalar reward R for every remaining native FLOWR.ROOT step. Executor uses the same forward prediction and
+self-conditioning, pulls R back to the current native coordinates, performs the native step and adds guidance_weight * dt * gradient(R).
+The external weight is fixed for the run and applied once. Native active coordinates of the target are differentiable unless explicitly
+fixed; observable atom support does not define the editable mask. Chemistry-conditioned references follow the declared current state.
+First identify independent remaining intervention needs in biology_plan and their raw residual/precursor evidence. Ask whether a
+native-resolved defect was selected without additional value and request a biology revision if needed. Do not let one convenient proxy
+absorb independent needs. Future raw measurements are contextual and never current numeric evidence.
+Research each mechanism in knowledge: source role, units, observables, physical reference and prerequisites; identify which parts
+are retained, specialized or reconstructed. Keep original source formulas separate from the new construction.
+Then determine target sets -> derive local response -> construct candidates. Sources do not set unexplained tolerances. A current distance
+or future raw geometry is not a calibrated physical reference. Geometry terms can use current typed bond/angle references or supported
+local energies; include torsion, exclusion or directional contacts only with suitable measurements and evaluators. Categorical changes,
+SA and oracle scores have no invented coordinate derivative. Missing inputs remain design_only or trigger biology reconsideration.
+Give independent losses physical scales before composition. Rank coefficients must enter the actual scalar expression through
+priority_weights or justified scalar composition. Keep component values, scale provenance, coefficients, gradient norms, cosines and
+actual directional contributions. Compare at the same current state, frame and allowed derivative space. Coordinate-copy response is
+not live pullback; mixed independent views do not prove a shared live direction. Use the read-only live probe when available, otherwise
+record not_run. Local surrogate improvement does not establish terminal quality or affinity benefit.
+Construct preservation directly in R or explicitly leave it as independent evaluation. Use scalar_potential, not common_descent or
+proposal constraints. Legacy common_descent and native_nonincrease designs require scalar redesign; no equivalent conversion is implied.
+Executor never clips, normalizes, adapts weights, schedules budgets/windows, rejects proposals, backtracks, suspends on graph change or
+revises R. Address excessive response through justified scale, curvature and composition design during candidate development. Compare
+fixed external-weight response, cancellation and domination; do not rely on an executor controller. Natural zero gradients are valid
+and reevaluated next step. An undefined required component is a calculation failure, never permission to silently drop it.
+Use construct_direction_potential to save a candidate once. Read or patch its ID/version, compare response and test_staged_mathematical_design
+when assembled; use test_current_candidate and submit_current_candidate for saved designs. Full legacy calls remain available through
+select_tool_group(all), without a forced sequence. Reopen research for a concrete evidence gap while retaining the candidate. Contracts
+have overview/section/full reads. Avoid repeated full schemas, stale drafts and resolved feedback. When mechanisms conflict with biology,
+request_biology_revision with evidence and a concrete alternative. Explicitly defer missing scientific inputs instead of inventing them.
+"""
 
 
 def run_experts(runtime, state):
@@ -192,13 +115,27 @@ def run_experts(runtime, state):
     feedback = None
     raw_context = bound_raw_context(state.get('raw_reference_context'), packet)
     temporal_tools = raw_reference_tools(raw_context, packet)
+    if getattr(runtime, 'measurement_supplements', None) is not None:
+        temporal_tools.extend(runtime.measurement_supplements.tools())
     raw_summary = raw_reference_summary(raw_context)
     raw_analysis = public_raw_analysis(state.get('raw_reference_analysis')) if raw_context['status'] in ('available', 'partial') else {}
     current = current_state_context(packet, report, state['model_dynamics'], raw_context, include_raw_reference=False)
     carried_drafts, carried_biology = {}, {}
     staged_directions, proposed_draft, tested_draft, last_validation = {}, {}, {}, {}
+    hosts = {role: HostWorkspace(state, 'thinker.'+role, runtime.config.runtime.no_progress_actions)
+             for role in ('biology', 'mathematics')}
+    numerical_cache = hosts['mathematics'].data.setdefault('numerical_cache', {})
+    binding = {'packet':digest(packet), 'raw_comparison':raw_context.get('comparison_id')}
+    for host in hosts.values():
+        host.save('bound_evidence', binding, kind='evidence')
+    recovered = recovery_candidate(state.get('monitor_event'))
+    if recovered:
+        hosts['mathematics'].save('recovery', recovered, kind='archive')
 
     def invoke(role, tools, context, completed):
+        for function in tools:
+            if function.name == 'get_expert_contract':
+                function.invoke({})  # Deterministic contract version/overview initialization.
         run_tools(runtime._model('molthinker.'+role), tools, instructions=instructions_by_role[role],
                   context=context, state=state, node='thinker.'+role,
                   max_steps=runtime.config.runtime.max_agent_steps,
@@ -208,7 +145,8 @@ def run_experts(runtime, state):
                        'latest_validation':bounded_values(last_validation),
                       'artifact_access':'read_expert_workspace reads current drafts, canonical recovery, decisions or archived public observations.'},
                   history_max_chars=runtime.config.thinker.history_max_chars,
-                  history_recent_rounds=runtime.config.thinker.history_recent_rounds)
+                  history_recent_rounds=runtime.config.thinker.history_recent_rounds,
+                  host_workspace=hosts[role])
 
     @tool
     def read_expert_workspace(section: str, direction_id: str | None = None,
@@ -263,10 +201,13 @@ def run_experts(runtime, state):
         workspace_history.append(workspace)
 
         @tool
-        def get_expert_contract() -> dict:
-            """Read the BiologyPlan JSON schema before submitting a plan."""
-            return {'schema': BiologyPlan.model_json_schema(), 'factors': list(FACTORS),
+        def get_expert_contract(section: str = 'overview', force_full: bool = False) -> dict:
+            """Read contract overview or a named section; section=full explicitly reads the entire contract."""
+            content = {'schema': BiologyPlan.model_json_schema(), 'factors': list(FACTORS),
                     'audit_required': runtime.config.thinker.require_design_audit}
+            host = hosts['biology']
+            receipt = host.save('contract', content, kind='contract')
+            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' else host.read('contract', None if section == 'full' else [section], force_full)
 
         @tool
         def inspect_biophysical_context(factor: str = 'all', view: str = 'both') -> dict:
@@ -285,18 +226,14 @@ def run_experts(runtime, state):
             """Submit complete evidence-linked directions, ranks and diagnostic dispositions."""
             if bio:
                 raise ValueError('Biology plan already submitted for this round')
-            if runtime.config.thinker.require_design_audit and inspected_factors != set(FACTORS):
-                from .contract_errors import ContractValidationError
-                raise ContractValidationError('Assess every biophysical factor before selecting a reward', ['factor_assessment'])
             bio['plan'] = validate_biology(plan, report, packet,
                 require_audit=runtime.config.thinker.require_design_audit)
-            return {'status':'accepted', 'biology_plan':deepcopy(bio['plan'])}
+            return {'status':'accepted', **hosts['biology'].save('biology', bio['plan'], kind='evidence')}
 
         invoke('biology', [get_expert_contract, inspect_biophysical_context, record_biology_decision, read_workflow_reference, read_expert_workspace, list_measurement_references, inspect_measurement, inspect_measurements, *temporal_tools, service.tool_for('biology'), submit_biology_plan],
                {'model_dynamics':state['model_dynamics'],
                 'task_context':task_context(state.get('monitor_event')), 'revision_request':feedback,
-                'current_state':current, 'decision_workspace':BIOLOGY_GUIDE,
-                'raw_reference':raw_summary, 'raw_reference_analysis':deepcopy(raw_analysis),
+                'raw_reference':raw_summary, 'current_state':current, 'decision_workspace':BIOLOGY_GUIDE, 'raw_reference_analysis':deepcopy(raw_analysis),
                 'workflow_references':reference_catalog(materials),
                 'previous_plan':state.get('biology_plan'), 'discussion_round':discussion}, lambda:bool(bio))
         state['biology_plan'] = bio['plan']
@@ -318,6 +255,9 @@ def run_experts(runtime, state):
         proposed_draft = {}
         staged_directions = {d['direction_id']:deepcopy(carried_drafts[d['direction_id']]) for d in biology['directions']
             if d['direction_id'] in carried_drafts and d == carried_biology.get(d['direction_id'])}
+        hosts['mathematics'].retire_candidates()
+        for ident, draft in staged_directions.items():
+            hosts['mathematics'].save(ident, draft, {'packet':digest(packet), 'biology':digest(biology)})
         last_validation = {}
         targets = {d['direction_id'] for d in selected_directions(biology)}
         target_map = {d['direction_id']: d for d in biology['directions'] if d['direction_id'] in targets}
@@ -331,9 +271,9 @@ def run_experts(runtime, state):
             return update_workspace(workspace['decisions'], 'mathematics', stage, record, direction_id)
 
         @tool
-        def get_expert_contract() -> dict:
-            """Read mathematical schema, observable bindings and expression grammar before designing."""
-            return {'schema':MathematicalDesign.model_json_schema(), 'observables':OBSERVABLES,
+        def get_expert_contract(section: str = 'overview', force_full: bool = False) -> dict:
+            """Read versioned contract overview or named section; full and force_full are explicit opt-ins."""
+            content = {'schema':MathematicalDesign.model_json_schema(), 'observables':OBSERVABLES,
                     'audit_required': runtime.config.thinker.require_design_audit,
                     'observable_fields':['observable_id','kind','view','atom_ids','evidence_ids','parameters'],
                     'parameters':{'receptor_distance':['receptor_serial','residue_id'],
@@ -352,13 +292,15 @@ def run_experts(runtime, state):
                                   'units':list(UNITS), 'limits':'128 nodes, depth 12; scalar nonnegative dimensionless output'},
                     'strategy_examples':[{'mode':'scalar_potential','aggregation':{'op':'single'},'justification':'Case-specific reason required'},
                                          {'mode':'scalar_potential','aggregation':{'op':'weighted_sum'},'priority_weights':{'goal_a':1.0,'goal_b':0.5},'justification':'Explain value ranking and normalized marginal response'},
-                                         {'mode':'common_descent','aggregation':None,'justification':'Case-specific reason required'},
-                                         {'mode':'design_only','aggregation':None,'justification':'Retain unresolved function/controller needs without execution'}],
+                                         {'mode':'design_only','aggregation':None,'justification':'Retain unresolved scalar-function needs without execution'}],
                     'state_context':{'representations':bounded_values(packet['representations']),
                                      'chemical_readiness':packet['steering']['chemical_readiness'],
                                      'receptor_atom_count':len(packet['steering']['receptor_atoms']),
                                      'support_rule':'Use exact localized measurement references for atom/receptor bindings; full receptor coordinates are retained by the Executor, not repeated in this contract.',
                                      'graph_signatures':packet['steering']['graph_signatures']}}
+            host = hosts['mathematics']
+            receipt = host.save('contract', content, kind='contract')
+            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' else host.read('contract', None if section == 'full' else [section], force_full)
 
         @tool
         def get_function_catalog() -> dict:
@@ -383,8 +325,6 @@ def run_experts(runtime, state):
             result = {'status': 'workspace', 'direction_id':direction_id, 'retrievals': [{
                 'retrieval_id': r['retrieval_id'], 'function_cards': [function_card(row) for row in r['records'] if row.get('function_id')]} for r in retrieved],
                 'source_passages':[deepcopy(row) for r in retrieved for row in r['records'] if not row.get('function_id')],
-                'biology_direction': research_map[direction_id],
-                'derivation_record':deepcopy(workspace['decisions']['mathematics'].get(direction_id, {})),
                 'next_questions': {name: MATH_GUIDE['stages'][name] for name in ('source_transfer','target_sets','local_response')},
                 'scope':'Actual sources and optional derivation help. Source availability does not activate a biological goal or supply its target parameters.'}
             workspace['source_transfers'].append(deepcopy(result))
@@ -417,15 +357,21 @@ def run_experts(runtime, state):
                 staged_directions[direction_id] = deepcopy(result['direction'])
                 tested_draft.clear(); last_validation.clear()
             result['derivation_record'] = deepcopy(workspace['decisions']['mathematics'].get(direction_id, {}))
-            workspace['constructions'].append(deepcopy(result))
+            if result['status'] == 'draft_only':
+                receipt = hosts['mathematics'].save(direction_id, staged_directions[direction_id], {'packet':digest(packet), 'biology':digest(biology)})
+                workspace['constructions'].append(receipt)
+                return dict(status='draft_only', **receipt, next_action='Read or patch by candidate ID; construction already saved it.')
             return result
 
         @tool
         def compare_constructed_architectures(strategies: list[dict[str, Any]]) -> dict:
-            """Measure alternative draft controllers on coordinate copies; report allocation/conflict without choosing or gating."""
+            """Measure alternative scalar compositions on coordinate copies and available live adapters; report component responses and conflicts."""
             strategies = [allocate_priorities({'directions':list(staged_directions.values()),'strategy':s}, biology,
                             runtime.config.thinker.rank_decay)['strategy'] for s in strategies]
             result = preview_architectures(packet, biology, staged_directions, state['model_dynamics'], strategies)
+            from molsteer.molexecutor.expert_control import probe_live_scalar_response
+            adapter = getattr(runtime.inference_adapter, 'sampling_adapter', runtime.inference_adapter)
+            result['live_response'] = [probe_live_scalar_response(adapter, packet, biology, staged_directions, s) for s in strategies]
             workspace['architecture_previews'].append(deepcopy(result))
             return result
 
@@ -468,10 +414,11 @@ def run_experts(runtime, state):
 
         @tool(args_schema=mathematical_draft_tool_schema())
         def test_mathematical_design(design: dict[str, Any]) -> dict:
-            """Check a proposed handoff and actually test its local expressions and controller on coordinate copies."""
+            """Check a proposed scalar handoff and test its expressions and component responses on coordinate copies."""
             if not isinstance(design,(dict,MathematicalDesign)):
                 raise ValueError('Propose a complete mathematical draft before patching')
             proposed_draft['design']=deepcopy(design.model_dump() if isinstance(design,MathematicalDesign) else design)
+            hosts['mathematics'].save('design', proposed_draft['design'], {'packet':digest(packet), 'biology':digest(biology)})
             tested_draft.clear(); last_validation.clear()
             retain_proposed_directions(staged_directions,proposed_draft['design'],targets)
             checked=validate_math(design,biology,packet,state['retrieval_records'],service.sources(), report=report,
@@ -481,7 +428,15 @@ def run_experts(runtime, state):
                 tested_draft['design']=deepcopy(checked)
                 return deferred
             from .executor import validate_and_test_reward
-            validation=validate_and_test_reward(packet,spec,report)
+            biology_dependencies=[{k:d.get(k) for k in ('direction_id','rank','disposition','evidence_ids','preservation_conditions')}
+                                  for d in biology['directions']]
+            cache_key=digest((computational_content(checked), packet, biology_dependencies, state['model_dynamics']))
+            validation=deepcopy(numerical_cache.get(cache_key))
+            if validation is None:
+                validation=validate_and_test_reward(packet,spec,report)
+                numerical_cache[cache_key]=deepcopy(validation)
+            else:
+                validation['reward_id']=spec['reward_id']
             last_validation.clear(); last_validation.update(deepcopy(validation))
             if validation.get('passed'):
                 tested_designs.add(digest(checked))
@@ -501,8 +456,10 @@ def run_experts(runtime, state):
         def stage_mathematical_direction(direction: dict[str, Any]) -> dict:
             """Retain one complete selected-direction draft only; never authorize execution or claim validation."""
             result = stage_direction_draft(staged_directions, direction, targets)
+            ident = direction['direction_id']
+            receipt = hosts['mathematics'].save(ident, staged_directions[ident], {'packet':digest(packet), 'biology':digest(biology)})
             tested_draft.clear(); last_validation.clear()
-            return result
+            return {'status':'draft_only', **receipt}
 
         @tool
         def test_staged_mathematical_design(strategy: dict[str, Any], conflict_assessment: str,
@@ -528,15 +485,53 @@ def run_experts(runtime, state):
             if not deferred and digest(checked) not in tested_designs:
                 raise ValueError('test_mathematical_design must pass for the exact submitted artifact')
             math_result['design'] = checked
-            return {'status':'accepted', 'mathematical_design':deepcopy(math_result['design'])}
+            return {'status':'accepted', **hosts['mathematics'].save('design', checked, {'packet':digest(packet), 'biology':digest(biology)})}
+
+        @tool
+        def read_candidate(candidate_id: str, path: list[str | int] | None = None, force_full: bool = False) -> dict:
+            """Read a canonical candidate by ID, optionally selecting exact fields."""
+            return hosts['mathematics'].read(candidate_id, path, force_full)
+
+        @tool
+        def patch_candidate(candidate_id: str, changes: list[DraftReplacement], version: int | None = None) -> dict:
+            """Patch existing candidate fields without resending the candidate. Test explicitly when ready."""
+            host = hosts['mathematics']
+            saved = host.data['artifacts'].get(candidate_id)
+            if saved is None or version is not None and version != saved['version']:
+                return dict(status='needs_input', blocking=False, hint='Read the current candidate ID/version.')
+            source = host.read(candidate_id, force_full=True)['value']
+            value = replace_draft_fields(source, [c.model_dump() for c in changes])
+            if candidate_id == 'design':
+                proposed_draft['design'] = value
+                retain_proposed_directions(staged_directions, value, targets)
+            else:
+                staged_directions[candidate_id] = value
+                if proposed_draft:
+                    for i, direction in enumerate(proposed_draft['design']['directions']):
+                        if direction['direction_id'] == candidate_id:
+                            proposed_draft['design']['directions'][i] = deepcopy(value)
+            tested_draft.clear(); last_validation.clear()
+            return dict(status='draft_only', **host.save(candidate_id, value, saved['dependencies']))
+
+        @tool
+        def test_current_candidate(candidate_id: str = 'design', version: int | None = None) -> dict:
+            """Test a saved complete design by reference; individual directions are assembled with test_staged_mathematical_design."""
+            saved = hosts['mathematics'].data['artifacts'].get(candidate_id)
+            if not saved or candidate_id != 'design' or version is not None and saved['version'] != version:
+                return dict(status='needs_input', blocking=False, hint='Assemble directions or select the current complete design version.')
+            return test_mathematical_design.invoke({'design': saved['content']})
+
+        @tool
+        def submit_current_candidate() -> dict:
+            """Submit the exact last tested or explicitly deferred design without retransmitting its schema."""
+            return submit_mathematical_design.invoke({})
 
         math_tools = [get_expert_contract, get_function_catalog, prepare_function_synthesis, record_function_derivation, read_workflow_reference, read_expert_workspace, *temporal_tools, construct_direction_potential,
                                compare_constructed_architectures, derive_allocation_operator, inspect_biophysical_context, list_measurement_references, inspect_measurement, inspect_measurements,
                                search_direction_knowledge, inspect_direction_functions, service.tool_for('mathematics'),
                                request_biology_revision, stage_mathematical_direction, test_staged_mathematical_design,
-                               patch_and_test_mathematical_design, submit_mathematical_design]
-        if len(targets)==1:
-            math_tools.append(test_mathematical_design)
+                               patch_and_test_mathematical_design, submit_mathematical_design,
+                               read_candidate, patch_candidate, test_current_candidate, submit_current_candidate, test_mathematical_design]
         invoke('mathematics', math_tools,
                {'biology_plan':biology, 'model_dynamics':state['model_dynamics'],
                 'task_context':task_context(state.get('monitor_event')),
@@ -563,5 +558,5 @@ def run_experts(runtime, state):
                                              state['retrieval_records'], state['model_dynamics'], service.sources())
         append_trace(state, node='thinker', kind='decision', summary='Biology priorities and mathematical design bound to evidence',
                      output={'biology_plan':biology, 'mathematical_design':math_result['design'], 'deferral':deferral})
-        return {'deferral':deferral} if deferral else {'spec':spec}
+        return {'deferral':deferral} if deferral else {'spec':spec, 'validation':deepcopy(last_validation)}
     raise RuntimeError('Unreachable expert scheduling state')

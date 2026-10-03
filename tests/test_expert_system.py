@@ -99,6 +99,21 @@ def test_versioned_spec_and_copy_derivatives(case):
     with pytest.raises(ValueError,match='digest'):validate_expert_spec(changed,p,r)
 
 
+def test_historical_scalar_execution_metadata_is_inert_but_bindings_remain_exact(case):
+    from molsteer.common import digest
+    p,r,*_=case
+    legacy=compiled(case)
+    legacy['runtime_execution']={'status':'awaiting_live_preflight','controller':'proposal_guard'}
+    legacy['required_validation']=['nonincrease','path_budget']
+    legacy['reward_id']='rw_'+digest({k:v for k,v in legacy.items() if k!='reward_id'})[:24]
+    assert validate_expert_spec(legacy,p,r)
+    changed=copy.deepcopy(legacy)
+    changed['active_direction_ids']=[]
+    changed['reward_id']='rw_'+digest({k:v for k,v in changed.items() if k!='reward_id'})[:24]
+    with pytest.raises(ValueError,match='validated handoff'):
+        validate_expert_spec(changed,p,r)
+
+
 def test_complete_biology_and_retrieval_coverage(case):
     p,r,b,d,ret=case
     bad=copy.deepcopy(b);bad['directions'].pop()
@@ -378,7 +393,69 @@ def test_math_submits_the_exact_host_retained_tested_artifact_without_regenerati
     assert result['status']=='validated'
     assert result['mathematical_design']['directions'][0]['expression']==case[3]['directions'][0]['expression']
     submitted=next(e for e in result['trace'] if e.get('tool_name')=='submit_mathematical_design')
-    assert submitted['input']=={} and submitted['output']['mathematical_design']==result['mathematical_design']
+    assert submitted['input']=={} and 'mathematical_design' not in submitted['output']
+    from molsteer.common import digest
+    assert submitted['output']['content_hash']==digest(result['mathematical_design'])
+
+
+def test_wording_patch_reuses_numerics_but_binds_exact_final_artifact(case, monkeypatch):
+    import molsteer.agents.executor as executor_module
+    actual = executor_module.validate_and_test_reward
+    calls = []
+    def counted(*args, **kwargs):
+        calls.append(args[1]['reward_id'])
+        return actual(*args, **kwargs)
+    monkeypatch.setattr(executor_module, 'validate_and_test_reward', counted)
+    cfg = load_config(); cfg.runtime.trace_dir = Path('outputs/test_experts')
+    cfg.thinker.require_design_audit = False
+    models = make_models(case)
+    original = models['molthinker.mathematics'].respond
+    def respond(n, messages):
+        if n == 1:
+            return original(n, messages)
+        if n == 2:
+            return original(n, messages)[:1]
+        if n == 3:
+            return [('patch_and_test_mathematical_design', {'changes':[{
+                'path':['directions',0,'derivation_summary'],
+                'value':'Clarified wording; the tested expression and all physical parameters are unchanged.'}]})]
+        return [('submit_current_candidate', {})]
+    models['molthinker.mathematics'].respond = respond
+    result = AgentRuntime(cfg, models=models).run(*case[:2], run_id='wording_cache_fixture')
+    assert result['status'] == 'validated', result['trace'][-3:]
+    assert len(calls) == 1
+    assert result['validation']['reward_id'] == result['reward_spec']['reward_id']
+    assert result['mathematical_design']['directions'][0]['derivation_summary'].startswith('Clarified wording')
+
+
+def test_optional_live_scalar_probe_is_read_only_and_reports_common_variable(case):
+    from molsteer.molexecutor.expert_control import probe_live_scalar_response
+    p, _, b, d, _ = case
+    d = copy.deepcopy(d)
+    d['directions'][0]['expression'] = op('power', op('divide',
+        {'op':'observable','id':d['directions'][0]['observables'][0]['observable_id']}, const(1.,'angstrom')), exponent=2)
+    coordinates = torch.tensor(p['steering']['coordinate_snapshots']['prediction']['coords_angstrom'], dtype=torch.float64)
+    class Adapter:
+        index = 0
+        config = {}
+        def __init__(self):
+            self.curr = dict(coords=coordinates[None].clone(), mask=torch.ones(1, len(coordinates), dtype=torch.bool))
+            self.cond = {'counter':torch.tensor(0.)}
+        def predict(self, coordinates=None):
+            self.cond['counter'].add_(1)
+            return {'coords':coordinates*2+torch.rand(1)/100}, self.cond
+        def endpoint(self, pred):
+            return {'coords':pred['coords'][0]}
+        def world_state_coordinates(self, x):
+            return x[0]
+    adapter = Adapter()
+    rng = torch.get_rng_state().clone()
+    result = probe_live_scalar_response(adapter, p, b, {v['direction_id']:v for v in d['directions']}, d['strategy'])
+    assert result['status'] == 'measured', result
+    assert result['scalar_gradient_norm'] > 0 and result['components'][0]['gradient_norm'] > 0
+    assert adapter.cond['counter'] == 0 and torch.equal(rng, torch.get_rng_state())
+    assert torch.equal(adapter.curr['coords'][0], coordinates)
+    assert probe_live_scalar_response(None,p,b,{},d['strategy'])['status'] == 'not_run'
 
 
 def test_math_can_patch_failed_draft_only_after_full_revalidation(case):
@@ -540,9 +617,9 @@ def test_compiled_expert_reward_binds_live_graph_and_formula(case):
     assert float(value)==pytest.approx(-expected)
     x=(pred['coords']/2).clone().requires_grad_(True)
     live=dict(pred,coords=2*x)
-    direction,_,_=reward.control_gradient(SimpleNamespace(),live,x,torch.ones_like(x))
-    direct=torch.autograd.grad(reward.evaluate(live)[0],x)[0]
-    assert torch.allclose(direction,direct)
+    direction=torch.autograd.grad(reward.evaluate(live)[0],x,retain_graph=True)[0]
+    assert torch.isfinite(direction).all() and direction.norm()>0
+    assert not hasattr(reward,'control_gradient')
     # Coordinate expressions do not acquire a whole-graph identity requirement.
     for key in ('atomics','charges','bonds'):
         changed=dict(pred,**{key:pred[key].roll(1,-1)})
@@ -556,7 +633,7 @@ def test_compiled_expert_reward_binds_live_graph_and_formula(case):
         reward.evaluate(dict(pred,coords=pred['coords'][:-1]))
 
 
-def test_engine_rejected_expert_probes_preserve_native_path_and_rng(tmp_path,monkeypatch):
+def test_engine_ignores_legacy_proposal_guards_and_preserves_rng(tmp_path,monkeypatch):
     from molsteer.molexecutor.engine import run_suffix
     from molsteer.molexecutor.interfaces import GuidanceBudget
     for name in ('reset_peak_memory_stats','max_memory_allocated'):
@@ -596,8 +673,9 @@ def test_engine_rejected_expert_probes_preserve_native_path_and_rng(tmp_path,mon
     end_rng=torch.get_rng_state().clone()
     torch.set_rng_state(rng)
     controlled=Adapter();result=run_suffix(controlled,Reward(),tmp_path/'rejected',GuidanceBudget(),'expert')
-    assert result['accepted_steps']==0
-    assert torch.equal(controlled.curr['coords'],baseline.curr['coords'])
+    assert result['injected_steps']==1
+    assert not torch.equal(controlled.curr['coords'][0],baseline.curr['coords'][0])
+    assert torch.equal(controlled.curr['coords'][1],baseline.curr['coords'][1])
     assert torch.equal(controlled.cond['cache'],baseline.cond['cache'])
     assert torch.equal(torch.get_rng_state(),end_rng)
 
@@ -613,7 +691,7 @@ def test_expert_api_failure_never_falls_back(case,role):
     assert models['molexecutor'].calls==0 and 'PRIVATE_FAILURE' not in json.dumps(state)
 
 
-def test_required_constraint_cannot_be_bought_off_by_reward_descent(case):
+def test_legacy_proposal_constraint_requires_scalar_redesign(case):
     p,r,b,d,ret=copy.deepcopy(case)
     biological=copy.deepcopy(next(x for x in b['directions'] if x['direction_id']=='repair'))
     biological.update(direction_id='preserve',rank=len(b['directions'])+1,disposition='constraint')
@@ -623,8 +701,5 @@ def test_required_constraint_cannot_be_bought_off_by_reward_descent(case):
     constraint['retrieval_ids']=['ret_constraint'];d['directions'].append(constraint)
     extra=dict(ret,retrieval_id='ret_constraint',direction_id='preserve')
     spec,defer=compile_expert_spec(p,r,b,d,[ret,extra],ModelDynamicsContext().model_dump(),{})
-    assert defer is None
-    trial=run_expert_trial(p,spec)
-    assert all(not row['accepted'] for row in trial['control_trials'])
-    assert trial['control_trials'][0]['constraint_failures']==['preserve']
-    assert trial['penalty_before']==trial['penalty_after']
+    assert spec is None and defer['status']=='design_only'
+    assert 'scalar redesign' in defer['reason'] and defer['blocked_directions']==['preserve']

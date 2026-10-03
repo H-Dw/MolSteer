@@ -1,5 +1,7 @@
 # 实时引导与模型接入
 
+当前直接执行契约见[剩余需求与标量注入](RESIDUAL_NATIVE_SCALAR.zh-CN.md)。下文涉及预算、提议拒绝、分段控制或共同下降的内容为历史适配器记录，不适用于当前 MolThinker → FLOWR.ROOT 路径。
+
 MolThinker 默认采用 `molthinker-reward-creativity`。显式指定 `--mode selection` 可使用保留的参考函数选择流程。未带后缀的 Skill 作为兼容入口，默认路由至 creativity。两套说明均提供英文与中文；实现细节、运行命令和环境信息保留在技术文档中。
 
 Skills 为 Agent 提供推导规范。当前确定性组合器支持有限的、经过实现与核验的奖励基元，并非能够自动实现任意知识库公式的符号发现系统。新可观测量需补充可微实现及适用性检查。

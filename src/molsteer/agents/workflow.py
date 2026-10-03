@@ -16,7 +16,7 @@ def build_workflow(runtime):
     graph.add_conditional_edges('thinker',lambda state:'done' if state.get('route')=='done' else 'executor',
                                 {'executor':'executor','done':END})
     graph.add_conditional_edges('executor',
-        lambda state: 'monitor' if runtime.config.agents['molmonitor'].enabled else state['route'],
+        lambda state: state['route'],
         {'monitor':'monitor','executor':'executor','done':END})
     def route(state): return state.get('route','done') if state.get('route')!='done' else 'done'
     graph.add_conditional_edges('monitor',route,{'reader':'reader','thinker':'thinker','executor':'executor','done':END})

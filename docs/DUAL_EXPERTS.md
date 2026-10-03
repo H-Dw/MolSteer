@@ -1,5 +1,7 @@
 # MolThinker dual experts
 
+See [the current residual-first scalar contract](RESIDUAL_NATIVE_SCALAR.md). Budget, proposal-rejection, segmented-control and common-descent sections below document historical adapters, not the current MolThinker → FLOWR.ROOT path.
+
 The shipped configuration enables `dual_expert`; old configurations without a
 `thinker` section retain `single`. Explicit offline mode still runs the historical
 deterministic algorithms. The public Reader → Thinker → Executor → Monitor graph

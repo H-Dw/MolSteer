@@ -1,5 +1,7 @@
 # Live execution and model adapters
 
+See [the current residual-first scalar contract](RESIDUAL_NATIVE_SCALAR.md). Budget, proposal-rejection, segmented-control and common-descent sections below document historical adapters, not the current MolThinker → FLOWR.ROOT path.
+
 MolThinker defaults to `molthinker-reward-creativity`. `--mode selection` selects the preserved reference-selection workflow. The unsuffixed skill is a compatibility router. Both workflows have English and Chinese instructions, with no implementation or release history embedded in the skill text.
 
 The skills guide an agent's reasoning. The deterministic composer currently compiles a bounded family of molecular rewards; it is not a general symbolic discovery system or an external LLM service. Additional observables require an explicit differentiable primitive and applicability checks.

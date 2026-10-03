@@ -134,11 +134,6 @@ class FlowrRootAdapter:
 
     def native_step(self, predicted, cond, step_size):
         with torch.no_grad():
-            policy=self.config.get('categorical_proposal')
-            if policy and policy['start']<=float(self.times[0][0])<policy['end']:
-                from .categorical import temper_prediction
-                predicted,cond=temper_prediction(predicted,cond,self.index,
-                    policy['temperature'],policy.get('confidence_ceiling',.95))
             self.curr=detached(self.model.integrator.step(self.curr,detached(predicted),self.prior,self.times,step_size))
             self.cond=detached(cond)
             self.times=self.model._update_times(self.times,step_size)

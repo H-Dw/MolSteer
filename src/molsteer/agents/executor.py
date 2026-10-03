@@ -11,7 +11,7 @@ def validate_and_test_reward(packet, spec, report=None, *, iterations=3, strengt
     validate_spec(spec,packet,report)
     if packet['steering']['graph_signatures'] != spec['graph_signatures']: raise ValueError('graph provenance mismatch')
     if spec['coordinate_hashes'] != {k:v['coordinate_hash'] for k,v in packet['steering']['coordinate_snapshots'].items()}: raise ValueError('coordinate provenance mismatch')
-    if not math.isfinite(strength) or not 0<strength<=1: raise ValueError('invalid strength')
+    if not math.isfinite(strength) or strength < 0: raise ValueError('invalid strength')
     if isinstance(iterations,bool) or not isinstance(iterations,int) or not 1<=iterations<=20: raise ValueError('invalid test iterations')
     if spec.get('schema_version')=='2.0.0':
         from molsteer.molexecutor.expert_control import run_expert_trial
@@ -21,9 +21,9 @@ def validate_and_test_reward(packet, spec, report=None, *, iterations=3, strengt
                         trials=[trial],status='needs_revision',
                         limitation='Coordinate-copy derivative failed; execution is not authorized')
         if not trial['fixed_atoms_unchanged'] or not trial['input_snapshot_unchanged']:
-            raise ValueError('Expert control violated coordinate-copy boundaries')
+            raise ValueError('Scalar response test violated coordinate-copy boundaries')
         return dict(kind='RewardValidation',passed=True,reward_id=spec['reward_id'],trials=[trial],status='tested',
-                    limitation='Version-2 expression and controller copy tests; live derivative and terminal outcome not_run')
+                    limitation='Version-2 scalar expression and component response on coordinate copies; live derivative and terminal outcome not_run')
     if 'design' in spec:
         trial=run_offline_design_trial(packet,spec,iterations=iterations,learning_rate=.25*strength)
         if not all(trial[k] for k in ('fixed_atoms_unchanged','input_snapshot_unchanged','monotone_penalty_descent')) or not trial['numerical_gradient']['passed']:

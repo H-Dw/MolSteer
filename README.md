@@ -1,10 +1,13 @@
 # MolSteer
 
+Current implementation: [residual-first decisions, host workspace and full native scalar injection](docs/RESIDUAL_NATIVE_SCALAR.md).
+
+
 The default MolThinker now uses [biology and mathematics experts](docs/DUAL_EXPERTS.md), with an on-demand Researcher, source-bound formula derivation, versioned executable expressions and live gradient-conflict checks. Existing single-agent and explicit offline modes remain available.
 
-MolSteer separates molecular evidence extraction, reward reasoning, execution and monitoring. The new [LangChain/LangGraph agent layer](docs/AGENT_SYSTEM.zh-CN.md) defaults to API-backed, independently configurable models for all four agents. See [configuration](configs/README.md). The existing deterministic creativity/selection commands and FLOWR.ROOT/domain adapters remain available for compatibility; see [live execution](docs/EXECUTOR.md).
+MolSteer separates molecular evidence extraction, reward reasoning, execution and monitoring. The new [LangChain/LangGraph agent layer](docs/AGENT_SYSTEM.zh-CN.md) uses API-backed Reader and Thinker experts followed by deterministic execution; independent monitoring is disabled by default. See [configuration](configs/README.md). The existing deterministic creativity/selection commands and FLOWR.ROOT/domain adapters remain available for compatibility; see [live execution](docs/EXECUTOR.md).
 
-The four agents default to `z-ai/glm-5.3` through OpenRouter. Set `OPENROUTER_API_KEY` in the host environment before an API run. A tested Linux/FLOWR.ROOT deployment and its exact-resume boundary are documented in [the 5i0b example](docs/FLOWR_ROOT_LINUX.zh-CN.md).
+The Reader and Thinker model profiles default to `z-ai/glm-5.3` through OpenRouter. Set `OPENROUTER_API_KEY` in the host environment before an API run. A tested Linux/FLOWR.ROOT deployment and its exact-resume boundary are documented in [the 5i0b example](docs/FLOWR_ROOT_LINUX.zh-CN.md).
 
 The [Conda and Docker deployment guide](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md) records the current Python 3.12 / CUDA 12.1 dependency stack for MolSteer and FLOWR.ROOT.
 
@@ -14,10 +17,10 @@ The [Conda and Docker deployment guide](docs/ENVIRONMENT_DEPLOYMENT.zh-CN.md) re
 |---|---|---|
 | MolReader | 43 independent metrics, three representations, localized diagnosis; steering capabilities, chemical readiness and coordinate/graph provenance | StatePacket, risk-only DiagnosticReport |
 | MolThinker | Parse and retrieve all 21 supplied knowledge functions; rank by lexical/risk relevance and locality, gate prerequisites, synthesize bound reward terms | RewardSpec, RetrievalTrace, bilingual derivation |
-| MolExecutor | Declarative differentiable rewards, model-neutral injection callbacks, FLOWR suffix execution and automatic entry scripts | Offline trial, live guided trajectories, resumable checkpoints |
-| MolMonitor | Matched native reference, localized temporal anomalies, bounded strength search, independent quality checks and persistent-failure routing | MonitorTrace, strength decisions, resumable MolThinker revision requests |
+| MolExecutor | Fixed-weight scalar gradient injection at every remaining native FLOWR step; deterministic loading | Per-step reward/gradient records and recoverable checkpoints |
+| MolMonitor | Independent optional monitoring and graph review; absent from the direct scalar path | Separate diagnostic artifacts |
 
-The legacy reasoning engine is deterministic and constrained by evidence; the new agent layer adds API-backed tool reasoning without silently replacing failed API calls with legacy results. The default agent Skill is [evidence-grounded reward creativity](skills/molthinker-reward-creativity/SKILL.md); [conflict-aware control](skills/molthinker-conflict-aware-control/SKILL.md) remains available when a constrained multi-objective solve is needed. The API reward path selects core targets and a bounded declarative objective tree rather than defaulting to a weighted list of diagnostic terms. The historical deterministic `think` command now requires an explicit mode. All 21 knowledge functions are retrievable. Executable primitives include interval/clash penalties, graph-conditioned geometry, a live affinity head, continuous MMFF strain, directional contacts and a smooth buried-polar proxy. Bound native outcomes enable active categorical hypothesis search and counterevidence-driven objective revision. Other objectives require registered backends and explicit prerequisites; unsupported objectives are not silently approximated.
+The legacy reasoning engine is deterministic and constrained by evidence; the new agent layer adds API-backed tool reasoning without silently replacing failed API calls with legacy results. The default agent Skill is [evidence-grounded reward creativity](skills/molthinker-reward-creativity/SKILL.md); [conflict-aware control](skills/molthinker-conflict-aware-control/SKILL.md) is a historical analysis reference, not the native scalar execution contract. The API reward path selects core targets and a bounded declarative objective tree rather than defaulting to a weighted list of diagnostic terms. The historical deterministic `think` command now requires an explicit mode. All 21 knowledge functions are retrievable. Executable primitives include interval/clash penalties, graph-conditioned geometry, a live affinity head, continuous MMFF strain, directional contacts and a smooth buried-polar proxy. Bound native outcomes enable active categorical hypothesis search and counterevidence-driven objective revision. Other objectives require registered backends and explicit prerequisites; unsupported objectives are not silently approximated.
 
 ## Layout
 

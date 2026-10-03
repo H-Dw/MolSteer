@@ -18,14 +18,14 @@ class BiologyDirection(StrictModel):
     direction_id: str = Field(min_length=1, max_length=100)
     rank: int = Field(ge=1, description='Value priority: lower ranks deserve earlier/stronger attention after raw trajectory, controllability, dependencies and tradeoffs are considered')
     value_assessment: dict = Field(default_factory=dict,
-        description='Public rationale: raw trajectory references, persistence/retyping/late repair, plausible benefit, native-evolution risk, controllability, dependency and uncertainty; no invented intervention gains')
+        description='Residual need IDs and terminal remainder; current precursor/mechanism; independent necessary coverage; native-resolved counterevidence; useful evolution to preserve; pairwise rank reasons and uncertainty. No invented intervention gains.')
     finding_ids: list[str] = Field(description='Diagnostic finding IDs, or [] for a separate measured preservation/task direction')
     evidence_ids: list[str] = Field(min_length=1)
     mechanism: str = Field(min_length=12)
     evidence_class: Literal['observation', 'proxy', 'mechanistic_hypothesis', 'intervention_supported']
     optimization_direction: str = Field(min_length=8)
     repair_predicate: str = Field(min_length=12)
-    preservation_conditions: list[str] = Field(description='IDs of explicit constraint directions; do not put unenforced prose here')
+    preservation_conditions: list[str] = Field(description='Legacy constraint references. New scalar handoffs use [] and encode preservation in optimize expressions or independent evaluation.')
     chemical_state: str = Field(min_length=8)
     falsifier: str = Field(min_length=12)
     uncertainty: list[str]
@@ -41,7 +41,7 @@ class BiologyPlan(StrictModel):
     schema_version: Literal['1.0'] = '1.0'
     outcome: str = Field(min_length=12)
     independent_measurement: str = Field(min_length=12)
-    directions: list[BiologyDirection] = Field(min_length=1, max_length=32)
+    directions: list[BiologyDirection] = Field(default_factory=list, max_length=32)
     summary: str = Field(min_length=12)
     factor_assessment: list[FactorAssessment] = Field(default_factory=list, max_length=8,
         description='When audit_required, assess every one of the eight factors exactly once; active factors require matching direction dispositions and no blocking prerequisites.')
@@ -264,6 +264,9 @@ def compile_expert_spec(packet, report, biology, design, retrievals, dynamics, s
         raise ValueError('Declared editable atoms must belong to the bound molecule')
     biology = validate_biology(biology, report, packet)
     design = validate_math(design, biology, packet, retrievals, sources, report=report)
+    if design['strategy']['mode'] == 'common_descent' or any(d['disposition'] == 'constraint' for d in biology['directions']):
+        return None, dict(status='design_only', blocked_directions=[d['direction_id'] for d in biology['directions'] if d['disposition']=='constraint'],
+            reason='Legacy common-descent or proposal constraints require scalar redesign. Encode preservation in the scalar reward or retain it as independent evaluation; no executor projection or rejection is available.')
     by_id = {d['direction_id']: d for d in design['directions']}
     blocked = [d['direction_id'] for d in biology['directions']
                if (d['required'] or d['disposition'] == 'constraint') and
@@ -286,9 +289,10 @@ def compile_expert_spec(packet, report, biology, design, retrievals, dynamics, s
                 coordinate_hashes={v:s['coordinate_hash'] for v,s in packet['steering']['coordinate_snapshots'].items()},
                 biology_plan=biology, mathematical_design=design, retrieval=retrievals, research_sources=sources,
                 model_dynamics=dynamics, active_direction_ids=active,
-                runtime_execution={'status':'requires_live_validation', 'live_gradient':'not_run'},
+                runtime_execution={'status':'scalar_ready', 'live_gradient':'not_run',
+                                   'execution_semantics':'native_scalar_gradient'},
                 required_validation=['units_and_domains', 'finite_difference', 'fixed_variables',
-                                     'live_pullback', 'post_injection_direction', 'proposal_constraints'])
+                                     'scalar_component_response'])
     if partial:
         spec['partial_execution']={'scope':'bounded_coordinate_pilot','complete_goal_set_resolved':False,
             'unresolved_required_direction_ids':blocked,
@@ -309,7 +313,15 @@ def validate_expert_spec(spec, packet, report=None):
         report = make_localized_report(packet)
     rebuilt, deferred = compile_expert_spec(packet, report, spec['biology_plan'], spec['mathematical_design'],
                                           spec['retrieval'], spec['model_dynamics'], spec['research_sources'])
-    if deferred or rebuilt['reward_id'] != spec['reward_id']:
-        raise ValueError('Expert reward is not an executable validated handoff')
+    if deferred:
+        raise ValueError('Expert reward requires redesign: '+deferred['reason'])
+    if rebuilt['reward_id'] != spec['reward_id']:
+        # Read historical scalar contracts without reviving their obsolete
+        # execution requirements. All scientific/computational binding stays exact.
+        inactive = {'reward_id', 'runtime_execution', 'required_validation'}
+        original_core = {k:v for k,v in spec.items() if k not in inactive}
+        rebuilt_core = {k:v for k,v in rebuilt.items() if k not in inactive}
+        if digest(original_core) != digest(rebuilt_core):
+            raise ValueError('Expert reward is not an executable validated handoff')
     ModelDynamicsContext.model_validate(spec['model_dynamics'])
     return True

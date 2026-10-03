@@ -101,6 +101,8 @@ def load_raw_reference(packet, config, repo_root):
         selected = [n for n in declarations if n['time'] in config.reference_times
                     or (config.include_final and n['role'] == 'final')]
         issues = [dict(kind='requested_time_not_saved', time=t) for t in config.reference_times if t not in times]
+        selected += [dict(node_id='missing_'+digest(t)[:12], time=t, role='intermediate', packet_path=None)
+                     for t in config.reference_times if t not in times]
         if config.include_final and not finals:
             issues.append(dict(kind='final_not_declared'))
         nodes = [dict(node_id='anchor', role='anchor', time=anchor_t, packet=anchor, source=anchor_source)]
@@ -546,6 +548,8 @@ def compare_raw_nodes(packet, nodes, config):
             context['opportunities'].append(opportunity)
     if config.group_regional_candidates:
         context['opportunities'] = _group_regional_opportunities(context['opportunities'])
+    from .residual_needs import build_residual_needs
+    context['residual_needs'] = build_residual_needs(context)
     return context
 
 
@@ -553,7 +557,8 @@ def _condition_trajectory(observations, nodes):
     """Describe actual per-node screens without calling retyping an old-object repair."""
     states = [o['current_condition_status'] for o in observations]
     terminal = next((i for i, n in enumerate(nodes) if n['role'] == 'final'), None)
-    clear = next((i for i, s in enumerate(states[1:], 1) if s == 'not_flagged'), None)
+    first_flag = next((i for i, s in enumerate(states) if s == 'flagged'), None)
+    clear = next((i for i, s in enumerate(states) if first_flag is not None and i > first_flag and s == 'not_flagged'), None)
     return dict(anchor_status=states[0], final_status=states[terminal] if terminal is not None else 'not_observed',
         final_node_id=nodes[terminal]['node_id'] if terminal is not None else None,
         sampled_flagged_nodes=[o['node_id'] for o in observations if o['current_condition_status'] == 'flagged'],
@@ -629,7 +634,9 @@ def raw_reference_summary(context):
     result['risk_classifications'] = dict(Counter(r['classification'] for r in context.get('risk_tracks', [])))
     result['opportunity_categories'] = dict(Counter(r['category'] for r in context.get('opportunities', [])))
     result['counts'] = {key: len(context.get(key, [])) for key in ('risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities')}
-    result['node_diagnostics'] = deepcopy(context.get('node_diagnostics', []))
+    result['residual_need_states'] = dict(Counter(r['evolution'] for r in context.get('residual_needs', [])))
+    result['residual_need_count'] = len(context.get('residual_needs', []))
+    result['decision_order'] = 'Page residual_needs first: explicit terminal remainder, current precursor, independent coverage, preservation and uncertainty. Chemistry transition is separate from defect persistence.'
     result['current_final_statuses'] = dict(Counter(r.get('current_condition_trajectory', {}).get('final_status', 'unknown')
                                                    for r in context.get('risk_tracks', [])))
     from molsteer.agents.design_audit import bounded_values
@@ -652,8 +659,8 @@ def bound_raw_context(context, packet):
 def inspect_comparison(context, section='summary', factor=None, view=None, offset=0, limit=8):
     if section == 'summary':
         return raw_reference_summary(context)
-    if section not in ('nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'):
-        return dict(status='needs_input', blocking=False, sections=['summary', 'nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'])
+    if section not in ('residual_needs', 'nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'):
+        return dict(status='needs_input', blocking=False, sections=['summary', 'residual_needs', 'nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'])
     if type(offset) is not int or offset < 0 or type(limit) is not int or not 1 <= limit <= 32:
         return dict(status='needs_input', blocking=False, hint='Use nonnegative offset and limit 1-32')
     if section == 'factor_coverage':
