@@ -80,6 +80,18 @@ def test_rank_coefficients_change_actual_gradient_and_explicit_allocation_is_pre
     assert allocate_priorities(design, biology)['strategy']['priority_weights'] == {'a': .7, 'b': 1.}
 
 
+def test_partial_strategy_returns_correctable_contract_feedback():
+    from molsteer.agents.contract_errors import ContractValidationError
+    from molsteer.agents.loop import _validation_feedback
+    design = {'directions': [], 'strategy': {'aggregation': {'op': 'single'}}}
+    with pytest.raises(ContractValidationError) as error:
+        allocate_priorities(design, {'directions': []})
+    feedback = _validation_feedback(error.value)
+    assert feedback['validation_path'] == ['strategy']
+    assert 'mode, aggregation and justification' in feedback['validation_hint']
+    assert design['strategy'] == {'aggregation': {'op': 'single'}}
+
+
 def test_legacy_constraint_analysis_cannot_suspend_scalar_objectives():
     evaluator = object.__new__(ExpertEvaluator)
     evaluator.roles = {'repair': 'optimize', 'independent': 'optimize', 'preserve': 'constraint'}

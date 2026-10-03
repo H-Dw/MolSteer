@@ -11,6 +11,9 @@ def allocate_priorities(design, biology, decay=0.5):
     """
     result = deepcopy(design)
     strategy = result['strategy']
+    if not isinstance(strategy, dict) or not {'mode', 'aggregation', 'justification'} <= set(strategy):
+        from .contract_errors import ContractValidationError
+        raise ContractValidationError('Strategy needs mode, aggregation and scientific justification', ['strategy'])
     executable = {d['direction_id'] for d in result['directions'] if d['status'] == 'executable'}
     ordered = sorted((d for d in biology['directions'] if d['disposition'] == 'optimize'
                       and d['direction_id'] in executable), key=lambda d: d['rank'])
