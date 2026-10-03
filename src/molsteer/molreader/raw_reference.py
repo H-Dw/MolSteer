@@ -656,7 +656,8 @@ def bound_raw_context(context, packet):
                  [dict(kind='stale_anchor', reason='Raw comparison belongs to a different current checkpoint')] if context else [])
 
 
-def inspect_comparison(context, section='summary', factor=None, view=None, offset=0, limit=8):
+def inspect_comparison(context, section='summary', factor=None, view=None, offset=0, limit=8,
+                       include_details=False):
     if section == 'summary':
         return raw_reference_summary(context)
     if section not in ('residual_needs', 'nodes', 'node_diagnostics', 'risk_tracks', 'regional_changes', 'outcome_trends', 'opportunities', 'factor_coverage'):
@@ -668,8 +669,18 @@ def inspect_comparison(context, section='summary', factor=None, view=None, offse
     else:
         records = [r for r in context.get(section, []) if (factor is None or factor in r.get('factors', []))
                    and (view is None or view == r.get('view'))]
+    selected = deepcopy(records[offset:offset+limit])
+    if section == 'residual_needs' and not include_details:
+        for card in selected:
+            # The index must fit a normal tool round. Exact source measurements
+            # remain available through their reference IDs or include_details.
+            card['observations'] = [{k:deepcopy(o[k]) for k in
+                ('node_id','time','status','current_condition_status','relation_applicability',
+                 'reference_ids','measurement_reference_ids','current_condition_reference_ids') if k in o}
+                for o in card.get('observations', [])]
+            card['details_access'] = 'read_raw_reference(reference_id) reads exact evidence; include_details=true reads full cards.'
     return dict(status=context['status'], comparison_id=context.get('comparison_id'), section=section,
-                records=deepcopy(records[offset:offset+limit]), total_count=len(records), offset=offset,
+                records=selected, total_count=len(records), offset=offset,
                 next_offset=offset+limit if offset+limit < len(records) else None)
 
 

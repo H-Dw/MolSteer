@@ -134,7 +134,8 @@ def main():
     prepare(args.native_root.resolve(), root)
     config = json.loads((REPO/'configs/agents.json').read_text(encoding='utf-8'))
     config['runtime'].update(max_agent_steps=48, max_repairs=16)
-    config['thinker'].update(execution_scope='bounded_coordinate_pilot', max_discussions=4)
+    config['thinker'].update(execution_scope='bounded_coordinate_pilot', max_discussions=4,
+                            history_max_chars=120000)
     if config['mode'] != 'api' or {v['model'] for v in config['models'].values()} != {'z-ai/glm-5.3'}:
         raise ValueError('Actual GLM-5.3 API mode is required')
     agent_file = root/'agents.experiment.json'

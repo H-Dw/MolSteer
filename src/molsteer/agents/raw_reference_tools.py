@@ -9,9 +9,10 @@ def raw_reference_tools(context, packet):
 
     @tool
     def inspect_raw_comparison(section: str = 'summary', factor: str | None = None,
-                               view: str | None = None, offset: int = 0, limit: int = 8) -> dict:
-        """Page configured raw nodes, risk_tracks, regional_changes, outcome_trends, opportunities or factor_coverage; no inference runs."""
-        return inspect_comparison(frozen, section, factor, view, offset, limit)
+                               view: str | None = None, offset: int = 0, limit: int = 8,
+                               include_details: bool = False) -> dict:
+        """Page residual_needs or other raw evidence indexes. Residual cards are compact; read exact reference IDs or request include_details=true. Use next_offset for subsequent pages."""
+        return inspect_comparison(frozen, section, factor, view, offset, limit, include_details)
 
     @tool
     def read_raw_reference(reference_id: str, include_details: bool = False) -> dict:

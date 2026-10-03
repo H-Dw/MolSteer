@@ -49,6 +49,23 @@ def test_missing_final_is_not_last_visible_node_and_cards_are_paged():
     assert result['total_count'] == 3 and result['next_offset'] == 2
 
 
+def test_residual_index_keeps_terminal_and_current_evidence_without_repeating_full_measurements():
+    raw = context(['flagged','not_flagged','flagged'], retyped=True)
+    raw['residual_needs'] = build_residual_needs(raw)
+    before = deepcopy(raw)
+    compact = inspect_comparison(raw, section='residual_needs')['records'][0]
+    full = inspect_comparison(raw, section='residual_needs', include_details=True)['records'][0]
+    assert compact['terminal_status'] == full['terminal_status'] == 'flagged'
+    assert compact['evolution'] == full['evolution'] == 'recurrent'
+    assert compact['current_precursor'] == full['current_precursor']
+    assert compact['chemistry_transitions'] == full['chemistry_transitions']
+    for brief, original in zip(compact['observations'], full['observations']):
+        assert brief['measurement_reference_ids'] == original['measurement_reference_ids']
+        assert brief['current_condition_status'] == original['current_condition_status']
+        assert 'measurements' not in brief and original['measurements']
+    assert raw == before
+
+
 def test_existing_calculator_creates_separate_bound_supplement_and_cache(tmp_path):
     coords = np.array([[0.,0.,0.],[1.2,0.,0.]])
     identity = dict(target_id='target',ligand_id='ligand',stage='stage',stage_t=.27)
