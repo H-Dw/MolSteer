@@ -104,7 +104,7 @@ def main():
         rows.append(dict(arm=name,weight=execution.get('weight',0),execution=execution,
             final=metrics,smiles=smiles,final_sdf=str(stage/'ligand.sdf'),
             initial_hypothesis_preserved=metrics['chemistry']==initial_metrics['chemistry'],
-            gradient_preflight=read(arm/'gradient_preflight.json')['passed'] if name!='unguided' else None,
+            derivative_probe_passed=read(run/'AdapterDerivativeProbe.json')['passed'],
             first_guidance_time=next((r['t'] for r in trace if r.get('guidance_active')),None),
             first_gradient_time=next((r['t'] for r in trace if 'gradient_norm' in r),None),
             proposal_failure_counts=dict(reasons),guidance_unavailable_counts=dict(events),
@@ -116,12 +116,12 @@ def main():
            for key in ('input_tokens','output_tokens','total_tokens')}
     program=read(run/'RewardProgram.api.json')
     design=program.get('expert_spec',{}).get('mathematical_design',{})
-    gradients={r['weight']:r['execution'].get('initial_gradient_norm') for r in rows if r['weight']}
-    base_weight=min(gradients) if gradients else None
-    base_gradient=gradients.get(base_weight)
-    scale_verified=(isinstance(base_gradient,(int,float)) and base_gradient>0
-                    and all(isinstance(v,(int,float)) and math.isclose(v/w,base_gradient/base_weight,rel_tol=1e-5,abs_tol=1e-10)
-                            for w,v in gradients.items()))
+    injections={r['weight']:r['execution'].get('initial_injection_l2_angstrom') for r in rows if r['weight']}
+    base_weight=min(injections) if injections else None
+    base_injection=injections.get(base_weight)
+    scale_verified=(isinstance(base_injection,(int,float)) and base_injection>0
+                    and all(isinstance(v,(int,float)) and math.isclose(v/w,base_injection/base_weight,rel_tol=1e-5,abs_tol=1e-10)
+                            for w,v in injections.items()))
     summary=dict(status='completed',target=target,molecule_index=0,initial_time=.5,
         initial=initial_metrics,api=api,api_requests_by_agent=dict(Counter(r['agent'] for r in completed)),
         model_profiles=read(run/'agents.api.json')['models'],
@@ -135,7 +135,7 @@ def main():
         f'目标：{target}；分子：molecule_000；t=0.50→1.00。MolMonitor 和图复核关闭。','',
         f"真实 API 完成请求：{len(completed)}；按 Agent 分布：{summary['api_requests_by_agent']}。",
         f"模型：{', '.join(sorted({p['model'] for p in summary['model_profiles'].values()}))}（服务器 OPENROUTER_API_KEY）。",
-        f"奖励：{program['program_id']}（{program['evaluator']}）。全局 Rw=wR，固定执行力度与位移预算。",'',
+        f"奖励：{program['program_id']}（{program['evaluator']}）。同一标量奖励，原生采样步后加入 w × dt × gradient(R)。",'',
         '| 权重 | t=0.5梯度范数 | 有梯度步 | 有效位移步 | 接受步 | 累计注入最大 Å | 最终化学有效 | 连通分量 | 蛋白碰撞 | MMFF应变代理 kcal/mol | 预测pKd |',
         '|---:|---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|']
     def number(v):return f'{v:.6g}' if isinstance(v,(int,float)) else '未测得'
@@ -144,8 +144,8 @@ def main():
         lines.append('| '+' | '.join(map(str,[row['weight'],number(e.get('initial_gradient_norm')),e['gradient_steps'],e.get('effective_steps',0),e['accepted_steps'],
             number(e['max_injected_path_angstrom']),m['sanitized'],m['component_count'],m['protein_clash_count'],
             number(m['strain_proxy_kcal_mol']),number(m['affinity'].get('pkd'))]))+' |')
-    lines+=['','所有引导分支通过 t=0.50 的实时有限差分检查。最终分子由独立 MolReader 重新评价，提交坐标不做事后最小化。',
-        '',f't=0.50 控制梯度按全局权重成比例缩放：{scale_verified}。接受步包括零位移提议，因此单列有效位移步。',
+    lines+=['','实时 endpoint 导数探针已通过；最终分子由独立 MolReader 重新评价，提交坐标不做事后最小化。',
+        '',f't=0.50 首次注入位移按全局权重成比例缩放：{scale_verified}。梯度范数属于同一未加权奖励；有效位移步另外列出。',
         '',f"data 完整性检查：{summary['data_integrity']['passed']}；文件数：{summary['data_integrity']['data_file_count']}。",
         '', '历史局部探针 4–12 与当前图适用性（不代表奖励的全部目标）：',
         '', '| 权重 | 终态slot 4元素 | 4–12实际键长 Å | 当前图MMFF参考 Å | 当前图相对偏差 | QED | SA |',

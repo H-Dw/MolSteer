@@ -5,6 +5,7 @@ Run in the CUDA environment recorded by the selected trajectory.
 """
 from __future__ import annotations
 import argparse
+from datetime import datetime, timezone
 from copy import deepcopy
 import hashlib
 import importlib.util
@@ -85,7 +86,8 @@ def observed_api_runtime(config, dynamics, receipt_path):
 
         def record(self, event):
             with receipt_path.open('a', encoding='utf-8') as stream:
-                stream.write(json.dumps(dict(agent=self.role, **event))+'\n')
+                stream.write(json.dumps(dict(agent=self.role,
+                    recorded_at_utc=datetime.now(timezone.utc).isoformat(), **event))+'\n')
 
         def on_chat_model_start(self, serialized, messages, *, run_id, **kwargs):
             self.started[str(run_id)] = time.perf_counter()
@@ -347,6 +349,8 @@ def execute(root, agent_file, attempt, weights=WEIGHTS):
         item=dict(weight=weight,**execution,
             effective_steps=sum(r.get('actual_injection_l2_angstrom',0)>1e-12 for r in rows),
             initial_gradient_norm=next((r['gradient_norm'] for r in rows if 'gradient_norm' in r),None),
+            initial_injection_l2_angstrom=next((r['actual_injection_l2_angstrom'] for r in rows
+                                              if 'gradient_norm' in r),None),
             maximum_injected_angstrom=max((r.get('injected_max_angstrom',0) for r in rows),default=0))
         matrix.append(item)
         write(output/'weight_summary.json',dict(status='in_progress',native=native,weights=matrix))
