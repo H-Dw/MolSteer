@@ -207,7 +207,7 @@ def run_experts(runtime, state):
                     'audit_required': runtime.config.thinker.require_design_audit}
             host = hosts['biology']
             receipt = host.save('contract', content, kind='contract')
-            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' else host.read('contract', None if section == 'full' else [section], force_full)
+            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' and not force_full else host.read('contract', None if section in ('full', 'overview') else [section], force_full)
 
         @tool
         def inspect_biophysical_context(factor: str = 'all', view: str = 'both') -> dict:
@@ -276,6 +276,7 @@ def run_experts(runtime, state):
             content = {'schema':MathematicalDesign.model_json_schema(), 'observables':OBSERVABLES,
                     'audit_required': runtime.config.thinker.require_design_audit,
                     'observable_fields':['observable_id','kind','view','atom_ids','evidence_ids','parameters'],
+                    'construction':SYNTHESIS_GUIDE,
                     'parameters':{'receptor_distance':['receptor_serial','residue_id'],
                                   'typed_steric_overlap':['receptor_serial','residue_id','buffer_ratio'],
                                   'bond_length_error':[], 'bond_angle_error':[],
@@ -300,7 +301,7 @@ def run_experts(runtime, state):
                                      'graph_signatures':packet['steering']['graph_signatures']}}
             host = hosts['mathematics']
             receipt = host.save('contract', content, kind='contract')
-            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' else host.read('contract', None if section == 'full' else [section], force_full)
+            return dict(status='overview', sections=list(content), **receipt) if section == 'overview' and not force_full else host.read('contract', None if section in ('full', 'overview') else [section], force_full)
 
         @tool
         def get_function_catalog() -> dict:
@@ -333,7 +334,14 @@ def run_experts(runtime, state):
         @tool
         def construct_direction_potential(direction_id: str, relations: list[dict[str, Any]],
                                            within_direction: str, interpretation: dict[str, Any] | None = None) -> dict:
-            """Construct and retain a draft from selected relation shapes/targets, with exact sources and derivative examples."""
+            """Construct a saved draft. Each relation has function_id, shape, clause_ids,
+            observable={observable_id,kind,view,atom_ids,evidence_ids,parameters}, and
+            parameters={shape parameter name: parameter record}. Read construction
+            contract and inspected function serialization_options for exact names.
+            current_reference_quadratic only takes scale in the observable unit;
+            bond_length_error/bond_angle_error observable parameters are {}.
+            Do not use name/units/observable_kind as observable field aliases.
+            """
             known = {row.get('function_id') for row in service.local.chunks.values() if row.get('function_id')}
             if direction_id not in targets or not 1 <= len(relations) <= 5:
                 return {'status': 'needs_input', 'blocking': False, 'hint': 'Use an active direction_id and 1-5 relations; custom larger expressions can use the existing draft tools.'}

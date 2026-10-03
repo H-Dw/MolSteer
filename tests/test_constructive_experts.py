@@ -113,6 +113,23 @@ def test_constructed_interval_passes_existing_full_audit_and_keeps_packet_unchan
     assert p == before
 
 
+def test_relation_feedback_identifies_exact_fields_without_inventing_parameters(case):
+    p, r, b, d, _ = audited(case)
+    bio = next(x for x in b['directions'] if x['direction_id'] == 'repair')
+    item = relation(case)
+    item['observable']['name'] = item['observable'].pop('observable_id')
+    result = construct_direction(bio, [item], 'single', [retrieval(case)], p)
+    assert result['missing_fields'] == ['observable_id']
+    assert result['unexpected_fields'] == ['name']
+    assert result['validation_path'] == ['relations', 0, 'observable']
+    item = relation(case)
+    item['parameters']['normalization_scale'] = item['parameters'].pop('scale')
+    result = construct_direction(bio, [item], 'single', [retrieval(case)], p)
+    assert result['missing_fields'] == ['scale']
+    assert result['unexpected_fields'] == ['normalization_scale']
+    assert 'value' not in result
+
+
 def test_shared_physical_constant_keeps_corroboration_without_changing_the_potential(case):
     p,r,b,d,_=audited(case)
     bio=next(x for x in b['directions'] if x['direction_id']=='repair')

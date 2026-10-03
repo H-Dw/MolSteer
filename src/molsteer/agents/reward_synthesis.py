@@ -269,6 +269,31 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
             return {'status':'needs_input','blocking':False,
                     'hint':'relation.observable must be a JSON object, not an ID or prose. Use the bound observable schema from get_expert_contract.',
                     'observable_fields':['observable_id','kind','view','atom_ids','evidence_ids','parameters']}
+        observable_fields = {'observable_id', 'kind', 'view', 'atom_ids', 'evidence_ids', 'parameters'}
+        for index, (relation, observable) in enumerate(zip(relations, obs)):
+            if set(observable) != observable_fields:
+                return {'status':'needs_input', 'blocking':False, 'relation_index':index,
+                        'validation_path':['relations', index, 'observable'],
+                        'missing_fields':sorted(observable_fields-set(observable)),
+                        'unexpected_fields':sorted(set(observable)-observable_fields),
+                        'observable_fields':sorted(observable_fields),
+                        'hint':'Supply exactly the bound observable fields. kind is an OBSERVABLES key; observable_id is your unique ID. Put units only in parameter records; use parameters={} for bond/angle errors and cite current direction evidence.'}
+            shape = relation.get('shape')
+            if shape not in SHAPES:
+                return {'status':'needs_input', 'blocking':False,
+                        'validation_path':['relations', index, 'shape'],
+                        'hint':'Select an inspected function card serialization option.',
+                        'shape_options':list(SHAPES)}
+            parameters = relation.get('parameters')
+            required = SHAPES[shape][0]
+            if not isinstance(parameters, dict) or set(parameters) != set(required):
+                return {'status':'needs_input', 'blocking':False,
+                        'validation_path':['relations', index, 'parameters'],
+                        'required_parameters':required,
+                        'missing_fields':sorted(set(required)-set(parameters or {})),
+                        'unexpected_fields':sorted(set(parameters or {})-set(required)),
+                        'parameter_record':deepcopy(SYNTHESIS_GUIDE['parameter_record']),
+                        'hint':'Use these exact parameter names and units. current_reference_quadratic only takes scale in the observable unit; chemistry supplies its current reference. A force constant has different units and cannot serve directly as a length scale.'}
         if len({o['observable_id'] for o in obs}) != len(obs):
             raise ValueError('duplicate_observable')
         units = validate_observables(obs, packet, set(biology_direction['evidence_ids']))
@@ -353,6 +378,7 @@ def construct_direction(biology_direction, relations, within_direction, retrieve
             'next_step': 'Review scientific targets and compare measured candidate interactions; final existing full-design test still owns execution approval.'}
     except (ValueError, KeyError, TypeError, RuntimeError) as exc:
         return {'status': 'needs_input', 'blocking': False, 'error_type': type(exc).__name__,
+            'validation_error':str(exc),
             'hint': hints.get(str(exc), 'Inspect the shape guide, complete parameter records and bound observable support. Unsupported inputs remain explicit; use custom draft tools if the intended mechanism is not representable.')}
 
 
